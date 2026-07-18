@@ -62,6 +62,14 @@ Do not move presentation or persistence concerns into `domain`.
 - Keep exported surface area minimal.
 - Avoid cyclic dependencies; reorganize packages instead of using workarounds.
 
+### Simplicity and Optimization Discipline
+
+- Prefer the simplest implementation that satisfies current OpenSpec requirements.
+- Avoid speculative abstractions, extension points, and generic frameworks before a second concrete use case exists.
+- Avoid premature optimization: do not add caching, pooling, concurrency, or custom data structures without measured evidence.
+- Use benchmark/profile data to justify performance changes (for example, `go test -bench`, `pprof`) and summarize the evidence in the PR.
+- Keep optimization changes deterministic and covered by tests using fixed seeds and reproducible assertions.
+
 ### Error Handling and Context
 
 - Return wrapped errors with `%w` and actionable context.
@@ -120,6 +128,7 @@ Every PR review must evaluate:
 6. Test quality and coverage deltas.
 7. CLI UX consistency and backward compatibility.
 8. Export format integrity (YAML frontmatter + wiki-link consistency).
+9. Simplicity-first design (no speculative abstractions) and optimization evidence when performance complexity is introduced.
 
 ## PR Checklist
 
@@ -129,6 +138,8 @@ Before merging, ensure all are true:
 - [ ] Tests cover new behavior and deterministic paths.
 - [ ] Coverage thresholds in this file are satisfied.
 - [ ] No architectural boundary violations were introduced.
+- [ ] The implementation stays as simple as possible for current requirements; no speculative generalization.
+- [ ] Any optimization-oriented complexity is justified by benchmark/profile evidence and documented in the PR.
 - [ ] Public flags/command behavior changes are documented.
 - [ ] Export schema/format changes are documented and tested.
 
