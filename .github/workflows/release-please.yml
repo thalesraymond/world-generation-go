@@ -1,0 +1,43 @@
+name: release-please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run Release Please
+        id: release
+        uses: googleapis/release-please-action@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          target-branch: main
+          release-type: go
+          package-name: world-generation-go
+
+      - name: Checkout
+        if: ${{ steps.release.outputs.release_created }}
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        if: ${{ steps.release.outputs.release_created }}
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Verify build
+        if: ${{ steps.release.outputs.release_created }}
+        run: go build ./...
+
+      - name: Verify tests
+        if: ${{ steps.release.outputs.release_created }}
+        run: go test ./...
