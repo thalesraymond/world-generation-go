@@ -1,7 +1,3 @@
-Abaixo encontra-se a tradução do artigo técnico para o inglês:
-
----
-
 ### Architectural Design of a Go CLI Utility for Procedural Generation of Stories and Worlds in Tabletop RPGs
 
 The creation of campaigns for tabletop role-playing games (TTRPGs) imposes a monumental creative and logistical challenge on Dungeon Masters (DMs), usually referred to as worldbuilding. Traditionally, this process requires the manual and time-consuming design of extensive geographies, intricate dynastic lineages, branching diplomatic conflicts, and foundational mythologies. However, the maturation of Procedural Content Generation (PCG) techniques has provided tools capable of algorithmically instantiating entire universes. Highly deterministic simulation systems can now generate initial world states, process the passage of millennia of history through complex computational logic, and ultimately present a static ecosystem rich in interconnected details, ready to be explored by players.
@@ -12,38 +8,38 @@ Crucially, this system operates in the total absence of Large Language Models (L
 
 #### Theoretical Foundations of Procedural Content Generation (PCG)
 
-To design an independent and functional algorithmic system, it is imperative to dissect the paradigms established by benchmark historical simulators that operate without artificial neural networks, relying entirely on strict pseudo-random generation and complex rule-based systems. Academic literature classifies Procedural Content Generation (PCG) as the automatic creation of game assets using algorithms, with an application history dating back to the 1980s in titles like *Rogue* and *Elite*.
+To design an independent and functional algorithmic system, it is imperative to dissect the paradigms established by benchmark historical simulators that operate without artificial neural networks, relying entirely on strict pseudo-random generation and complex rule-based systems. Academic literature classifies Procedural Content Generation (PCG) as the automatic creation of game assets using algorithms, with an application history dating back to the 1980s in titles like _Rogue_ and _Elite_.
 
 In worldbuilding, algorithms are frequently divided between constructive methods and generate-and-test methods. Constructive algorithms guarantee that the generated output is unconditionally playable and logical, dispensing with the need for an evaluating agent to analyze dead ends or breaks in historical coherence. For a CLI utility designed to generate instant campaigns for a Dungeon Master, offline constructive generation presents itself as the ideal methodology, as it exhaustively processes the content prior to the start of the gaming session, ensuring stability and consuming fewer resources during the subsequent interaction phase.
 
 #### Paradigm Analysis in Traditional Historical Simulators
 
-The architectural proposal for the Go CLI is fundamentally inspired by two antagonistic yet complementary simulation philosophies, present in procedural generation masterpieces: the purely mechanistic simulation of *Dwarf Fortress* and the narrative and rhetorical approach of *Caves of Qud*.
+The architectural proposal for the Go CLI is fundamentally inspired by two antagonistic yet complementary simulation philosophies, present in procedural generation masterpieces: the purely mechanistic simulation of _Dwarf Fortress_ and the narrative and rhetorical approach of _Caves of Qud_.
 
 **The Bottom-Up and Geological Paradigm of Dwarf Fortress**
-*Dwarf Fortress*, conceived by Tarn and Zach Adams, represents the current zenith of bottom-up world simulation. The generation process in this software follows an incredibly rigid and deterministic multiphase architecture. World generation is subordinated to the premise that geography dictates civilization, and not the reverse. The system begins by preparing elevation fields based on noise algorithms, establishing temperature maps according to latitudes, executing erosion routines to trace the path of hydrographic basins, and subsequently forming lakes and importing wildlife based on the resulting biomes. Only after the complete consolidation of orogeny and climatology are sapient civilizations instantiated in the simulation.
+_Dwarf Fortress_, conceived by Tarn and Zach Adams, represents the current zenith of bottom-up world simulation. The generation process in this software follows an incredibly rigid and deterministic multiphase architecture. World generation is subordinated to the premise that geography dictates civilization, and not the reverse. The system begins by preparing elevation fields based on noise algorithms, establishing temperature maps according to latitudes, executing erosion routines to trace the path of hydrographic basins, and subsequently forming lakes and importing wildlife based on the resulting biomes. Only after the complete consolidation of orogeny and climatology are sapient civilizations instantiated in the simulation.
 
-From this moment on, the *Dwarf Fortress* engine transitions into a behavioral and historical simulator that operates like a giant strategy game without player intervention, governed by thousands of agents equipped with rudimentary artificial intelligence, where world history is the literal and holistic record of these micro-interactions. The internal workings of event generation rely on meticulous and numerical tracking of sociopolitical occurrences. Every historical figure, whether a demon, god, dwarf, or forgotten beast, is monitored.
+From this moment on, the _Dwarf Fortress_ engine transitions into a behavioral and historical simulator that operates like a giant strategy game without player intervention, governed by thousands of agents equipped with rudimentary artificial intelligence, where world history is the literal and holistic record of these micro-interactions. The internal workings of event generation rely on meticulous and numerical tracking of sociopolitical occurrences. Every historical figure, whether a demon, god, dwarf, or forgotten beast, is monitored.
 
-The computational depth of *Dwarf Fortress's* Legends Mode exposes the degree of granulation in this method. Upon requesting a data export (XML dump) of the generated world, the user accesses a massive relational tree. The underlying logical structure, which will serve as partial inspiration for our CLI's data modeling, is defined through precise hierarchical schemas.
+The computational depth of _Dwarf Fortress's_ Legends Mode exposes the degree of granulation in this method. Upon requesting a data export (XML dump) of the generated world, the user accesses a massive relational tree. The underlying logical structure, which will serve as partial inspiration for our CLI's data modeling, is defined through precise hierarchical schemas.
 
-| Structural Entity (XML / Logic) | Description of Associated Parameters | Relevance in Go Utility Design |
-| --- | --- | --- |
-| **historical_figure** | Unique ID, generated name, race, caste/gender, birth year, death year (with a -1 flag for living figures). | Foundational for tracking the life cycle of agents in our engine. |
-| **site** | Identifier, toponymic designation, spatial coordinates, structure type (e.g., city, fortress, lair). | Allows indexing locations to the Pointcrawl geographic nodes. |
-| **event** | ID, occurrence year, references to identifiers (e.g., attacker_civ_id, defender_general_hfid), event type and subtype. | Essential for building a causal narrative and exportable chronicles for the DM. |
-| **artifact** | Material, type, list of associated deaths, tracking of guardians or owners. | Elements of high interest for creating adventure hooks in TTRPG quests. |
+| Structural Entity (XML / Logic) | Description of Associated Parameters                                                                                   | Relevance in Go Utility Design                                                  |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| **historical_figure**           | Unique ID, generated name, race, caste/gender, birth year, death year (with a -1 flag for living figures).             | Foundational for tracking the life cycle of agents in our engine.               |
+| **site**                        | Identifier, toponymic designation, spatial coordinates, structure type (e.g., city, fortress, lair).                   | Allows indexing locations to the Pointcrawl geographic nodes.                   |
+| **event**                       | ID, occurrence year, references to identifiers (e.g., attacker_civ_id, defender_general_hfid), event type and subtype. | Essential for building a causal narrative and exportable chronicles for the DM. |
+| **artifact**                    | Material, type, list of associated deaths, tracking of guardians or owners.                                            | Elements of high interest for creating adventure hooks in TTRPG quests.         |
 
 However, the strict simulation of the bottom-up paradigm presents a significant algorithmic and performance gap. As the world ages and the global population proliferates, the processing of each year worsens under the weight of simulating daily individual behaviors. In a newborn universe, generation consumes fractions of a second per simulated year; in a centennial world, temporal progress can slow down to consume several seconds just to process a single annual cycle, limiting the viability of rapid generation in a lightweight interface environment.
 
 **The Ex Post Facto and Rhetorical Model of Caves of Qud**
-To bridge the performance issues inherent in an atomic simulation, the CLI tool must integrate the opposite architecture, brilliantly executed in the sci-fi title *Caves of Qud*. Its creators, Jason Grinblat and Brian Bucklew, devised a biography and story generator that acts conceptually in reverse, a methodology termed "subversion of cause and effect".
+To bridge the performance issues inherent in an atomic simulation, the CLI tool must integrate the opposite architecture, brilliantly executed in the sci-fi title _Caves of Qud_. Its creators, Jason Grinblat and Brian Bucklew, devised a biography and story generator that acts conceptually in reverse, a methodology termed "subversion of cause and effect".
 
-The academic premise behind the *Caves of Qud* engine argues that history fundamentally serves a rhetorical function. Real-life stories and chronicles constitute inextricable networks whose true relational mechanics are obscured, often manipulated to promote sociocultural narratives that hide original facts. Instead of exhaustively simulating logistical chains to explain the founding of a cult, the system relies on finite state machines and replacement grammars to forge random historical events, dedicating its processing load to "rationalizing" them after the fact (*ex post facto*).
+The academic premise behind the _Caves of Qud_ engine argues that history fundamentally serves a rhetorical function. Real-life stories and chronicles constitute inextricable networks whose true relational mechanics are obscured, often manipulated to promote sociocultural narratives that hide original facts. Instead of exhaustively simulating logistical chains to explain the founding of a cult, the system relies on finite state machines and replacement grammars to forge random historical events, dedicating its processing load to "rationalizing" them after the fact (_ex post facto_).
 
 By adopting this rhetorical and top-down format, it is possible to establish thematic categories or domains of interest (e.g., "ice", "jewelry", "scholarship") for eminent leaders (Sultans). Generation is processed in a highly optimized sequence: the system instigates a stochastic state transition ("The Leader initiated a war against Nation B"), and the grammar engine takes charge of compiling the textual pieces of the narrative based on their domain. This system fosters apophenia—the innate tendency of human cognition to perceive logical patterns where only stochastic connections exist—allowing TTRPG players to invent "stories" from raw data. Incorporating similar systems based on rules or query languages, like the Felt interpreter, also enables story sifting through simulation logs to identify and highlight only narratively intriguing event chains.
 
-The combination of a preliminary geological mapping inspired by *Dwarf Fortress* with the abstracted and high-performance historical-mythological generation of *Caves of Qud* forms the conceptual and algorithmic foundation of our utility engine developed in Go.
+The combination of a preliminary geological mapping inspired by _Dwarf Fortress_ with the abstracted and high-performance historical-mythological generation of _Caves of Qud_ forms the conceptual and algorithmic foundation of our utility engine developed in Go.
 
 #### Go Software Architecture for Headless Tools
 
@@ -53,13 +49,13 @@ To materialize this strict level of independence, the adoption of "Clean Archite
 
 The physical and logical structure of the Go application repository must rigidly adhere to clear idiomatic and semantic conventions, organized through the following package distribution matrix:
 
-| Directory / Layer | Responsibility and Code Semantics | Dependency and Coupling Restrictions |
-| --- | --- | --- |
-| **cmd/worldgen/** | The focal point of execution (`main()`). Interconnects abstract components with system input implementations. | It is the outermost layer. Imports orchestration libraries (like Cobra/Viper) and injects dependencies into the system. |
-| **internal/domain/** | Constitutes the primary entities. Encompasses pure business rules (e.g., World, HistoricalFigure, Faction). | Completely devoid of external dependencies. Does not include JSON, GORM annotations, or references to web servers or CLI. |
-| **internal/usecase/** | Orchestrating use cases (Application Logic). Processes simulation mechanics, determining the flow of time and events. | Imports the domain. Defines interfaces for persistence or formatting, which will be fulfilled in an inverted manner by the infrastructure. |
-| **internal/adapter/** | The link between use cases and delivery mechanisms. Houses CLI controllers, REST handlers, or gRPC servers. | Transforms the reading of console arguments into pure types processable by use cases, converting outputs back into text streams (stdout). |
-| **internal/infra/** | Integrations with systemic components. Implements the file export engine, direct YAML manipulation, and I/O operations. | Strictly implements the abstractions dictated by the `usecase` layer without infecting the conceptual core of the historical algorithm. |
+| Directory / Layer     | Responsibility and Code Semantics                                                                                       | Dependency and Coupling Restrictions                                                                                                       |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **cmd/worldgen/**     | The focal point of execution (`main()`). Interconnects abstract components with system input implementations.           | It is the outermost layer. Imports orchestration libraries (like Cobra/Viper) and injects dependencies into the system.                    |
+| **internal/domain/**  | Constitutes the primary entities. Encompasses pure business rules (e.g., World, HistoricalFigure, Faction).             | Completely devoid of external dependencies. Does not include JSON, GORM annotations, or references to web servers or CLI.                  |
+| **internal/usecase/** | Orchestrating use cases (Application Logic). Processes simulation mechanics, determining the flow of time and events.   | Imports the domain. Defines interfaces for persistence or formatting, which will be fulfilled in an inverted manner by the infrastructure. |
+| **internal/adapter/** | The link between use cases and delivery mechanisms. Houses CLI controllers, REST handlers, or gRPC servers.             | Transforms the reading of console arguments into pure types processable by use cases, converting outputs back into text streams (stdout).  |
+| **internal/infra/**   | Integrations with systemic components. Implements the file export engine, direct YAML manipulation, and I/O operations. | Strictly implements the abstractions dictated by the `usecase` layer without infecting the conceptual core of the historical algorithm.    |
 
 The decoupling provided by this model ensures that the underlying logic of how kingdoms evolve or fight is intrinsically impermeable to the nuances of the operational environment. If, in the future, the DM community demands that the CLI assume the form of an API invocable via microservices, it will suffice to add an `internal/adapter/http` package serving Gin or Echo framework routes, without altering a single line of code in the simulation files contained within `internal/usecase`.
 
@@ -69,9 +65,9 @@ To enhance DM ergonomics in local CLI usage without sacrificing design integrity
 
 The expected behavior is reflected in the structured invocation from the terminal. The interaction syntax allows managing multiple instances and generation phases:
 
-* `worldgen init --name "Ashtar" --size medium --seed 12345`: This subcommand provides the adapter instruction to initialize a local geological vault without history.
-* `worldgen simulate --years 500 --events dense`: Transmits the temporal directives to the use case interface, activating the state machine to calculate five centuries of political interactions.
-* `worldgen export --format obsidian --output /path/to/vault`: Executes the reading of the final data tree and initiates the infrastructural routine to generate specialized formatting documents.
+- `worldgen init --name "Ashtar" --size medium --seed 12345`: This subcommand provides the adapter instruction to initialize a local geological vault without history.
+- `worldgen simulate --years 500 --events dense`: Transmits the temporal directives to the use case interface, activating the state machine to calculate five centuries of political interactions.
+- `worldgen export --format obsidian --output /path/to/vault`: Executes the reading of the final data tree and initiates the infrastructural routine to generate specialized formatting documents.
 
 The synergy between Cobra and Viper solves the hierarchical complexity of options. A parameterization variable (for example, the map's precipitation scale) can be defined via literal arguments (flags) in the console, loaded via a `.yaml` file associated with the DM's campaign profile, or assume the intrinsic code defaults of the library.
 
@@ -105,22 +101,22 @@ The simulation's main loop initiates an algorithmic clock, which iterates over c
 `[Year 148] :: Battle of the Dark Valley. General Gorag faces King Lirion.`
 `[Year 148] :: [ALERT] General Gorag perishes in combat. King Lirion obtains the Artifact "Glass Hammer".`
 
-This terminal transcription combines the mechanical spectacle of *Dwarf Fortress* with modern speed and modularity, ensuring the DM actively monitors the evolutionary progression of their campaign, and facilitating the timely cancellation of the routine via systemic signals (CTRL+C) if the narrative loses interest, thereby saving the processed phase at the moment of forced closure.
+This terminal transcription combines the mechanical spectacle of _Dwarf Fortress_ with modern speed and modularity, ensuring the DM actively monitors the evolutionary progression of their campaign, and facilitating the timely cancellation of the routine via systemic signals (CTRL+C) if the narrative loses interest, thereby saving the processed phase at the moment of forced closure.
 
 **Phase 4: The Grammatical Paradigm of Battles, Factions, and Mythic Texts**
 The transcriptions displayed in the terminal and, inevitably, in the post-simulation export files should not appear in the arid format originating from logical equations. A pure computational simulation only generates structures like `attacker_civ_id = 45; defender_civ_id = 92; battle_type = siege`. To convert this data without resorting to the insubordinate variability of LLM tools, our application will rely on intrinsic algorithmic and library support for Context-Free Grammars (CFGs).
 
-A CFG operates based on formal grammatical rules (such as the Backus-Naur Form, or BNF), performing deterministic mappings of non-terminal symbols to production strings containing other linguistic variables or pure final data. In the context of an application written in Go, tools rooted in efficient parsing based on the Earley Parser algorithm or decentralized automata evaluation routines prove prodigious for ultra-fast narrative generation. The *ex post facto* rhetorical system draws heavily from this logical functionality.
+A CFG operates based on formal grammatical rules (such as the Backus-Naur Form, or BNF), performing deterministic mappings of non-terminal symbols to production strings containing other linguistic variables or pure final data. In the context of an application written in Go, tools rooted in efficient parsing based on the Earley Parser algorithm or decentralized automata evaluation routines prove prodigious for ultra-fast narrative generation. The _ex post facto_ rhetorical system draws heavily from this logical functionality.
 
 By designing an integrated grammatical parser within the core logic of our Go system's adapter, we stipulate generative rules in the base text blocks:
 
-| Semantic Rule / Non-Terminal | Production and Textual Interpolation by Simulation (CFG) |
-| --- | --- |
-| `<CITY_NAME>` | `<PREF>+<SUF>, <ADJECTIVE> <GEOGRAPHIC_FEATURE>, The Bastion of <HIST_FIGURE>` |
-| `<WAR_MOTIVATION>` | `due to ancient grievances over <LOCATION>, sparked by a blood feud.` |
-| `<ARTIFACT_DESCRIPTION>` | `A <MATERIAL> <WEAPON>, forged in the fires of <LOCATION> by <HIST_FIGURE>.` |
+| Semantic Rule / Non-Terminal | Production and Textual Interpolation by Simulation (CFG)                       |
+| ---------------------------- | ------------------------------------------------------------------------------ |
+| `<CITY_NAME>`                | `<PREF>+<SUF>, <ADJECTIVE> <GEOGRAPHIC_FEATURE>, The Bastion of <HIST_FIGURE>` |
+| `<WAR_MOTIVATION>`           | `due to ancient grievances over <LOCATION>, sparked by a blood feud.`          |
+| `<ARTIFACT_DESCRIPTION>`     | `A <MATERIAL> <WEAPON>, forged in the fires of <LOCATION> by <HIST_FIGURE>.`   |
 
-In conjunction with the top-down approach tested and refined with brilliant results in the Sultan biography routines of the *Caves of Qud* ecosystem, the engine does not have to physically calculate the forging of the magic axe by an agent. It occasionally instigates a sociological event—and analytically steps back in the static time of that ruler, analyzing their dominant domains (Power, Obsidian, Tyranny) to intertwine the phrases through BNF grammar and produce chained chronicles, formatted in pure native text, brimming with unshakeable literary mysticism devoid of anomalies.
+In conjunction with the top-down approach tested and refined with brilliant results in the Sultan biography routines of the _Caves of Qud_ ecosystem, the engine does not have to physically calculate the forging of the magic axe by an agent. It occasionally instigates a sociological event—and analytically steps back in the static time of that ruler, analyzing their dominant domains (Power, Obsidian, Tyranny) to intertwine the phrases through BNF grammar and produce chained chronicles, formatted in pure native text, brimming with unshakeable literary mysticism devoid of anomalies.
 
 #### Spatial Abstraction: The Pointcrawl Concept
 
@@ -130,16 +126,16 @@ In antithesis to meticulous strict hexagonal grid systems (Hexcrawls) that popul
 
 This algorithmic architectural process groups the resulting information into three relational paradigms of grid discovery that will comprise the base narrative exports:
 
-* **Known Points (Landmarks):** Capital seats of kingdoms and civilizations openly known from the start to the innate cognition of player characters, interconnected by the most stabilized and active roman roads, documented in the CLI's initial narratives.
-* **Unknown Points (Unknown):** Spatial spheres that branching nodes may indirectly cross; intermediate wasteland settlements subject to chance.
-* **Hidden/Secret Points (Hidden/Secret):** Primordial sanctuaries and castles in a lethargic state, preserved in the bowels of grammatical trees, to which only the resolution of mysteries in the narrative plot grants coupling directions to the pointcrawl's main network path.
+- **Known Points (Landmarks):** Capital seats of kingdoms and civilizations openly known from the start to the innate cognition of player characters, interconnected by the most stabilized and active roman roads, documented in the CLI's initial narratives.
+- **Unknown Points (Unknown):** Spatial spheres that branching nodes may indirectly cross; intermediate wasteland settlements subject to chance.
+- **Hidden/Secret Points (Hidden/Secret):** Primordial sanctuaries and castles in a lethargic state, preserved in the bowels of grammatical trees, to which only the resolution of mysteries in the narrative plot grants coupling directions to the pointcrawl's main network path.
 
 To enrich DM mechanical utility and alleviate their mechanical preparation regarding the TTRPG system, the Go CLI will iterate unifying paths between POIs with the heuristic calculation of base navigation and watch times inherent to the traversal friction dictated by the generated environmental matrix, instantiated in formatted exported tables.
 
-| Pointcrawl Relational Route | Dynamic Cost Components (Traversal) | Resulting Exported Penalty |
-| --- | --- | --- |
-| Camp A -> Village B | Short Distance + Standard Plain Trail | 1 Total Watch (Safe Journey) |
-| City B -> Hidden Ruin C | Medium Distance + Dangerous Orogenic Slope | 4 Total Watches (High Risk) |
+| Pointcrawl Relational Route | Dynamic Cost Components (Traversal)          | Resulting Exported Penalty      |
+| --------------------------- | -------------------------------------------- | ------------------------------- |
+| Camp A -> Village B         | Short Distance + Standard Plain Trail        | 1 Total Watch (Safe Journey)    |
+| City B -> Hidden Ruin C     | Medium Distance + Dangerous Orogenic Slope   | 4 Total Watches (High Risk)     |
 | Lair C -> Winged Fortress D | Long Distance + Hostile Mythic Forest + Road | 5 Total Watches (Need for Rest) |
 
 #### Export and Integration with Obsidian Vaults
@@ -153,12 +149,12 @@ Consequently, the infrastructure module located in the base architecture (`inter
 **Semantic Structure of Agnostic Directories for TTRPGs**
 To assimilate the massive tangled chronicles without drowning the DM in redundant peripheral information overload, the CLI systematically structures the artifacts into predefined root directories within the exported native project.
 
-| Vault Directory | Architectural Semantics of Algorithmically Generated Content |
-| --- | --- |
-| **bases/ or atlas/** | Primary starting points. Files generated from the global pointcrawl map. A relational manifesto consolidating geology and cardinal commercial communication routes. |
-| **notes/lore/** | The sanctuary of chronicles and the system's subverted retroactive historical memory. Gathers static mythologies, ancient inter-dynastic conflicts ("The Ruby Fire of 430"). |
-| **notes/monsters/ or characters/** | Hierarchical archives with detailed notes on relevant Historical Figures, living renegade generals, or dormant monsters identified by the hidden nodes of the territorial graph. |
-| **notes/magic items/** | Individual inventory of Mythic Artifacts whose procedural baptisms by the CFG are paired with biographical reviews of assassinations and former mortal bearers that give mechanical life to global greed. |
+| Vault Directory                    | Architectural Semantics of Algorithmically Generated Content                                                                                                                                              |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **bases/ or atlas/**               | Primary starting points. Files generated from the global pointcrawl map. A relational manifesto consolidating geology and cardinal commercial communication routes.                                       |
+| **notes/lore/**                    | The sanctuary of chronicles and the system's subverted retroactive historical memory. Gathers static mythologies, ancient inter-dynastic conflicts ("The Ruby Fire of 430").                              |
+| **notes/monsters/ or characters/** | Hierarchical archives with detailed notes on relevant Historical Figures, living renegade generals, or dormant monsters identified by the hidden nodes of the territorial graph.                          |
+| **notes/magic items/**             | Individual inventory of Mythic Artifacts whose procedural baptisms by the CFG are paired with biographical reviews of assassinations and former mortal bearers that give mechanical life to global greed. |
 
 **Markdown Semantics, YAML Frontmatter, and Relational Connections (Dataview)**
 The supremacy of a universe conceived independently of the inherent flaws and intrinsic amnesiac unraveling of current Generative Artificial Intelligence iterators lies in the perfect absolute relational and referential metadata interconnections that a purely computational native structure compiled in Go can print natively across the entire web of generated Markdown files in milliseconds.
@@ -169,6 +165,7 @@ An illustrative example of the outputs rendered in local repositories for the DM
 
 ```yaml
 ---
+
 base: characters
 type: npc
 aliases: [The Bloody Spear, General Korg]
@@ -177,7 +174,9 @@ status: alive
 location: "[[Blackstone Fortress]]"
 birth_year: 842
 related_events: ["[[Battle of the Dark Cascade]]"]
+
 ---
+
 # Korg, The Bloody Spear
 
 **Korg** emerged resplendent from the glacial plains around the frigid and somber winter at the dawn of the great [[Age of the Rift]]. Wielding the once forged arcane relic, the masterful [[Crystal Reaper]], he led mortal hosts in the historic fierce and relentless carnage before the bronze gates against the doomed King Aethel...
@@ -192,8 +191,12 @@ The conceptual and algorithmic elaboration formalizing the derivation of a geolo
 
 The engine decisively moves away from the hallucination and temporal and spatial dissonance inherent in free texts by neural iterative proxy, taking refuge dogmatically and peremptorily in absolute certainties, in the algorithmic reproduction guaranteed by the systemic security of the hermetic encapsulation provided by localized operational seeds derived from innovations like the native platform's compilation environment's `math/rand/v2`.
 
-The amalgamation of heavy architecture sedimented by the microscopic structural concentric philosophies imbued in the formidable pioneering of exhaustive constructive generation inherent to continuous simulation evident lightyears away by the mechanical genuineness innovations of *Dwarf Fortress*, merges harmoniously in this organic engine in complementary and irrevocable alliance with the schemas of macroscopic apophenic abstraction and purely generative rhetorical rationalizations retroactively tested in the modeled free grammar matrices in the operative brilliance methodologically imposed in *Caves of Qud*. This results in an exceptionally parallel-agile, highly performant conceptual composite explicitly tailored to the modern ecosystem.
+The amalgamation of heavy architecture sedimented by the microscopic structural concentric philosophies imbued in the formidable pioneering of exhaustive constructive generation inherent to continuous simulation evident lightyears away by the mechanical genuineness innovations of _Dwarf Fortress_, merges harmoniously in this organic engine in complementary and irrevocable alliance with the schemas of macroscopic apophenic abstraction and purely generative rhetorical rationalizations retroactively tested in the modeled free grammar matrices in the operative brilliance methodologically imposed in _Caves of Qud_. This results in an exceptionally parallel-agile, highly performant conceptual composite explicitly tailored to the modern ecosystem.
 
 The uncompromising reliance on the robust dynamics conceptually advocated in the inviolable theoretical principles of "Clean Architecture," in intrinsic concert with massive utility standards proven by hegemonic native orchestration libraries like Cobra and Viper, is not limited to bridging the operative functional urgencies of an isolated tool based on a headless command-line terminal; it paves an unlimited horizon allowing the functional core of this empire simulation abstraction to passively evolve or perfectly transcend, free from trauma and blocks, into infrastructures globally based in web cloud clusters integrated through robust asynchronous REST channels and flexible, immutable decentralized server APIs.
 
 In final summary, the unconditional realization of this massive chain of compiling abstract chronicles into tangible interfaces crystallized through standardized exports with the absolute referenced support of wiki logic, dynamic frontmatter, and interactive conceptual grids based on optimized frictionless relational ontologies directly directed into the backbone of data vaults of local boundless interconnected repositories in organic Markdown for the Obsidian ecosystem encapsulates a methodical triumph. It fully and invariably respects the intellectual dignity of the natural, organic, free narrative exercise imperative to all manifest social branches of classic TTRPG tabletops, liberating humanity from the exhausting routine mathematics of cold creation without, however, intervening in the supreme capacity to dynamically guide and interact with the natural agency of unified imagination on its own inviolable terms inherent to the inexhaustible collective organic ludic free will shared by the primordial and invaluable human cognitive creator factor at the table.
+
+```
+
+```
