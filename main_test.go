@@ -1,12 +1,28 @@
 package main
 
-import "testing"
+import (
+	"bytes"
+	"strings"
+	"testing"
 
-func TestGreet(t *testing.T) {
-	got := greet()
-	want := "world-generation-go is ready"
+	"github.com/thalesraymond/world-generation-go/cmd"
+)
 
-	if got != want {
-		t.Fatalf("greet() = %q, want %q", got, want)
+func TestRootHelpListsCommands(t *testing.T) {
+	rootCmd := cmd.NewRootCommand()
+	output := &bytes.Buffer{}
+	rootCmd.SetOut(output)
+	rootCmd.SetErr(output)
+	rootCmd.SetArgs(nil)
+
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatalf("Execute() returned error: %v", err)
+	}
+
+	help := output.String()
+	for _, fragment := range []string{"Usage:", "init", "simulate", "export"} {
+		if !strings.Contains(help, fragment) {
+			t.Fatalf("help output missing %q in %q", fragment, help)
+		}
 	}
 }

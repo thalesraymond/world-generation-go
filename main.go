@@ -1,11 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"os"
 
-func greet() string {
-	return "world-generation-go is ready"
-}
+	"github.com/thalesraymond/world-generation-go/cmd"
+)
 
 func main() {
-	fmt.Println(greet())
+	if err := cmd.Execute(); err != nil {
+		os.Exit(1)
+	}
 }
