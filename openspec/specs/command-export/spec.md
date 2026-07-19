@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Define the expected behavior of the export command for writing generated world data to an output destination.
+
+## Requirements
 
 ### Requirement: Export generated world data
 

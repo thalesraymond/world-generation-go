@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Define the expected initialization behavior for scaffolding project configuration and structure.
+
+## Requirements
 
 ### Requirement: Initialize project structure
 

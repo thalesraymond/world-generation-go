@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Define the expected behavior of the simulate command to trigger deterministic world generation.
+
+## Requirements
 
 ### Requirement: Trigger world generation
 

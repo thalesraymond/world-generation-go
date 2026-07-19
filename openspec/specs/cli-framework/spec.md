@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+Define the baseline CLI framework behavior for command routing and configuration precedence.
+
+## Requirements
 
 ### Requirement: CLI application structure and config management
 
