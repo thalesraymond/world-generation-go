@@ -1,28 +1,38 @@
 # world-generation-go
 
-world-generation-go is a deterministic Go CLI for fantasy world generation. The project is being built around a clean architecture and an OpenSpec-driven roadmap, with the long-term goal of supporting world initialization, simulation, and export to an Obsidian-friendly Markdown vault.
+`world-generation-go` is a deterministic Go CLI for fantasy world generation. It is being built around Clean Architecture and an OpenSpec-driven roadmap, with the long-term goal of supporting world initialization, phased simulation, and export to an Obsidian-compatible Markdown vault.
+
+The tool is intentionally LLM-free: it relies on constructive generation algorithms, cellular automata, context-free grammars, and deterministic pseudo-random number generation to produce reproducible worlds and histories.
 
 ## What is implemented today
 
-The repository already contains the foundations for a working generation pipeline:
+The repository contains the foundations of the generation pipeline:
 
-- A Cobra-based CLI with the core commands `init`, `simulate`, and `export`
-- Configuration loading through flags, environment variables, and optional config files via Viper
-- A deterministic state engine that derives isolated PRNG streams from a master seed
-- A terrain generation subsystem that produces elevation, temperature, humidity, and biome data from deterministic noise
-- Unit and command-level tests covering the core domain behavior and CLI entrypoints
+- **CLI entrypoint** — a Cobra-based command tree with `init`, `simulate`, and `export` subcommands.
+- **Configuration loading** — typed config via Viper, supporting flags, environment variables, and optional YAML config files.
+- **Clean Architecture scaffolding** — layered packages (`cmd`, `internal/adapter`, `internal/usecase`, `internal/domain`, `internal/infra`) with documented dependency rules.
+- **Deterministic state engine** — derives isolated `math/rand/v2` PRNG streams from a master seed, ensuring component-level reproducibility.
+- **Terrain generation** — Perlin-noise-based elevation, latitude-aware temperature, humidity, and biome classification into `water`, `tundra`, `desert`, `forest`, and `grassland`.
+- **Tests** — unit and command-level coverage for CLI behavior, PRNG determinism, and terrain rules.
 
-The current CLI commands are wired as entrypoints and currently acknowledge their inputs, while the underlying generation logic is implemented in the domain layer and is being expanded toward full simulation and export workflows.
+The CLI commands currently acknowledge and validate their inputs; the underlying generation logic lives in the `domain` layer and is being expanded toward full simulation and export workflows.
 
 ## Project structure
 
-- `cmd/` — CLI command definitions and entrypoints
-- `config/` — typed configuration loading
-- `internal/domain/` — pure domain logic for deterministic world generation
-  - `state/` — seed-derived PRNG engine
-  - `terrain/` — noise generation, terrain maps, and biome mapping
-- `internal/usecase/`, `internal/adapter/`, and `internal/infra/` — architecture scaffolding for the next stages of the application
-- `openspec/` — the source-of-truth design/specification documents for the project
+```
+cmd/                    CLI command definitions and entrypoints
+config/                 Typed configuration loading
+internal/
+  adapter/              Input/output translation and command handlers
+  domain/               Pure business logic (no framework/infrastructure imports)
+    state/              Deterministic PRNG engine
+    terrain/            Noise generation, terrain maps, and biome mapping
+  usecase/              Application orchestration and interfaces
+  infra/                File I/O, exporters, and external integrations
+openspec/               Source-of-truth design and specification documents
+```
+
+Each `internal/*` layer contains a `README.md` describing its responsibilities and dependency rules. For the authoritative architecture and engineering standards, see [AGENTS.md](AGENTS.md).
 
 ## Getting started
 
@@ -40,17 +50,27 @@ go run . simulate --years 500 --events dense
 go run . export --format obsidian --output ./vault
 ```
 
+At this stage, `init`, `simulate`, and `export` parse configuration and acknowledge the requested operation. Full simulation and file export are under active development.
+
 ## Configuration
 
-The CLI supports these global options:
+Global options:
 
 - `--config` — path to a YAML config file
 - `--seed` — deterministic seed override
 - `--output` — output directory for generated artifacts
 
-Configuration precedence follows the current Viper behavior:
+Command-specific options:
 
-`CLI flags > environment variables > config file > defaults`
+- `init` — `--name`, `--size`
+- `simulate` — `--years`, `--events`
+- `export` — `--format`
+
+Configuration precedence:
+
+```
+CLI flags > environment variables > config file > defaults
+```
 
 Environment variables use the `WORLDGEN_` prefix. For example:
 
@@ -58,25 +78,47 @@ Environment variables use the `WORLDGEN_` prefix. For example:
 WORLDGEN_OUTPUT=./vault go run . export
 ```
 
-## Current development focus
+A config file without an explicit path is resolved as `worldgen.yaml` in the current directory or the user's home directory.
 
-The implemented domain pieces already cover the groundwork for deterministic generation, but the full end-to-end workflow is still being developed. The next major milestones in the roadmap are:
+## Roadmap
 
-- full simulation loop orchestration
-- demographic automata and settlement generation
-- narrative synthesis and timeline streaming
-- Obsidian-compatible export formatting
+Implemented milestones are archived under `openspec/changes/archive/`. Active work is tracked under `openspec/changes/` and includes:
+
+1. **Deterministic RNG pipeline integration** — wire the state engine into simulation bootstrapping so every subsystem uses an injected, seed-derived PRNG.
+2. **Core simulation loop** — year-by-year world advancement with channel-based timeline streaming to `stdout`.
+3. **Demographic automata and settlement generation** — cellular-automata population spread and suitability-driven settlement placement.
+4. **CFG narrative engine** — context-free grammar parser that turns numerical events into readable mythic text.
+5. **Pointcrawl spatial abstraction** — graph of Points of Interest with travel-cost heuristics measured in "watches".
+6. **Obsidian Markdown export** — YAML frontmatter, wiki-links, and a vault directory structure for personal knowledge management.
+
+For full requirements and design rationale, see the corresponding `design.md` and `spec.md` files in `openspec/`.
+
+## Determinism
+
+Identical seeds must produce identical worlds. The project enforces this through:
+
+- `math/rand/v2` PRNGs created per component.
+- A master-seed engine in `internal/domain/state` that derives stable sub-seeds from a component identifier.
+- No package-level random state and no shared global RNG.
 
 ## Testing
 
-The repository includes tests for:
+The test suite covers:
 
 - CLI help and command behavior
-- deterministic PRNG behavior
-- terrain generation and biome classification
+- deterministic PRNG streams and component isolation
+- terrain generation, biome classification, and noise normalization
 
-Run the test suite with:
+Run tests:
 
 ```bash
 go test ./...
 ```
+
+Run with the race detector:
+
+```bash
+go test ./... -race
+```
+
+Coverage expectations are defined in [AGENTS.md](AGENTS.md): repository-wide statement coverage must remain >= 80%, and `internal/domain` and `internal/usecase` each must remain >= 90%.
