@@ -151,6 +151,7 @@ Before merging, ensure all are true:
 - Avoid drive-by refactors unrelated to the requested change.
 - Update docs/spec references when behavior changes.
 - Always use conventional commit messages with clear scope and type (e.g., `feat`, `fix`, `refactor`, `test`, `docs`).
+- The conventional commit should also be the title of the PR for clarity in history and changelog generation. Always use the "bigger" scope for the PR title if multiple commits are squashed. If a PR has a "feat" commit and a "fix" commit, the PR title should be "feat: ..." to reflect the larger scope.
 
 ## Agent Behavior in This Repo
 
