@@ -5,12 +5,14 @@ World generation relies on pseudo-random number generators (PRNG) to create vari
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Provide a Deterministic State Management Engine that serves isolated, seed-derived PRNG instances to different components.
 - Migrate to `math/rand/v2` for generating random sequences.
 - Ensure strict seed segregation to prevent cross-component interference.
 - Guarantee that the same master seed always reproduces the same component-specific PRNG stream.
 
 **Non-Goals:**
+
 - We are not refactoring terrain, climate, demographic, or simulation modules in this change.
 - We are not yet proving full end-to-end world reproducibility in the CLI pipeline.
 - This change does not focus on improving the performance of world generation algorithms.

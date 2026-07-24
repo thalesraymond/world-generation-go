@@ -12,6 +12,7 @@ World generation requires deterministic outcomes based on an initial seed to ens
 ## Capabilities
 
 ### New Capabilities
+
 - `deterministic-rng`: Provides reproducible, strictly segregated pseudo-random number generators based on `math/rand/v2` for different simulation components.
 
 ### Modified Capabilities

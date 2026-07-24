@@ -12,9 +12,11 @@ The deterministic state engine now exists, but the generation and simulation pip
 ## Capabilities
 
 ### New Capabilities
+
 - `deterministic-rng-integration`: Integrates isolated deterministic PRNG streams into world generation and simulation components.
 
 ### Modified Capabilities
+
 - `terrain-generation`: Must consume injected deterministic PRNGs.
 - `simulation-loop`: Must initialize and distribute component-specific PRNGs deterministically.
 - `demographic-automata`: Must use isolated deterministic PRNGs for repeatable simulation behavior.

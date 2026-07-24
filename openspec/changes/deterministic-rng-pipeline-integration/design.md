@@ -5,12 +5,14 @@ The deterministic state engine provides reproducible component-specific PRNGs, b
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Refactor generation and simulation modules to accept `*rand.Rand` instances from `math/rand/v2`.
 - Assign a stable component identifier to each subsystem so its PRNG stream remains isolated.
 - Wire the deterministic engine into the simulation bootstrap and use it to derive per-component PRNGs.
 - Add integration coverage proving same-seed runs produce identical results.
 
 **Non-Goals:**
+
 - Replacing or redesigning terrain, demographic, or simulation algorithms beyond the randomness plumbing they require.
 - Optimizing performance or introducing concurrency changes unrelated to deterministic RNG injection.
 
