@@ -27,6 +27,7 @@ Prioritize requirements from:
 - `openspec/specs/initial_concept.md`
 - `openspec/changes/*/specs/**/spec.md`
 - implementation details in each corresponding `design.md`
+- After changes are implemented, update the OpenSpec docs to reflect the final design and behavior. Run `openspec validate --all` to make sure the spec is consistent and valid.
 
 ## Architecture Rules (Non-Negotiable)
 
