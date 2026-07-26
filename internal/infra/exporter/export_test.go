@@ -1,11 +1,13 @@
 package exporter
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	"github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
@@ -267,6 +269,216 @@ func TestExportPointcrawlNilGraph(t *testing.T) {
 	}
 }
 
+func TestExportFiguresCreatesFiles(t *testing.T) {
+	state := &world.State{
+		Width:  10,
+		Height: 10,
+		Settlements: []world.Settlement{
+			{
+				Name: "Riverwatch",
+				Figures: []figures.HistoricalFigure{
+					{ID: "f1", Name: "Aldric Stone", BirthYear: 100, Faction: "Ironbound", Role: "Leader"},
+					{ID: "f2", Name: "Bren/Guard", BirthYear: 105, Faction: "Ironbound", Role: "Guard"},
+				},
+			},
+		},
+	}
+
+	tmpDir := t.TempDir()
+	targetDir := filepath.Join(tmpDir, "vault")
+
+	if err := ExportFigures(state, nil, targetDir); err != nil {
+		t.Fatalf("ExportFigures failed: %v", err)
+	}
+
+	charsDir := filepath.Join(targetDir, "characters")
+	if _, err := os.Stat(charsDir); os.IsNotExist(err) {
+		t.Fatal("characters directory does not exist")
+	}
+
+	entries, err := os.ReadDir(charsDir)
+	if err != nil {
+		t.Fatalf("read characters dir: %v", err)
+	}
+	if len(entries) != 2 {
+		t.Fatalf("expected 2 figure files, got %d", len(entries))
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			t.Errorf("expected .md file, got directory %s", entry.Name())
+		}
+		if !strings.HasSuffix(entry.Name(), ".md") {
+			t.Errorf("expected .md suffix, got %s", entry.Name())
+		}
+		if strings.ContainsAny(entry.Name(), "<>:\"/\\|?*") {
+			t.Errorf("file name contains special characters: %s", entry.Name())
+		}
+	}
+}
+
+func TestExportFiguresFrontmatterFields(t *testing.T) {
+	aliveFigure := figures.HistoricalFigure{
+		ID:        "char-alive",
+		Name:      "Lyra Windwhisper",
+		BirthYear: 200,
+		Role:      "Mage",
+		Faction:   "Sylvani",
+		Relationships: figures.Relationships{
+			Parents:  []string{"char-parent"},
+			Spouse:   []string{"char-spouse"},
+			Children: []string{"char-child"},
+		},
+	}
+	deceasedFigure := figures.HistoricalFigure{
+		ID:        "char-dead",
+		Name:      "Thorin Embercrown",
+		BirthYear: 150,
+		DeathYear: 210,
+		Role:      "King",
+		Faction:   "Ironbound",
+	}
+
+	state := &world.State{
+		Width:  10,
+		Height: 10,
+		Settlements: []world.Settlement{
+			{
+				Name:    "Oakhaven",
+				Figures: []figures.HistoricalFigure{aliveFigure, deceasedFigure},
+			},
+		},
+	}
+
+	tmpDir := t.TempDir()
+	targetDir := filepath.Join(tmpDir, "vault")
+
+	if err := ExportFigures(state, nil, targetDir); err != nil {
+		t.Fatalf("ExportFigures failed: %v", err)
+	}
+
+	aliveBytes, err := os.ReadFile(filepath.Join(targetDir, "characters", "Lyra Windwhisper.md"))
+	if err != nil {
+		t.Fatalf("read alive figure: %v", err)
+	}
+	alive := string(aliveBytes)
+
+	for _, want := range []string{
+		"id: char-alive",
+		"type: character",
+		"name: Lyra Windwhisper",
+		"role: Mage",
+		"faction: Sylvani",
+		"birthYear: 200",
+		`settlement: "[[Oakhaven]]"`,
+		"status: alive",
+	} {
+		if !strings.Contains(alive, want) {
+			t.Errorf("alive figure missing frontmatter field: %s", want)
+		}
+	}
+	if strings.Contains(alive, "deathYear") {
+		t.Error("alive figure should NOT have deathYear field")
+	}
+	if !strings.Contains(alive, `parents:`) || !strings.Contains(alive, `[[char-parent]]`) {
+		t.Errorf("alive figure missing parents frontmatter field, got:\n%s", alive)
+	}
+	if !strings.Contains(alive, `spouse:`) || !strings.Contains(alive, `[[char-spouse]]`) {
+		t.Errorf("alive figure missing spouse frontmatter field")
+	}
+	if !strings.Contains(alive, `children:`) || !strings.Contains(alive, `[[char-child]]`) {
+		t.Errorf("alive figure missing children frontmatter field")
+	}
+
+	deadBytes, err := os.ReadFile(filepath.Join(targetDir, "characters", "Thorin Embercrown.md"))
+	if err != nil {
+		t.Fatalf("read deceased figure: %v", err)
+	}
+	dead := string(deadBytes)
+
+	if !strings.Contains(dead, "status: deceased") {
+		t.Errorf("deceased figure missing status: deceased")
+	}
+	if !strings.Contains(dead, "deathYear: 210") {
+		t.Errorf("deceased figure missing deathYear field")
+	}
+}
+
+func TestExportFiguresWikiLinks(t *testing.T) {
+	state := &world.State{
+		Width:  10,
+		Height: 10,
+		Settlements: []world.Settlement{
+			{
+				Name:    "Oakhaven",
+				Faction: "Sylvani",
+				Figures: []figures.HistoricalFigure{
+					{
+						ID:        "char-1",
+						Name:      "Elara",
+						BirthYear: 200,
+						Faction:   "Sylvani",
+						Role:      "Leader",
+						Relationships: figures.Relationships{
+							Parents: []string{"char-parent"},
+							Spouse:  []string{"char-spouse"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	tmpDir := t.TempDir()
+	targetDir := filepath.Join(tmpDir, "vault")
+
+	if err := ExportFigures(state, nil, targetDir); err != nil {
+		t.Fatalf("ExportFigures failed: %v", err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(targetDir, "characters", "Elara.md"))
+	if err != nil {
+		t.Fatalf("read figure file: %v", err)
+	}
+	body := string(content)
+
+	if !strings.Contains(body, "[[Sylvani]]") {
+		t.Errorf("missing wiki-link to faction")
+	}
+	if !strings.Contains(body, "[[Oakhaven]]") {
+		t.Errorf("missing wiki-link to settlement")
+	}
+	if !strings.Contains(body, "[[char-parent]]") {
+		t.Errorf("missing wiki-link to parent")
+	}
+	if !strings.Contains(body, "[[char-spouse]]") {
+		t.Errorf("missing wiki-link to spouse")
+	}
+}
+
+func TestExportFiguresNoCharactersDirWhenEmpty(t *testing.T) {
+	state := &world.State{
+		Width:  10,
+		Height: 10,
+		Settlements: []world.Settlement{
+			{Name: "Riverwatch", Figures: []figures.HistoricalFigure{}},
+			{Name: "Oakhaven"},
+		},
+	}
+
+	tmpDir := t.TempDir()
+	targetDir := filepath.Join(tmpDir, "vault")
+
+	if err := ExportFigures(state, nil, targetDir); err != nil {
+		t.Fatalf("ExportFigures failed: %v", err)
+	}
+
+	charsDir := filepath.Join(targetDir, "characters")
+	if _, err := os.Stat(charsDir); !os.IsNotExist(err) {
+		t.Error("characters directory should NOT exist when no figures are present")
+	}
+}
+
 func TestExportTimelineEmptyEvents(t *testing.T) {
 	tmpDir := t.TempDir()
 	if err := ExportTimeline(nil, tmpDir); err != nil {
@@ -283,5 +495,212 @@ func TestExportTimelineEmptyEvents(t *testing.T) {
 
 	if _, err := os.Stat(filepath.Join(tmpDir, "chronicles")); !os.IsNotExist(err) {
 		t.Fatal("expected chronicles directory NOT to be created for empty events")
+	}
+}
+
+func TestJSONRoundTripReExportCycle(t *testing.T) {
+	original := world.NewState(10, 10)
+	original.Settlements = []world.Settlement{
+		{
+			Name: "Riverwatch", Type: "Town", X: 2, Y: 3, Faction: "Ironbound", Population: 500,
+			Figures: []figures.HistoricalFigure{
+				{ID: "rw-0", Name: "Aldric Stone", BirthYear: 10, Faction: "Ironbound", Role: "Leader"},
+				{ID: "rw-1", Name: "Bren Moss", BirthYear: 25, Faction: "Ironbound", Role: "Explorer", DeathYear: 80, MaxAge: 70},
+			},
+		},
+	}
+
+	events := []simulation.Event{
+		{Year: 45, Category: "politics", Description: "Aldric declares a feast", FigureID: "rw-0", SettlementName: "Riverwatch"},
+	}
+
+	dir1 := t.TempDir()
+	if err := Export(original, dir1); err != nil {
+		t.Fatalf("Export original: %v", err)
+	}
+	if err := ExportTimeline(events, dir1); err != nil {
+		t.Fatalf("ExportTimeline original: %v", err)
+	}
+	if err := ExportFigures(original, events, dir1); err != nil {
+		t.Fatalf("ExportFigures original: %v", err)
+	}
+
+	stateJSON, err := original.ToJSON()
+	if err != nil {
+		t.Fatalf("ToJSON: %v", err)
+	}
+
+	roundtripped, err := world.FromJSON(stateJSON)
+	if err != nil {
+		t.Fatalf("FromJSON: %v", err)
+	}
+
+	dir2 := t.TempDir()
+	if err := Export(roundtripped, dir2); err != nil {
+		t.Fatalf("Export roundtripped: %v", err)
+	}
+	if err := ExportTimeline(events, dir2); err != nil {
+		t.Fatalf("ExportTimeline roundtripped: %v", err)
+	}
+	if err := ExportFigures(roundtripped, events, dir2); err != nil {
+		t.Fatalf("ExportFigures roundtripped: %v", err)
+	}
+
+	subdirs := []string{"bases", "factions", "characters", "chronicles"}
+	for _, sub := range subdirs {
+		entries1, err := os.ReadDir(filepath.Join(dir1, sub))
+		if err != nil {
+			t.Fatalf("read dir %s (original): %v", sub, err)
+		}
+		entries2, err := os.ReadDir(filepath.Join(dir2, sub))
+		if err != nil {
+			t.Fatalf("read dir %s (roundtripped): %v", sub, err)
+		}
+		if len(entries1) != len(entries2) {
+			t.Errorf("dir %s file count differs: %d vs %d", sub, len(entries1), len(entries2))
+			continue
+		}
+		for i := range entries1 {
+			if entries1[i].Name() != entries2[i].Name() {
+				t.Errorf("dir %s file names differ: %s vs %s", sub, entries1[i].Name(), entries2[i].Name())
+				continue
+			}
+			data1, _ := os.ReadFile(filepath.Join(dir1, sub, entries1[i].Name()))
+			data2, _ := os.ReadFile(filepath.Join(dir2, sub, entries2[i].Name()))
+			if !bytes.Equal(data1, data2) {
+				t.Errorf("file %s/%s differs after JSON round-trip", sub, entries1[i].Name())
+			}
+		}
+	}
+}
+
+func TestExportFiguresIntegration(t *testing.T) {
+	state := &world.State{
+		Width:  100,
+		Height: 100,
+		Settlements: []world.Settlement{
+			{
+				Name: "Riverwatch", Type: "Town", X: 10, Y: 20, Faction: "Ironbound", Population: 500,
+				Figures: []figures.HistoricalFigure{
+					{ID: "riverwatch-0", Name: "Aldric Bronzefist", Role: "Leader", Faction: "Ironbound", BirthYear: 10},
+					{ID: "riverwatch-1", Name: "Mira Bronzefist", Role: "Explorer", Faction: "Ironbound", BirthYear: 35},
+					{ID: "riverwatch-2", Name: "Beran Stonehand", Role: "Warrior", Faction: "Ironbound", BirthYear: 60},
+				},
+			},
+			{
+				Name: "Oakhaven", Type: "City", X: 30, Y: 40, Faction: "Sylvani", Population: 1200,
+				Figures: []figures.HistoricalFigure{
+					{ID: "oakhaven-0", Name: "Elena Silksong", Role: "Leader", Faction: "Sylvani", BirthYear: 5},
+				},
+			},
+		},
+	}
+
+	events := []simulation.Event{
+		{Year: 45, Category: "politics", Description: "Aldric declares a festival", FigureID: "riverwatch-0", SettlementName: "Riverwatch"},
+		{Year: 70, Category: "discovery", Description: "Mira charts the eastern ridge", FigureID: "riverwatch-1", SettlementName: "Riverwatch"},
+	}
+
+	tmpDir := t.TempDir()
+
+	if err := Export(state, tmpDir); err != nil {
+		t.Fatalf("Export failed: %v", err)
+	}
+	if err := ExportTimeline(events, tmpDir); err != nil {
+		t.Fatalf("ExportTimeline failed: %v", err)
+	}
+	if err := ExportFigures(state, events, tmpDir); err != nil {
+		t.Fatalf("ExportFigures failed: %v", err)
+	}
+
+	charsDir := filepath.Join(tmpDir, "characters")
+	if _, err := os.Stat(charsDir); os.IsNotExist(err) {
+		t.Fatalf("characters directory does not exist")
+	}
+
+	entries, err := os.ReadDir(charsDir)
+	if err != nil {
+		t.Fatalf("read characters dir: %v", err)
+	}
+	if len(entries) != 4 {
+		t.Fatalf("expected 4 character files, got %d", len(entries))
+	}
+
+	expectedFiles := map[string]bool{
+		"Aldric Bronzefist.md": false,
+		"Mira Bronzefist.md":   false,
+		"Beran Stonehand.md":   false,
+		"Elena Silksong.md":    false,
+	}
+	for _, entry := range entries {
+		expectedFiles[entry.Name()] = true
+	}
+	for name, found := range expectedFiles {
+		if !found {
+			t.Errorf("expected character file %s not found", name)
+		}
+	}
+
+	aldricBytes, err := os.ReadFile(filepath.Join(charsDir, "Aldric Bronzefist.md"))
+	if err != nil {
+		t.Fatalf("read Aldric file: %v", err)
+	}
+	aldric := string(aldricBytes)
+
+	if !strings.Contains(aldric, "type: character") {
+		t.Errorf("character file missing type field")
+	}
+	if !strings.Contains(aldric, "name: Aldric Bronzefist") {
+		t.Errorf("character file missing name field")
+	}
+	if !strings.Contains(aldric, "role: Leader") {
+		t.Errorf("character file missing role field")
+	}
+	if !strings.Contains(aldric, "settlement: \"[[Riverwatch]]\"") {
+		t.Errorf("character file missing settlement wiki-link")
+	}
+	if !strings.Contains(aldric, "## Chronicle") {
+		t.Errorf("character file missing Chronicle section")
+	}
+	if !strings.Contains(aldric, "Year 45: Aldric declares a festival") {
+		t.Errorf("character file missing expected event")
+	}
+
+	riverwatchBytes, err := os.ReadFile(filepath.Join(tmpDir, "bases", "Riverwatch.md"))
+	if err != nil {
+		t.Fatalf("read Riverwatch file: %v", err)
+	}
+	riverwatch := string(riverwatchBytes)
+
+	if !strings.Contains(riverwatch, "## Characters") {
+		t.Errorf("settlement file missing Characters section")
+	}
+	if !strings.Contains(riverwatch, "### Leader") {
+		t.Errorf("settlement file missing Leader subsection")
+	}
+	if !strings.Contains(riverwatch, "### Explorers") {
+		t.Errorf("settlement file missing Explorers subsection")
+	}
+	if !strings.Contains(riverwatch, "### Others") {
+		t.Errorf("settlement file missing Others subsection")
+	}
+	if !strings.Contains(riverwatch, "[[Aldric Bronzefist]] (Leader)") {
+		t.Errorf("settlement file missing leader wiki-link")
+	}
+	if !strings.Contains(riverwatch, "[[Mira Bronzefist]] (Explorer)") {
+		t.Errorf("settlement file missing explorer wiki-link")
+	}
+	if !strings.Contains(riverwatch, "[[Beran Stonehand]] (Warrior)") {
+		t.Errorf("settlement file missing other figure wiki-link")
+	}
+
+	chronicleBytes, err := os.ReadFile(filepath.Join(tmpDir, "chronicles", "Chronicle.md"))
+	if err != nil {
+		t.Fatalf("read Chronicle file: %v", err)
+	}
+	chronicle := string(chronicleBytes)
+
+	if !strings.Contains(chronicle, "*(by [[riverwatch-0]])*") {
+		t.Errorf("chronicle missing figure reference for event with FigureID")
 	}
 }

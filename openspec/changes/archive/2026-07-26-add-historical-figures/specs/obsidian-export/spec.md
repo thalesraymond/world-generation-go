@@ -62,10 +62,10 @@ The export system SHALL create individual Markdown character files in the `chara
 
 ### Requirement: Chronicle Event Integration with Figures
 
-Chronicle event descriptions SHALL include figure wiki-links when events reference figures.
+Chronicle event descriptions SHALL include a figure reference when events reference figures.
 
 #### Scenario: Chronicle event with figure link
 
 - **WHEN** a chronicle event references a figure (has a non-empty `figureId`)
-- **THEN** the event description displayed in the chronicle SHALL contain a wiki-link to the figure's character file
-- **THEN** the wiki-link target filename SHALL match the sanitized figure name used for the character file
+- **THEN** the event description displayed in the chronicle SHALL contain an inline wiki-link reference to the figure
+- **THEN** the reference SHALL use the event's `figureId` value

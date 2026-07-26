@@ -75,10 +75,10 @@ Settlement and faction files SHALL link to the figures that belong to them.
 
 ### Requirement: Chronicle Event Integration
 
-Chronicle files SHALL include figure wiki-links when events reference figures.
+Chronicle files SHALL include a figure reference when events reference figures.
 
 #### Scenario: Chronicle event with figure
 
 - **WHEN** a chronicle event is generated from a timeline event that has a `figureId`
-- **THEN** the event description in the chronicle SHALL include a wiki-link to the figure's character file
-- **THEN** the wiki-link SHALL use the sanitized figure filename
+- **THEN** the event description in the chronicle SHALL include an inline reference to the figure using wiki-link syntax
+- **THEN** the reference SHALL use the event's `figureId` value

@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	"github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
@@ -56,6 +57,42 @@ func Export(state *world.State, targetDir string) error {
 		content += fmt.Sprintf("**Coordinates:** (%d, %d)\n", s.X, s.Y)
 		content += fmt.Sprintf("**Population:** %.0f\n", s.Population)
 		content += fmt.Sprintf("**Type:** %s\n\n", s.Type)
+
+		if len(s.Figures) > 0 {
+			content += "## Characters\n\n"
+			var leaders, explorers, others []figures.HistoricalFigure
+			for _, f := range s.Figures {
+				switch strings.ToLower(f.Role) {
+				case "leader":
+					leaders = append(leaders, f)
+				case "explorer":
+					explorers = append(explorers, f)
+				default:
+					others = append(others, f)
+				}
+			}
+			if len(leaders) > 0 {
+				content += "### Leader\n"
+				for _, f := range leaders {
+					content += fmt.Sprintf("- [[%s]] (%s)\n", tracker.sanitize(f.Name), f.Role)
+				}
+				content += "\n"
+			}
+			if len(explorers) > 0 {
+				content += "### Explorers\n"
+				for _, f := range explorers {
+					content += fmt.Sprintf("- [[%s]] (%s)\n", tracker.sanitize(f.Name), f.Role)
+				}
+				content += "\n"
+			}
+			if len(others) > 0 {
+				content += "### Others\n"
+				for _, f := range others {
+					content += fmt.Sprintf("- [[%s]] (%s)\n", tracker.sanitize(f.Name), f.Role)
+				}
+				content += "\n"
+			}
+		}
 
 		if err := os.WriteFile(path, []byte(frontmatter(fields)+content), 0644); err != nil {
 			return fmt.Errorf("write settlement file: %w", err)
@@ -252,7 +289,11 @@ func ExportTimeline(events []simulation.Event, targetDir string) error {
 		fmt.Fprintf(&b, "## Decade %ds\n\n", decade)
 		for _, event := range grouped[decade] {
 			fmt.Fprintf(&b, "### Year %d\n", event.Year)
-			fmt.Fprintf(&b, "- [%s] %s\n\n", event.Category, event.Description)
+			if event.FigureID != "" {
+				fmt.Fprintf(&b, "- [%s] %s *(by [[%s]])*\n\n", event.Category, event.Description, event.FigureID)
+			} else {
+				fmt.Fprintf(&b, "- [%s] %s\n\n", event.Category, event.Description)
+			}
 		}
 	}
 

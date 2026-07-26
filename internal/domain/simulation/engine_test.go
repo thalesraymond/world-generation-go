@@ -2,6 +2,7 @@ package simulation
 
 import (
 	"fmt"
+	"reflect"
 	"sync"
 	"testing"
 
@@ -109,7 +110,7 @@ func TestSimulationRunAndDeterminism(t *testing.T) {
 	}
 
 	for i := range res1 {
-		if res1[i] != res2[i] {
+		if !reflect.DeepEqual(res1[i], res2[i]) {
 			t.Errorf("determinism violation at index %d: %v vs %v", i, res1[i], res2[i])
 		}
 	}
@@ -152,7 +153,7 @@ func TestSimulationDeterminismWithRNGEntities(t *testing.T) {
 	}
 
 	for i := range res1 {
-		if res1[i] != res2[i] {
+		if !reflect.DeepEqual(res1[i], res2[i]) {
 			t.Errorf("determinism violation at index %d: %v vs %v", i, res1[i], res2[i])
 		}
 	}

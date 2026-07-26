@@ -1,9 +1,11 @@
 package world
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	"github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 )
 
@@ -212,5 +214,97 @@ func TestFromJSONRejectsInvalidGridLengths(t *testing.T) {
 
 	if _, err := FromJSON(payload); err == nil {
 		t.Fatalf("expected validation error for invalid layer length")
+	}
+}
+
+func TestSettlementJSONRoundTripWithFigures(t *testing.T) {
+	settlement := Settlement{
+		Name:       "Riverwatch",
+		Type:       "Town",
+		X:          2,
+		Y:          3,
+		Faction:    "ind",
+		Population: 1200,
+		Figures: []figures.HistoricalFigure{
+			{
+				ID:        "fig-001",
+				Name:      "Alden the Bold",
+				BirthYear: 100,
+				MaxAge:    60,
+				Role:      "leader",
+				Faction:   "ind",
+				Relationships: figures.Relationships{
+					Parents:  []string{"fig-p1"},
+					Children: []string{"fig-c1"},
+					Spouse:   []string{"fig-s1"},
+				},
+			},
+			{
+				ID:        "fig-002",
+				Name:      "Mira the Wise",
+				BirthYear: 120,
+				DeathYear: 180,
+				MaxAge:    70,
+				Role:      "explorer",
+				Faction:   "ind",
+			},
+		},
+	}
+
+	data, err := json.Marshal(settlement)
+	if err != nil {
+		t.Fatalf("Marshal() error = %v", err)
+	}
+
+	var decoded Settlement
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("Unmarshal() error = %v", err)
+	}
+
+	if !reflect.DeepEqual(settlement, decoded) {
+		t.Fatalf("settlement mismatch after round trip: got %+v, want %+v", decoded, settlement)
+	}
+}
+
+func TestSettlementEmptyFiguresSerialization(t *testing.T) {
+	settlement := Settlement{
+		Name:       "Empty Hollow",
+		Type:       "Village",
+		X:          0,
+		Y:          0,
+		Faction:    "ind",
+		Population: 500,
+		Figures:    []figures.HistoricalFigure{},
+	}
+
+	data, err := json.Marshal(settlement)
+	if err != nil {
+		t.Fatalf("Marshal() error = %v", err)
+	}
+
+	var decoded Settlement
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("Unmarshal() error = %v", err)
+	}
+
+	if !reflect.DeepEqual(settlement, decoded) {
+		t.Fatalf("settlement mismatch after round trip: got %+v, want %+v", decoded, settlement)
+	}
+}
+
+func TestSettlementBackwardCompat(t *testing.T) {
+	payload := []byte(`{"name":"Test","type":"Village","x":0,"y":0,"faction":"ind","population":500}`)
+
+	var decoded Settlement
+	if err := json.Unmarshal(payload, &decoded); err != nil {
+		t.Fatalf("Unmarshal() error = %v", err)
+	}
+
+	if decoded.Name != "Test" || decoded.Type != "Village" || decoded.Population != 500 {
+		t.Fatalf("decoded settlement mismatch: got %+v", decoded)
+	}
+
+	if len(decoded.Figures) != 0 {
+		t.Fatalf("expected Figures nil or empty, got %v", decoded.Figures)
 	}
 }

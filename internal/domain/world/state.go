@@ -4,17 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	"github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 )
 
 // Settlement captures a founded settlement on the world grid.
 type Settlement struct {
-	Name       string  `json:"name"`
-	Type       string  `json:"type"`
-	X          int     `json:"x"`
-	Y          int     `json:"y"`
-	Faction    string  `json:"faction"`
-	Population float64 `json:"population"`
+	Name       string                     `json:"name"`
+	Type       string                     `json:"type"`
+	X          int                        `json:"x"`
+	Y          int                        `json:"y"`
+	Faction    string                     `json:"faction"`
+	Population float64                    `json:"population"`
+	Figures    []figures.HistoricalFigure `json:"figures"`
 }
 
 // State stores simulation layers aligned to a terrain grid.

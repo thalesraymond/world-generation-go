@@ -195,3 +195,67 @@ func TestGraphFromJSONInitializesMissingCollections(t *testing.T) {
 		}
 	})
 }
+
+func TestGetUndiscoveredNear_ReturnsExpectedNodes(t *testing.T) {
+	g := NewGraph()
+	g.AddNode(&Node{ID: 1, X: 0, Y: 0, Name: "KnownClose", Visibility: Known})
+	g.AddNode(&Node{ID: 2, X: 3, Y: 4, Name: "UnknownAtRadius", Visibility: Unknown})
+	g.AddNode(&Node{ID: 3, X: 6, Y: 8, Name: "HiddenOutOfRange", Visibility: Hidden})
+	g.AddNode(&Node{ID: 4, X: 1, Y: 1, Name: "HiddenClose", Visibility: Hidden})
+
+	nodes := g.GetUndiscoveredNear(0, 0, 5.0)
+	if len(nodes) != 2 {
+		t.Fatalf("len(nodes) = %d, want 2", len(nodes))
+	}
+	if nodes[0].ID != 2 {
+		t.Errorf("nodes[0].ID = %d, want 2", nodes[0].ID)
+	}
+	if nodes[1].ID != 4 {
+		t.Errorf("nodes[1].ID = %d, want 4", nodes[1].ID)
+	}
+}
+
+func TestGetUndiscoveredNear_EmptyWhenNone(t *testing.T) {
+	g := NewGraph()
+	g.AddNode(&Node{ID: 1, X: 0, Y: 0, Name: "Known", Visibility: Known})
+	g.AddNode(&Node{ID: 2, X: 10, Y: 10, Name: "UnknownFar", Visibility: Unknown})
+
+	nodes := g.GetUndiscoveredNear(0, 0, 5.0)
+	if len(nodes) != 0 {
+		t.Fatalf("len(nodes) = %d, want 0", len(nodes))
+	}
+}
+
+func TestGetUndiscoveredNear_DeterministicOrder(t *testing.T) {
+	g := NewGraph()
+	g.AddNode(&Node{ID: 5, X: 1, Y: 0, Visibility: Unknown})
+	g.AddNode(&Node{ID: 2, X: 0, Y: 1, Visibility: Hidden})
+	g.AddNode(&Node{ID: 9, X: -1, Y: 0, Visibility: Unknown})
+
+	first := g.GetUndiscoveredNear(0, 0, 2.0)
+	second := g.GetUndiscoveredNear(0, 0, 2.0)
+
+	if len(first) != 3 {
+		t.Fatalf("len(first) = %d, want 3", len(first))
+	}
+	if len(second) != 3 {
+		t.Fatalf("len(second) = %d, want 3", len(second))
+	}
+	expected := []int{2, 5, 9}
+	for i, id := range expected {
+		if first[i].ID != id {
+			t.Errorf("first[%d].ID = %d, want %d", i, first[i].ID, id)
+		}
+		if second[i].ID != id {
+			t.Errorf("second[%d].ID = %d, want %d", i, second[i].ID, id)
+		}
+	}
+}
+
+func TestGetUndiscoveredNear_NilGraph(t *testing.T) {
+	var g *Graph
+	nodes := g.GetUndiscoveredNear(0, 0, 10.0)
+	if nodes != nil {
+		t.Fatalf("expected nil, got %v", nodes)
+	}
+}
