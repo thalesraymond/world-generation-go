@@ -1,0 +1,44 @@
+# Mythical Fantasy Event Grammar
+# Generates narrative descriptions for fantasy world events
+
+# Shared building blocks
+title ::= "the Great" | "the Fallen" | "the Crimson" | "the Ancient" | "the Shattered"
+force ::= "army" | "horde" | "legion" | "warband" | "host"
+settlement_type ::= "village" | "town" | "city" | "fortress" | "outpost"
+location_desc ::= "in the depths of " $location | "beyond the " $location | "within " $location
+faction_name ::= "the Order of the " | "the Dominion of " | "the Children of "
+
+# Battle events
+battle ::= "The " $attacker " clashed with " $defender " at " $location ". " $outcome "."
+	| $attacker " laid siege to " $location ", defended by " $defender ". " $outcome "."
+	| "A bloody skirmish erupted between " $attacker " and " $defender " near " $location ". " $outcome "."
+	| $attacker " ambushed " $defender " on the road to " $location ". " $outcome "."
+	| "The " <force> " of " $attacker " marched on " $location ", held by " $defender ". " $outcome "."
+
+# Discovery events
+discovery ::= $explorer " discovered " $thing " hidden " <location_desc> "."
+	| "While exploring " $place ", " $explorer " stumbled upon " $thing "."
+	| $explorer " unearthed " $thing " from the ruins of " $place "."
+	| "Legends spoke of " $thing ", and " $explorer " found it in " $place "."
+	| "In a forgotten corner of " $place ", " $explorer " uncovered " $thing "."
+
+# Founding events
+founding ::= $settlement " was established by " $faction " as a " <settlement_type> "."
+	| $faction " founded " $settlement " to secure their hold on the region."
+	| "A new " <settlement_type> " called " $settlement " arose under " $faction "."
+	| $settlement ", a " <settlement_type> " of " $faction ", was built " <location_desc> "."
+	| $faction " declared the founding of " $settlement " with great ceremony."
+
+# Disaster events
+disaster ::= "A terrible " $type " struck " $location ", leaving devastation in its wake."
+	| $location " was ravaged by a " $type " that none had foreseen."
+	| "The " $type " swept through " $location ", destroying everything in its path."
+	| $location " suffered greatly when a " $type " erupted without warning."
+	| "No one in " $location " survived the " $type " that consumed the land."
+
+# Diplomacy events
+diplomacy ::= $faction_a " and " $faction_b " signed a treaty of " $result "."
+	| "After long negotiations, " $faction_a " reached an accord with " $faction_b ". The " $result " was celebrated."
+	| $faction_a " declared war on " $faction_b ", citing the " $result " as justification."
+	| "Envoys from " $faction_a " arrived in the court of " $faction_b ", offering " $result "."
+	| $faction_a " and " $faction_b " formed an alliance, sealed by a pact of " $result "."

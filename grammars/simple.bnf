@@ -1,0 +1,13 @@
+# Simple test grammar
+# Used for basic parser verification
+
+test ::= "hello world"
+	| "goodbye"
+	| "the quick brown fox"
+	| "lorem ipsum"
+	| "testing one two three"
+
+variable_test ::= $name " did " $action " in " $place
+	| $name " went to " $place " to " $action
+	| "Long ago, " $name " performed " $action " near " $place
+	| $place " was where " $name " chose to " $action
