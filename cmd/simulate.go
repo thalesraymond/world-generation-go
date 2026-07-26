@@ -52,7 +52,29 @@ func (s *settlementEntity) Tick(year int, eventChan chan<- domsim.Event, rng *ra
 		}
 	}
 
-	// 4. Check role vacancies
+	// 4. Form marriages for adult unmarried figures
+	if s.figureRNG.IntN(5) == 0 {
+		aliveAdults := make([]*figures.HistoricalFigure, 0)
+		for i := range s.settlement.Figures {
+			f := &s.settlement.Figures[i]
+			if f.IsAlive() && f.Age(year) >= 18 && f.Age(year) <= 50 && len(f.Relationships.Spouse) == 0 {
+				aliveAdults = append(aliveAdults, f)
+			}
+		}
+		if len(aliveAdults) >= 2 {
+			idx1 := s.figureRNG.IntN(len(aliveAdults))
+			idx2 := s.figureRNG.IntN(len(aliveAdults))
+			if idx1 != idx2 {
+				event, ok := figures.FormMarriage(aliveAdults[idx1], aliveAdults[idx2], year)
+				if ok {
+					event.SettlementName = s.settlement.Name
+					eventChan <- event
+				}
+			}
+		}
+	}
+
+	// 5. Check role vacancies
 	roleEvents := figures.AssignRoles(s.settlement.Figures, s.pointcrawlGraph, s.settlement.X, s.settlement.Y, s.figureRNG)
 	for _, e := range roleEvents {
 		e.Year = year
@@ -124,20 +146,9 @@ func newSimulateCommand() *cobra.Command {
 
 			cmd.Printf("World generated: %d x %d, %d settlements.\n", worldState.Width, worldState.Height, len(worldState.Settlements))
 
-			stateJSON, err := json.Marshal(worldState)
-			if err != nil {
-				return fmt.Errorf("marshal world state: %w", err)
-			}
-
 			if err := os.MkdirAll(outputDir, 0755); err != nil {
 				return fmt.Errorf("create output directory: %w", err)
 			}
-
-			statePath := filepath.Join(outputDir, "world_state.json")
-			if err := os.WriteFile(statePath, stateJSON, 0644); err != nil {
-				return fmt.Errorf("write world state: %w", err)
-			}
-			cmd.Printf("World state saved to %s\n", statePath)
 
 			cmd.Printf("Starting timeline simulation for %d years with event density %q.\n", cfg.Years, cfg.Events)
 
@@ -180,6 +191,16 @@ func newSimulateCommand() *cobra.Command {
 				return fmt.Errorf("write timeline: %w", err)
 			}
 			cmd.Printf("Timeline saved to %s\n", timelinePath)
+
+			stateJSON, err := json.Marshal(worldState)
+			if err != nil {
+				return fmt.Errorf("marshal world state: %w", err)
+			}
+			statePath := filepath.Join(outputDir, "world_state.json")
+			if err := os.WriteFile(statePath, stateJSON, 0644); err != nil {
+				return fmt.Errorf("write world state: %w", err)
+			}
+			cmd.Printf("World state saved to %s\n", statePath)
 
 			narrativeEngine, err := domnarrative.NewEngineFromString(infranarrative.DefaultGrammar)
 			if err != nil {

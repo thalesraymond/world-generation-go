@@ -110,7 +110,10 @@ func buildFigureBody(f figures.HistoricalFigure, settlementName string, events [
 	}
 	body += "**Lived:** " + lifespan + "  \n\n"
 
-	body += "## Relationships\n\n"
+	hasRelationships := len(f.Relationships.Parents) > 0 || len(f.Relationships.Children) > 0 || len(f.Relationships.Spouse) > 0
+	if hasRelationships {
+		body += "## Relationships\n\n"
+	}
 	if len(f.Relationships.Parents) > 0 {
 		body += "- **Parents:** "
 		var links []string
@@ -135,7 +138,9 @@ func buildFigureBody(f figures.HistoricalFigure, settlementName string, events [
 		}
 		body += join(links, ", ") + "\n"
 	}
-	body += "\n"
+	if hasRelationships {
+		body += "\n"
+	}
 
 	body += "## Chronicle\n\n"
 	figureEvents := filterEventsForFigure(events, f.ID)

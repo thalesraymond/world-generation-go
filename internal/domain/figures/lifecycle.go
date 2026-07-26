@@ -21,6 +21,9 @@ func GenerateFounders(rng *randv2.Rand, settlementName, faction string, founding
 	founders := make([]HistoricalFigure, count)
 	for i := range count {
 		birthYear := foundingYear - rng.IntN(maxFounderAgeOffset)
+		if birthYear < 1 {
+			birthYear = 1
+		}
 		maxAge := 70 + rng.IntN(21) // 70-90
 		founders[i] = HistoricalFigure{
 			ID:            fmt.Sprintf("%s-%d", settlementName, i),
@@ -33,6 +36,13 @@ func GenerateFounders(rng *randv2.Rand, settlementName, faction string, founding
 	}
 	// First founder is always Leader
 	founders[0].Role = "Leader"
+
+	// Form spouse pairs among founders
+	if len(founders) >= 2 {
+		for i := 0; i < len(founders)-1; i += 2 {
+			AddSpouse(&founders[i], &founders[i+1])
+		}
+	}
 	return founders
 }
 
@@ -92,6 +102,22 @@ func CheckBirths(figures []HistoricalFigure, population float64, currentYear int
 		BirthYear:     currentYear,
 		MaxAge:        maxAge,
 		Relationships: Relationships{},
+	}
+
+	// Assign 1-2 parents from existing living adult figures
+	var parents []int
+	for i := range figures {
+		if figures[i].IsAlive() && figures[i].Age(currentYear) >= adultAge {
+			parents = append(parents, i)
+		}
+	}
+	if len(parents) > 0 {
+		numParents := 1 + rng.IntN(min(2, len(parents)))
+		for j := 0; j < numParents && j < len(parents); j++ {
+			k := j + rng.IntN(len(parents)-j)
+			parents[j], parents[k] = parents[k], parents[j]
+			AddParentChild(&figures[parents[j]], figure)
+		}
 	}
 	return figure
 }
