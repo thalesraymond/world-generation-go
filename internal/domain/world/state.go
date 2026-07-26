@@ -3,6 +3,8 @@ package world
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 )
 
 // Settlement captures a founded settlement on the world grid.
@@ -16,12 +18,13 @@ type Settlement struct {
 
 // State stores simulation layers aligned to a terrain grid.
 type State struct {
-	Width             int          `json:"width"`
-	Height            int          `json:"height"`
-	PopulationDensity []float64    `json:"populationDensity"`
-	FactionInfluence  []string     `json:"factionInfluence"`
-	Suitability       []float64    `json:"suitability"`
-	Settlements       []Settlement `json:"settlements"`
+	Width             int               `json:"width"`
+	Height            int               `json:"height"`
+	PopulationDensity []float64         `json:"populationDensity"`
+	FactionInfluence  []string          `json:"factionInfluence"`
+	Suitability       []float64         `json:"suitability"`
+	Settlements       []Settlement      `json:"settlements"`
+	PointcrawlGraph   *pointcrawl.Graph `json:"pointcrawlGraph,omitempty"`
 }
 
 // NewState creates an initialized world state for the provided dimensions.

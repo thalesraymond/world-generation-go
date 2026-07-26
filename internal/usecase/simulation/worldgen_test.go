@@ -3,7 +3,62 @@ package simulation
 import (
 	"bytes"
 	"testing"
+
+	"github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 )
+
+func TestGenerateWorldHasPointcrawlGraph(t *testing.T) {
+	config := WorldGenConfig{Seed: 42, Width: 32, Height: 32, Years: 100}
+
+	worldState, err := GenerateWorld(config)
+	if err != nil {
+		t.Fatalf("GenerateWorld() error = %v", err)
+	}
+
+	if worldState.PointcrawlGraph == nil {
+		t.Fatalf("expected PointcrawlGraph to be populated")
+	}
+
+	if worldState.PointcrawlGraph.NodeCount() == 0 {
+		t.Fatalf("expected PointcrawlGraph to have nodes")
+	}
+
+	if worldState.PointcrawlGraph.EdgeCount() == 0 {
+		t.Fatalf("expected PointcrawlGraph to have edges")
+	}
+}
+
+func TestGenerateWorldPointcrawlGraphIsDeterministic(t *testing.T) {
+	config := WorldGenConfig{Seed: 42, Width: 32, Height: 32, Years: 100}
+
+	first, err := GenerateWorld(config)
+	if err != nil {
+		t.Fatalf("GenerateWorld() first run error = %v", err)
+	}
+
+	second, err := GenerateWorld(config)
+	if err != nil {
+		t.Fatalf("GenerateWorld() second run error = %v", err)
+	}
+
+	firstJSON, err := graphToJSON(first.PointcrawlGraph)
+	if err != nil {
+		t.Fatalf("graphToJSON() first error = %v", err)
+	}
+
+	secondJSON, err := graphToJSON(second.PointcrawlGraph)
+	if err != nil {
+		t.Fatalf("graphToJSON() second error = %v", err)
+	}
+
+	if !bytes.Equal(firstJSON, secondJSON) {
+		t.Fatalf("expected identical pointcrawl graph for same seed")
+	}
+}
+
+func graphToJSON(graph *pointcrawl.Graph) ([]byte, error) {
+	return pointcrawl.GraphToJSON(graph)
+}
 
 func TestGenerateWorldIsDeterministicForSameSeed(t *testing.T) {
 	config := WorldGenConfig{Seed: 42, Width: 16, Height: 16, Years: 100}

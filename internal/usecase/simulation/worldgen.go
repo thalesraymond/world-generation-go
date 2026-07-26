@@ -8,6 +8,7 @@ import (
 	"github.com/thalesraymond/world-generation-go/internal/domain/state"
 	"github.com/thalesraymond/world-generation-go/internal/domain/terrain"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
+	"github.com/thalesraymond/world-generation-go/internal/geography/pointcrawl"
 )
 
 type WorldGenConfig struct {
@@ -28,6 +29,7 @@ func GenerateWorld(config WorldGenConfig) (*world.State, error) {
 	climateRNG := engine.GetPRNG("climate")
 	demographicsRNG := engine.GetPRNG("demographics")
 	settlementsRNG := engine.GetPRNG("settlements")
+	pointcrawlRNG := engine.GetPRNG("pointcrawl")
 
 	terrainConfig := terrain.DefaultGeneratorConfig(config.Width, config.Height)
 	terrainConfig.TerrainRNG = terrainRNG
@@ -55,6 +57,18 @@ func GenerateWorld(config WorldGenConfig) (*world.State, error) {
 	if err := settlement.Generate(worldState, settlementConfig); err != nil {
 		return nil, fmt.Errorf("generate settlements: %w", err)
 	}
+
+	pointcrawlConfig := pointcrawl.DefaultGeneratorConfig()
+	pointcrawlConfig.RNG = pointcrawlRNG
+
+	graph, err := pointcrawl.Generate(worldState, &terrainMap, pointcrawlConfig)
+	if err != nil {
+		return nil, fmt.Errorf("generate pointcrawl graph: %w", err)
+	}
+
+	pointcrawl.ConnectNodes(graph, &terrainMap, pointcrawl.DefaultMaxConnectionDistance)
+
+	worldState.PointcrawlGraph = graph
 
 	return worldState, nil
 }
