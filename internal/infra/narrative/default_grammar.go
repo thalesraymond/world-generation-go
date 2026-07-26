@@ -1,8 +1,8 @@
 package narrative
 
 // DefaultGrammar is the default CFG grammar string for the narrative engine.
-// Rules map to Event.Category values: Settlement, Conflict, Disaster, Politics, Discovery.
-// Available context variables: $year, $category, $description.
+// Rules map to Event.Category values: Settlement, Conflict, Disaster, Politics, Discovery, Birth, Death.
+// Available context variables: $year, $category, $description, $FigureName, $FigureRole, $SettlementName.
 const DefaultGrammar = `# Mythic Fantasy Default Grammar
 # Maps directly to Event.Category values
 
@@ -224,4 +224,14 @@ discovery_return ::= "returned bearing a crown of living crystal"
 	| "brought back a map to the edge of the world and beyond"
 	| "emerged from the depths with eyes that saw invisible truths"
 	| "came home changed, speaking in riddles and bearing gifts of unearthly beauty"
+
+# ── Birth ───────────────────────────────────────────────
+Birth ::= "In " $year ", " $FigureName " was born in " $SettlementName "."
+	| "The people of " $SettlementName " welcomed " $FigureName " in " $year "."
+	| $FigureName " drew their first breath in " $SettlementName " during " $year "."
+
+# ── Death ───────────────────────────────────────────────
+Death ::= "In " $year ", " $FigureName " the " $FigureRole " of " $SettlementName " passed into memory."
+	| "The " $FigureRole " " $FigureName " of " $SettlementName " was laid to rest in " $year "."
+	| $SettlementName " mourned " $FigureName " throughout " $year "."
 `

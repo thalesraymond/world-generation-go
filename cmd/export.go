@@ -55,6 +55,10 @@ func newExportCommand() *cobra.Command {
 				}
 			}
 
+			if err := exporter.ExportFigures(state, events, cfg.Output); err != nil {
+				return fmt.Errorf("export figures: %w", err)
+			}
+
 			factionSet := make(map[string]struct{})
 			for _, s := range state.Settlements {
 				factionSet[s.Faction] = struct{}{}

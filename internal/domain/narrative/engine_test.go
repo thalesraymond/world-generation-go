@@ -307,6 +307,40 @@ greet ::= "Salutations, " $title " " $name ". The year is " $year "."
 	}
 }
 
+func TestEngine_Narrate_FigureVariables(t *testing.T) {
+	s := `
+Politics ::= "In " $year ", " $FigureName " the " $FigureRole " of " $SettlementName " " <political_event> "."
+political_event ::= "held a tense council"
+`
+	eng, err := NewEngineFromString(s)
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+
+	event := simulation.Event{
+		Year:           450,
+		Category:       "Politics",
+		Description:    "Aldric holds council.",
+		FigureID:       "aldric-1",
+		SettlementName: "Goldhaven",
+	}
+	extra := map[string]string{
+		"FigureName":     "Aldric Bronzefist",
+		"FigureRole":     "Leader",
+		"SettlementName": "Goldhaven",
+	}
+	rng := randv2.New(randv2.NewPCG(1, 2))
+
+	got, err := eng.Narrate(event, extra, rng)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	want := "In 450, Aldric Bronzefist the Leader of Goldhaven held a tense council."
+	if got != want {
+		t.Fatalf("expected %q, got %q", want, got)
+	}
+}
+
 func TestEngine_Narrate_Determinism(t *testing.T) {
 	s := `
 omen ::= "The omens were " $mood " in " $year "."

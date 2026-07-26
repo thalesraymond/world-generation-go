@@ -60,6 +60,65 @@ func graphToJSON(graph *pointcrawl.Graph) ([]byte, error) {
 	return pointcrawl.GraphToJSON(graph)
 }
 
+func TestGenerateWorldCreatesSettlementFigures(t *testing.T) {
+	config := WorldGenConfig{Seed: 42, Width: 48, Height: 48, Years: 100}
+
+	worldState, err := GenerateWorld(config)
+	if err != nil {
+		t.Fatalf("GenerateWorld() error = %v", err)
+	}
+
+	if len(worldState.Settlements) == 0 {
+		t.Fatalf("expected at least one settlement to test figure generation")
+	}
+
+	for _, settlement := range worldState.Settlements {
+		if len(settlement.Figures) == 0 {
+			t.Errorf("settlement %q has no figures", settlement.Name)
+			continue
+		}
+
+		founder := settlement.Figures[0]
+		if founder.Role != "Leader" {
+			t.Errorf("settlement %q first founder role = %q, want Leader", settlement.Name, founder.Role)
+		}
+		if founder.Faction != settlement.Faction {
+			t.Errorf("settlement %q founder faction = %q, want %q", settlement.Name, founder.Faction, settlement.Faction)
+		}
+	}
+}
+
+func TestGenerateWorldFoundersAreDeterministic(t *testing.T) {
+	config := WorldGenConfig{Seed: 42, Width: 48, Height: 48, Years: 100}
+
+	first, err := GenerateWorld(config)
+	if err != nil {
+		t.Fatalf("GenerateWorld() first run error = %v", err)
+	}
+
+	second, err := GenerateWorld(config)
+	if err != nil {
+		t.Fatalf("GenerateWorld() second run error = %v", err)
+	}
+
+	if len(first.Settlements) != len(second.Settlements) {
+		t.Fatalf("settlement counts differ: %d vs %d", len(first.Settlements), len(second.Settlements))
+	}
+
+	for i := range first.Settlements {
+		if len(first.Settlements[i].Figures) != len(second.Settlements[i].Figures) {
+			t.Fatalf("settlement %q figure counts differ", first.Settlements[i].Name)
+		}
+		for j := range first.Settlements[i].Figures {
+			f1 := first.Settlements[i].Figures[j]
+			f2 := second.Settlements[i].Figures[j]
+			if f1.ID != f2.ID || f1.Name != f2.Name || f1.Role != f2.Role || f1.BirthYear != f2.BirthYear || f1.MaxAge != f2.MaxAge {
+				t.Errorf("settlement %q figure[%d] differs", first.Settlements[i].Name, j)
+			}
+		}
+	}
+}
+
 func TestGenerateWorldIsDeterministicForSameSeed(t *testing.T) {
 	config := WorldGenConfig{Seed: 42, Width: 16, Height: 16, Years: 100}
 

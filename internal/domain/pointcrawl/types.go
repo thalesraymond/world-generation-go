@@ -1,5 +1,10 @@
 package pointcrawl
 
+import (
+	"math"
+	"sort"
+)
+
 // Visibility represents how much information the player has about a node.
 type Visibility int
 
@@ -68,4 +73,35 @@ func (g *Graph) EdgeCount() int {
 	}
 
 	return len(g.Edges)
+}
+
+// GetUndiscoveredNear returns undiscovered nodes within radius of (x, y).
+// Nodes are filtered by visibility (Unknown or Hidden) and Euclidean distance,
+// then sorted deterministically by ID ascending.
+func (g *Graph) GetUndiscoveredNear(x, y int, radius float64) []*Node {
+	if g == nil || g.Nodes == nil {
+		return nil
+	}
+
+	var result []*Node
+	for _, node := range g.Nodes {
+		if node == nil {
+			continue
+		}
+		if node.Visibility != Unknown && node.Visibility != Hidden {
+			continue
+		}
+
+		dx := float64(node.X - x)
+		dy := float64(node.Y - y)
+		if math.Sqrt(dx*dx+dy*dy) <= radius {
+			result = append(result, node)
+		}
+	}
+
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].ID < result[j].ID
+	})
+
+	return result
 }

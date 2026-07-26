@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/thalesraymond/world-generation-go/internal/domain/demographics"
+	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	"github.com/thalesraymond/world-generation-go/internal/domain/settlement"
 	"github.com/thalesraymond/world-generation-go/internal/domain/state"
 	"github.com/thalesraymond/world-generation-go/internal/domain/terrain"
@@ -56,6 +57,12 @@ func GenerateWorld(config WorldGenConfig) (*world.State, error) {
 	settlementConfig.RNG = settlementsRNG
 	if err := settlement.Generate(worldState, settlementConfig); err != nil {
 		return nil, fmt.Errorf("generate settlements: %w", err)
+	}
+
+	for i := range worldState.Settlements {
+		s := &worldState.Settlements[i]
+		figureRNG := engine.GetPRNG("figures:" + s.Name)
+		s.Figures = figures.GenerateFounders(figureRNG, s.Name, s.Faction, 0)
 	}
 
 	pointcrawlConfig := pointcrawl.DefaultGeneratorConfig()

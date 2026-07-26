@@ -3,3 +3,5 @@ coverage.out
 worldgen
 worldgen.yaml
 output/
+usecase.out
+domain.out
