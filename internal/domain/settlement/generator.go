@@ -14,6 +14,7 @@ type Config struct {
 	MinSuitability float64
 	MinPopulation  float64
 	MinDistance    float64
+	MaxPopulation  float64
 	MaxSettlements int
 	RNG            *randv2.Rand
 }
@@ -24,6 +25,7 @@ func DefaultConfig() Config {
 		MinSuitability: 0.65,
 		MinPopulation:  0.35,
 		MinDistance:    3,
+		MaxPopulation:  100000,
 		MaxSettlements: 0,
 	}
 }
@@ -60,7 +62,7 @@ func Generate(state *world.State, config Config) error {
 			X:          c.x,
 			Y:          c.y,
 			Faction:    faction,
-			Population: state.PopulationDensity[c.index],
+			Population: math.Round(state.PopulationDensity[c.index] * config.MaxPopulation),
 		})
 	}
 

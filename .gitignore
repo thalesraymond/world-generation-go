@@ -2,3 +2,4 @@ world-generation-go
 coverage.out
 worldgen
 worldgen.yaml
+output/

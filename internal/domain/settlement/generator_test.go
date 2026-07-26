@@ -54,6 +54,29 @@ func TestGenerateEnforcesMinimumDistance(t *testing.T) {
 	}
 }
 
+func TestGenerateScalesPopulation(t *testing.T) {
+	state := world.NewState(1, 1)
+	state.Suitability = []float64{0.9}
+	state.PopulationDensity = []float64{0.7}
+	state.FactionInfluence = []string{""}
+
+	config := DefaultConfig()
+	config.MinDistance = 0
+	config.MaxPopulation = 1000
+
+	if err := Generate(state, config); err != nil {
+		t.Fatalf("Generate() error = %v", err)
+	}
+
+	if len(state.Settlements) != 1 {
+		t.Fatalf("settlement count = %d, want 1", len(state.Settlements))
+	}
+
+	if state.Settlements[0].Population != 700 {
+		t.Fatalf("population = %v, want 700", state.Settlements[0].Population)
+	}
+}
+
 func TestGenerateAssignsIndependentWhenNoDominantFaction(t *testing.T) {
 	state := world.NewState(1, 1)
 	state.Suitability = []float64{0.9}
