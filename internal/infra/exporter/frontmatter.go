@@ -17,7 +17,7 @@ func frontmatter(fields []field) string {
 	var b strings.Builder
 	b.WriteString("---\n")
 	for _, f := range fields {
-		b.WriteString(fmt.Sprintf("%s: %s\n", f.Key, quoteIfNeeded(f.Value)))
+		fmt.Fprintf(&b, "%s: %s\n", f.Key, quoteIfNeeded(f.Value))
 	}
 	b.WriteString("---\n")
 	return b.String()

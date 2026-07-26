@@ -29,6 +29,12 @@ func NewRootCommand() *cobra.Command {
 	rootCmd.PersistentFlags().String("output", "./output", "Output directory for generated artifacts")
 
 	viper.SetDefault("output", "./output")
+	viper.SetDefault("seed", int64(42))
+	viper.SetDefault("name", "NewWorld")
+	viper.SetDefault("size", "medium")
+	viper.SetDefault("years", 100)
+	viper.SetDefault("events", "normal")
+	viper.SetDefault("format", "obsidian")
 	viper.SetEnvPrefix("WORLDGEN")
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 	viper.AutomaticEnv()

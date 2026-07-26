@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	appconfig "github.com/thalesraymond/world-generation-go/config"
+	"gopkg.in/yaml.v3"
 )
 
 func newInitCommand() *cobra.Command {
@@ -17,7 +19,18 @@ func newInitCommand() *cobra.Command {
 				return fmt.Errorf("load config: %w", err)
 			}
 
-			cmd.Printf("Initialization acknowledged for world %q with size %q.\n", cfg.Name, cfg.Size)
+			cfg.Width, cfg.Height = appconfig.ResolveSize(cfg.Size)
+
+			data, err := yaml.Marshal(&cfg)
+			if err != nil {
+				return fmt.Errorf("marshal config: %w", err)
+			}
+
+			if err := os.WriteFile("worldgen.yaml", data, 0644); err != nil {
+				return fmt.Errorf("write worldgen.yaml: %w", err)
+			}
+
+			cmd.Println("Project initialized: worldgen.yaml")
 			return nil
 		},
 	}

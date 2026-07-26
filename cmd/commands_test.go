@@ -2,31 +2,56 @@ package cmd
 
 import (
 	"bytes"
+	"os"
 	"strings"
 	"testing"
+
+	"github.com/spf13/viper"
 )
 
 func TestInitCommandAcknowledgesInitialization(t *testing.T) {
+	t.Cleanup(func() { _ = os.Remove("worldgen.yaml") })
+
 	output := executeCommand(t, "init", "--name", "Ashtar", "--size", "large")
 
-	if !strings.Contains(output, "Initialization acknowledged") {
-		t.Fatalf("init output = %q, want acknowledgement", output)
+	if !strings.Contains(output, "Project initialized: worldgen.yaml") {
+		t.Fatalf("init output = %q, want project initialized message", output)
 	}
 }
 
 func TestSimulateCommandRunsSimulation(t *testing.T) {
-	output := executeCommand(t, "simulate", "--years", "10", "--events", "normal")
+	tmpDir := t.TempDir()
+	viper.Set("output", tmpDir)
+	output := executeCommand(t, "simulate", "--output", tmpDir, "--years", "10", "--events", "normal")
 
 	if !strings.Contains(output, "World generated") || !strings.Contains(output, "Simulation completed successfully") {
 		t.Fatalf("simulate output = %q, want simulation execution output", output)
 	}
+
+	if !strings.Contains(output, "World state saved to") {
+		t.Fatalf("simulate output = %q, want world state saved message", output)
+	}
+
+	if !strings.Contains(output, "Timeline saved to") {
+		t.Fatalf("simulate output = %q, want timeline saved message", output)
+	}
+
+	if !strings.Contains(output, "Chronicle") {
+		t.Fatalf("simulate output = %q, want chronicle output", output)
+	}
 }
 
 func TestExportCommandAcknowledgesDestination(t *testing.T) {
-	output := executeCommand(t, "export", "--format", "obsidian", "--output", "./vault")
+	tmpDir := t.TempDir()
 
-	if !strings.Contains(output, "./vault") {
-		t.Fatalf("export output = %q, want output path", output)
+	viper.Set("output", tmpDir)
+	executeCommand(t, "simulate", "--output", tmpDir, "--years", "10", "--width", "16", "--height", "16")
+
+	viper.Set("output", tmpDir)
+	output := executeCommand(t, "export", "--format", "obsidian", "--output", tmpDir)
+
+	if !strings.Contains(output, "Export complete:") {
+		t.Fatalf("export output = %q, want export complete message", output)
 	}
 }
 

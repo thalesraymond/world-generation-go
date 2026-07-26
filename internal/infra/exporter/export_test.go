@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
+	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 )
 
@@ -23,7 +25,9 @@ func TestExportCreatesExpectedFilesAndContent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() {
+		_ = os.RemoveAll(tmpDir)
+	}()
 
 	targetDir := filepath.Join(tmpDir, "vault")
 
@@ -142,7 +146,9 @@ func TestExportEmptySettlements(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create temp dir: %v", err)
 	}
-	defer os.RemoveAll(tmpDir)
+	defer func() {
+		_ = os.RemoveAll(tmpDir)
+	}()
 
 	targetDir := filepath.Join(tmpDir, "vault")
 
@@ -174,5 +180,96 @@ func TestExportEmptySettlements(t *testing.T) {
 	}
 	if len(factionsEntries) != 0 {
 		t.Errorf("expected empty factions dir, got %d entries", len(factionsEntries))
+	}
+}
+
+func TestExportPointcrawlCreatesFiles(t *testing.T) {
+	state := &world.State{Width: 10, Height: 10}
+	graph := pointcrawl.NewGraph()
+	graph.AddNode(&pointcrawl.Node{ID: 0, X: 1, Y: 1, Name: "Testville", Kind: "settlement", Visibility: pointcrawl.Known})
+	graph.AddNode(&pointcrawl.Node{ID: 1, X: 5, Y: 5, Name: "WildPlace", Kind: "wilderness", Visibility: pointcrawl.Unknown})
+	graph.AddEdge(0, 1, 3)
+	graph.AddEdge(1, 0, 3)
+	state.PointcrawlGraph = graph
+
+	tmpDir := t.TempDir()
+	err := ExportPointcrawl(state, tmpDir)
+	if err != nil {
+		t.Fatalf("ExportPointcrawl error: %v", err)
+	}
+
+	networkPath := filepath.Join(tmpDir, "pointcrawl", "Network.md")
+	if _, err := os.Stat(networkPath); os.IsNotExist(err) {
+		t.Fatalf("expected Network.md to exist")
+	}
+
+	nodePath := filepath.Join(tmpDir, "pointcrawl", "Testville.md")
+	if _, err := os.Stat(nodePath); os.IsNotExist(err) {
+		t.Fatalf("expected Testville.md to exist")
+	}
+
+	wildPath := filepath.Join(tmpDir, "pointcrawl", "WildPlace.md")
+	if _, err := os.Stat(wildPath); os.IsNotExist(err) {
+		t.Fatalf("expected WildPlace.md to exist")
+	}
+}
+
+func TestExportTimelineCreatesFiles(t *testing.T) {
+	events := []simulation.Event{
+		{Year: 105, Category: "war", Description: "Battle of Testville"},
+		{Year: 110, Category: "founding", Description: "Oakhaven founded"},
+	}
+
+	tmpDir := t.TempDir()
+	err := ExportTimeline(events, tmpDir)
+	if err != nil {
+		t.Fatalf("ExportTimeline error: %v", err)
+	}
+
+	chroniclePath := filepath.Join(tmpDir, "chronicles", "Chronicle.md")
+	if _, err := os.Stat(chroniclePath); os.IsNotExist(err) {
+		t.Fatalf("expected Chronicle.md to exist")
+	}
+}
+
+func TestExportPointcrawlNilState(t *testing.T) {
+	tmpDir := t.TempDir()
+	if err := ExportPointcrawl(nil, tmpDir); err != nil {
+		t.Fatalf("expected nil error for nil state, got: %v", err)
+	}
+
+	if _, err := os.Stat(filepath.Join(tmpDir, "pointcrawl")); !os.IsNotExist(err) {
+		t.Fatal("expected pointcrawl directory NOT to be created for nil state")
+	}
+}
+
+func TestExportPointcrawlNilGraph(t *testing.T) {
+	state := &world.State{Width: 10, Height: 10}
+	tmpDir := t.TempDir()
+	if err := ExportPointcrawl(state, tmpDir); err != nil {
+		t.Fatalf("expected nil error for nil graph, got: %v", err)
+	}
+
+	if _, err := os.Stat(filepath.Join(tmpDir, "pointcrawl")); !os.IsNotExist(err) {
+		t.Fatal("expected pointcrawl directory NOT to be created for nil graph")
+	}
+}
+
+func TestExportTimelineEmptyEvents(t *testing.T) {
+	tmpDir := t.TempDir()
+	if err := ExportTimeline(nil, tmpDir); err != nil {
+		t.Fatalf("expected nil error for nil events, got: %v", err)
+	}
+
+	if _, err := os.Stat(filepath.Join(tmpDir, "chronicles")); !os.IsNotExist(err) {
+		t.Fatal("expected chronicles directory NOT to be created for empty events")
+	}
+
+	if err := ExportTimeline([]simulation.Event{}, tmpDir); err != nil {
+		t.Fatalf("expected nil error for empty events, got: %v", err)
+	}
+
+	if _, err := os.Stat(filepath.Join(tmpDir, "chronicles")); !os.IsNotExist(err) {
+		t.Fatal("expected chronicles directory NOT to be created for empty events")
 	}
 }

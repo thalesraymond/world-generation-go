@@ -1,11 +1,17 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	appconfig "github.com/thalesraymond/world-generation-go/config"
+	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
+	"github.com/thalesraymond/world-generation-go/internal/domain/world"
+	"github.com/thalesraymond/world-generation-go/internal/infra/exporter"
 )
 
 func newExportCommand() *cobra.Command {
@@ -18,7 +24,53 @@ func newExportCommand() *cobra.Command {
 				return fmt.Errorf("load config: %w", err)
 			}
 
-			cmd.Printf("Export acknowledged for format %q to %q.\n", cfg.Format, cfg.Output)
+			statePath := filepath.Join(cfg.Output, "world_state.json")
+			stateData, err := os.ReadFile(statePath)
+			if err != nil {
+				return fmt.Errorf("read world state: %w", err)
+			}
+
+			state, err := world.FromJSON(stateData)
+			if err != nil {
+				return fmt.Errorf("parse world state: %w", err)
+			}
+
+			if err := exporter.Export(state, cfg.Output); err != nil {
+				return fmt.Errorf("export world: %w", err)
+			}
+
+			if err := exporter.ExportPointcrawl(state, cfg.Output); err != nil {
+				return fmt.Errorf("export pointcrawl: %w", err)
+			}
+
+			var events []simulation.Event
+			timelinePath := filepath.Join(cfg.Output, "timeline.json")
+			if timelineData, err := os.ReadFile(timelinePath); err == nil {
+				if err := json.Unmarshal(timelineData, &events); err != nil {
+					return fmt.Errorf("parse timeline: %w", err)
+				}
+
+				if err := exporter.ExportTimeline(events, cfg.Output); err != nil {
+					return fmt.Errorf("export timeline: %w", err)
+				}
+			}
+
+			factionSet := make(map[string]struct{})
+			for _, s := range state.Settlements {
+				factionSet[s.Faction] = struct{}{}
+			}
+
+			nodeCount := 0
+			if state.PointcrawlGraph != nil {
+				nodeCount = state.PointcrawlGraph.NodeCount()
+			}
+
+			cmd.Printf("Export complete: %d settlements, %d factions, %d pointcrawl nodes, %d timeline events.\n",
+				len(state.Settlements),
+				len(factionSet),
+				nodeCount,
+				len(events),
+			)
 			return nil
 		},
 	}

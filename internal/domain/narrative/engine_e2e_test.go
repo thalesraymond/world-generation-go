@@ -29,9 +29,9 @@ func TestNewEngineFromFile_LoadsMythicalGrammar(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		event   simulation.Event
-		extra   map[string]string
+		name     string
+		event    simulation.Event
+		extra    map[string]string
 		contains []string
 	}{
 		{

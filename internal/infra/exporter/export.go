@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
+	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 )
 
@@ -76,10 +79,10 @@ func Export(state *world.State, targetDir string) error {
 		}
 
 		var b strings.Builder
-		b.WriteString(fmt.Sprintf("# %s\n\n", faction))
+		fmt.Fprintf(&b, "# %s\n\n", faction)
 		for _, member := range members {
 			sanitized := sanitizedSettlements[member]
-			b.WriteString(fmt.Sprintf("- [[%s]]\n", sanitized))
+			fmt.Fprintf(&b, "- [[%s]]\n", sanitized)
 		}
 
 		if err := os.WriteFile(path, []byte(frontmatter(fields)+b.String()), 0644); err != nil {
@@ -88,4 +91,187 @@ func Export(state *world.State, targetDir string) error {
 	}
 
 	return nil
+}
+
+// ExportPointcrawl generates markdown files for the pointcrawl graph.
+func ExportPointcrawl(state *world.State, targetDir string) error {
+	if state == nil || state.PointcrawlGraph == nil {
+		return nil
+	}
+
+	graph := state.PointcrawlGraph
+
+	pointcrawlDir := filepath.Join(targetDir, "pointcrawl")
+	if err := os.MkdirAll(pointcrawlDir, 0755); err != nil {
+		return fmt.Errorf("create pointcrawl directory: %w", err)
+	}
+
+	tracker := newNameTracker()
+	nodeNames := make(map[int]string)
+	for _, node := range graph.Nodes {
+		nodeNames[node.ID] = tracker.sanitize(node.Name)
+	}
+
+	networkPath := filepath.Join(pointcrawlDir, "Network.md")
+	if err := writeNetworkIndex(graph, nodeNames, networkPath); err != nil {
+		return err
+	}
+
+	for _, node := range graph.Nodes {
+		filename := nodeNames[node.ID] + ".md"
+		path := filepath.Join(pointcrawlDir, filename)
+		if err := writeNodeFile(node, graph, nodeNames, path); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func writeNetworkIndex(graph *pointcrawl.Graph, nodeNames map[int]string, path string) error {
+	var b strings.Builder
+
+	fields := []field{
+		{"type", "pointcrawl"},
+		{"nodeCount", fmt.Sprintf("%d", graph.NodeCount())},
+		{"edgeCount", fmt.Sprintf("%d", graph.EdgeCount())},
+	}
+	b.WriteString(frontmatter(fields))
+	b.WriteString("# Pointcrawl Network\n\n")
+
+	b.WriteString("## Nodes\n\n")
+	b.WriteString("| ID | Name | Kind | Coordinates |\n")
+	b.WriteString("|---:|---|---|---|\n")
+
+	nodeIDs := make([]int, 0, len(graph.Nodes))
+	for id := range graph.Nodes {
+		nodeIDs = append(nodeIDs, id)
+	}
+	sort.Ints(nodeIDs)
+
+	for _, id := range nodeIDs {
+		node := graph.Nodes[id]
+		fmt.Fprintf(&b, "| %d | %s | %s | (%d, %d) |\n",
+			node.ID, node.Name, node.Kind, node.X, node.Y)
+	}
+
+	b.WriteString("\n## Edges\n\n")
+	b.WriteString("| From | To | Cost in watches |\n")
+	b.WriteString("|---|---|---:|\n")
+
+	for _, edge := range graph.Edges {
+		fromName := nodeNames[edge.From]
+		toName := nodeNames[edge.To]
+		fmt.Fprintf(&b, "| [[%s]] | [[%s]] | %d |\n",
+			fromName, toName, edge.Cost)
+	}
+
+	if err := os.WriteFile(path, []byte(b.String()), 0644); err != nil {
+		return fmt.Errorf("write network index: %w", err)
+	}
+
+	return nil
+}
+
+func writeNodeFile(node *pointcrawl.Node, graph *pointcrawl.Graph, nodeNames map[int]string, path string) error {
+	fields := []field{
+		{"id", fmt.Sprintf("%d", node.ID)},
+		{"type", "pointcrawlNode"},
+		{"name", node.Name},
+		{"kind", node.Kind},
+		{"x", fmt.Sprintf("%d", node.X)},
+		{"y", fmt.Sprintf("%d", node.Y)},
+	}
+
+	var b strings.Builder
+	b.WriteString(frontmatter(fields))
+	fmt.Fprintf(&b, "# %s\n\n", node.Name)
+	fmt.Fprintf(&b, "**Kind:** %s\n", node.Kind)
+	fmt.Fprintf(&b, "**Coordinates:** (%d, %d)\n\n", node.X, node.Y)
+
+	b.WriteString("## Connected Edges\n\n")
+	b.WriteString("| Destination | Cost in watches |\n")
+	b.WriteString("|---|---:|\n")
+
+	connected := edgesForNode(node.ID, graph)
+	for _, edge := range connected {
+		toName := nodeNames[edge.To]
+		fmt.Fprintf(&b, "| [[%s]] | %d |\n", toName, edge.Cost)
+	}
+
+	if err := os.WriteFile(path, []byte(b.String()), 0644); err != nil {
+		return fmt.Errorf("write node file: %w", err)
+	}
+
+	return nil
+}
+
+func edgesForNode(nodeID int, graph *pointcrawl.Graph) []pointcrawl.Edge {
+	var edges []pointcrawl.Edge
+	for _, edge := range graph.Edges {
+		if edge.From == nodeID {
+			edges = append(edges, edge)
+		}
+	}
+	sort.Slice(edges, func(i, j int) bool {
+		return edges[i].To < edges[j].To
+	})
+	return edges
+}
+
+// ExportTimeline generates a chronicle markdown file from timeline events.
+func ExportTimeline(events []simulation.Event, targetDir string) error {
+	if len(events) == 0 {
+		return nil
+	}
+
+	chroniclesDir := filepath.Join(targetDir, "chronicles")
+	if err := os.MkdirAll(chroniclesDir, 0755); err != nil {
+		return fmt.Errorf("create chronicles directory: %w", err)
+	}
+
+	grouped := groupEventsByDecade(events)
+	decades := make([]int, 0, len(grouped))
+	for decade := range grouped {
+		decades = append(decades, decade)
+	}
+	sort.Ints(decades)
+
+	fields := []field{
+		{"type", "chronicle"},
+		{"eventCount", fmt.Sprintf("%d", len(events))},
+	}
+
+	var b strings.Builder
+	b.WriteString(frontmatter(fields))
+	b.WriteString("# Chronicle\n\n")
+
+	for _, decade := range decades {
+		fmt.Fprintf(&b, "## Decade %ds\n\n", decade)
+		for _, event := range grouped[decade] {
+			fmt.Fprintf(&b, "### Year %d\n", event.Year)
+			fmt.Fprintf(&b, "- [%s] %s\n\n", event.Category, event.Description)
+		}
+	}
+
+	path := filepath.Join(chroniclesDir, "Chronicle.md")
+	if err := os.WriteFile(path, []byte(b.String()), 0644); err != nil {
+		return fmt.Errorf("write chronicle: %w", err)
+	}
+
+	return nil
+}
+
+func groupEventsByDecade(events []simulation.Event) map[int][]simulation.Event {
+	grouped := make(map[int][]simulation.Event)
+	for _, event := range events {
+		decade := (event.Year / 10) * 10
+		grouped[decade] = append(grouped[decade], event)
+	}
+	for _, group := range grouped {
+		sort.Slice(group, func(i, j int) bool {
+			return group[i].Year < group[j].Year
+		})
+	}
+	return grouped
 }
