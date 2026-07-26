@@ -14,11 +14,13 @@ Factions are currently plain strings (`"Ashfield"`, `"Coldcrest"`), carrying no 
 ## Capabilities
 
 ### New Capabilities
+
 - `faction-entity`: Domain model for factions — identity (cultural/ethnic grouping), leadership (figures with faction-wide authority), treasury (shared resources), strategic goals, member settlement tracking, and inter-faction relations.
 - `faction-agency`: Strategic-level agent behavior — annual decision loop, war declaration, alliance formation, policy setting (expansion/defense/diplomacy), event emission, and deterministic RNG integration.
 - `faction-dynamics`: Dynamic faction membership — settlement faction switching through conquest or diplomatic defection, faction collapse when empty, new faction formation from breakaway settlements, and history recording of membership changes.
 
 ### Modified Capabilities
+
 - `settlement-generation`: Settlement faction assignment changes from copying a string from the `FactionInfluence` grid to referencing a registered `Faction` entity. Default faction for isolated settlements changes from `"independent"` to an implicit unaffiliated state.
 - `obsidian-export`: Faction pages gain dynamic content — membership timeline, strategic decision log, alliance relationships, and faction identity metadata.
 - `world-state`: `FactionInfluence []string` grid is replaced with a `Factions map[string]*faction.Faction` registry. World state JSON serialization gains faction entity data.

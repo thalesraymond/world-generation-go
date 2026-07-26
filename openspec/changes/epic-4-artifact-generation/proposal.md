@@ -13,6 +13,7 @@ Introduce a legendary artifact generation system where named, typed items emerge
 The current simulation produces history without persistent stakes. Events occur and pass — settlements rise and fall, figures live and die — but nothing physical carries forward. A conquered settlement yields no treasures; a legendary general's deeds produce no named relics; there are no objects for factions to covet or fight over.
 
 Per the product vision in `openspec/specs/initial_concept.md`, the export should include `notes/magic items/` — individual Markdown files for mythic artifacts whose CFG-generated names are paired with biographical reviews of creation, bearers, and transfers. The ADR (`docs/adr/0001-agent-driven-world-generation.md`) defines artifacts as emergent outcomes of agent actions that:
+
 - Persist through history, changing hands
 - Become plot devices in causal chains (e.g., "Faction A raids Faction B to recover the Crown of Ashfield")
 - Are created by specific figures (Master Smith, Legendary Hero) as special action outcomes
@@ -32,11 +33,11 @@ Without artifacts, the Obsidian vault output lacks a key dimension of interconne
 
 This epic **depends on** Epics 1–3 being completed first:
 
-| Epic | What It Provides | Why Epic 4 Needs It |
-|------|-----------------|---------------------|
-| Epic 1: Settlement Agent Foundation | Agent decision loop, settlement state vectors, core actions (Raid, Conquer, Prosper) | Artifacts emerge from agent action outcomes; raids and conquests are primary transfer mechanisms |
-| Epic 2: Character-Driven Execution | Figures as executors, expanded roles (Master Smith, General, Diplomat), stats and reputation | Master Smith creates artifacts; General's battle victories trigger forging; figure ownership tracking |
-| Epic 3: Faction-Level Agency | Factions as strategic agents, dynamic membership, inter-faction relations | Artifacts become faction-level plot devices; faction relations drive artifact-motivated conflicts |
+| Epic                                | What It Provides                                                                             | Why Epic 4 Needs It                                                                                   |
+| ----------------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Epic 1: Settlement Agent Foundation | Agent decision loop, settlement state vectors, core actions (Raid, Conquer, Prosper)         | Artifacts emerge from agent action outcomes; raids and conquests are primary transfer mechanisms      |
+| Epic 2: Character-Driven Execution  | Figures as executors, expanded roles (Master Smith, General, Diplomat), stats and reputation | Master Smith creates artifacts; General's battle victories trigger forging; figure ownership tracking |
+| Epic 3: Faction-Level Agency        | Factions as strategic agents, dynamic membership, inter-faction relations                    | Artifacts become faction-level plot devices; faction relations drive artifact-motivated conflicts     |
 
 Without Epics 1–3, there is no agent infrastructure to trigger artifact creation, no figure executor to own or create artifacts, and no faction entity to covet them.
 

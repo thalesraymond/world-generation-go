@@ -13,6 +13,7 @@ Epic 2 transforms figures from passive records into active characters with perso
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Add `Stats{Martial, Diplomatic, Infamy int}` to `HistoricalFigure` with 1–20 range and role-based generation bias.
 - Add reputation system as event-sourced log (`[]ReputationEntry`) with `AddReputation()` method.
 - Implement `General`, `Diplomat`, `Master Smith` roles with domain-specific event generation.
@@ -25,6 +26,7 @@ Epic 2 transforms figures from passive records into active characters with perso
 - Keep coverage ≥80% repo-wide, ≥90% domain and usecase.
 
 **Non-Goals:**
+
 - Agent decision-making or causal event chains (Epic 1 scope).
 - Faction-level agency — cross-faction marriage, faction identity, strategic decisions (Epic 3 scope).
 - Artifact generation — Master Smith forging artifacts (Epic 4 scope).
@@ -49,9 +51,10 @@ type Stats struct {
 Generated deterministically at figure creation using settlement-scoped RNG with role-based bias: Generals get +2 Martial, Diplomats +2 Diplomatic. Base values are 1–18, bias can push to 20.
 
 **Alternatives considered:**
-- *Separate stats table:* `map[string]Stats` on `world.State` keyed by figure ID. Adds serialization complexity and two lookup paths. Rejected for simplicity — stats belong on the figure.
-- *Enum-based stats (Low/Medium/High):* Loses granularity needed for outcome probability calculations. Rejected.
-- *Float 0–1 range:* Floating-point determinism issues across platforms. Rejected for integer precision.
+
+- _Separate stats table:_ `map[string]Stats` on `world.State` keyed by figure ID. Adds serialization complexity and two lookup paths. Rejected for simplicity — stats belong on the figure.
+- _Enum-based stats (Low/Medium/High):_ Loses granularity needed for outcome probability calculations. Rejected.
+- _Float 0–1 range:_ Floating-point determinism issues across platforms. Rejected for integer precision.
 
 **Rationale:** Value-type struct keeps stats co-located with the figure, serializes cleanly as a JSON sub-object, and integer range avoids floating-point determinism concerns.
 
@@ -71,8 +74,9 @@ type ReputationEntry struct {
 Each notable action appends an entry. `Infamy` stat is influenced by accumulated negative reputation. Reputation log is exported to character file as "Notable Deeds" section.
 
 **Alternatives considered:**
-- *Single float score:* Simple but loses causal history. Can't answer "why is this figure infamous?" without log. Rejected for narrative depth.
-- *Per-category scores (Martial rep, Diplomatic rep):* Over-engineered for current scope. Single log with delta values is sufficient. Deferred.
+
+- _Single float score:_ Simple but loses causal history. Can't answer "why is this figure infamous?" without log. Rejected for narrative depth.
+- _Per-category scores (Martial rep, Diplomatic rep):_ Over-engineered for current scope. Single log with delta values is sufficient. Deferred.
 
 **Rationale:** Event-sourced log preserves the causal chain ("Year 67: Won Battle of Ashfield, +3 Martial reputation") that makes the Obsidian export narratively rich and the simulation auditable.
 
@@ -92,14 +96,16 @@ type HistoricalFigure struct {
 Keep `Role string` field for JSON round-trip and simple queries. Add `RoleRole Role` for behavior. This avoids breaking existing serialization.
 
 **Alternatives considered:**
-- *Keep string + factory:* Every event generation call requires `NewRole(f.Role)`. Works but means role-specific state (stats modifiers, transition history) must be stored separately. Rejected because stats-aware role generation needs persistent role state.
-- *Replace string entirely with interface:* Breaks JSON serialization — Go interfaces don't serialize. Would need custom marshaler that writes role name string. More invasive change.
+
+- _Keep string + factory:_ Every event generation call requires `NewRole(f.Role)`. Works but means role-specific state (stats modifiers, transition history) must be stored separately. Rejected because stats-aware role generation needs persistent role state.
+- _Replace string entirely with interface:_ Breaks JSON serialization — Go interfaces don't serialize. Would need custom marshaler that writes role name string. More invasive change.
 
 **Rationale:** Dual storage (string for serialization, interface for behavior) is the pragmatic middle ground. The string field provides backward compatibility and simple queries; the interface provides type-safe behavior dispatch.
 
 ### Decision 4: Succession — heir-first with stat inheritance
 
 **Choice:** On leader death, call `GetHeir()` first. If an heir exists:
+
 1. Assign Leader role to heir.
 2. Grant stat bonus: heir gains +1 to each stat from parent (capped at 20), applied once.
 3. Emit succession event with heir name and parent reference.
@@ -107,9 +113,10 @@ Keep `Role string` field for JSON round-trip and simple queries. Add `RoleRole R
 If no heir, fall back to existing `AssignRoles()` (first roleless adult). The stat inheritance bonus is tracked as a `ParentID` field on the figure for provenance.
 
 **Alternatives considered:**
-- *Always random succession:* No dynastic feel. Loses the narrative arc of legendary lineages. Rejected.
-- *Full stat inheritance (copy parent stats):* Overpowered across generations. A dynasty of 20/20 stats. Rejected.
-- *No stat inheritance:* Simpler but loses the "bonuses transfer or fade" requirement from ADR Epic 2. Rejected.
+
+- _Always random succession:_ No dynastic feel. Loses the narrative arc of legendary lineages. Rejected.
+- _Full stat inheritance (copy parent stats):_ Overpowered across generations. A dynasty of 20/20 stats. Rejected.
+- _No stat inheritance:_ Simpler but loses the "bonuses transfer or fade" requirement from ADR Epic 2. Rejected.
 
 **Rationale:** Heir-first with capped stat inheritance creates dynastic narrative without runaway power escalation. The +1 cap per generation means legendary stats require legendary ancestry.
 
@@ -125,8 +132,9 @@ Conflict.generic = "A conflict erupted near $SettlementName"
 The engine tries figure-aware rules first (when variables are present), falls back to generic rules.
 
 **Alternatives considered:**
-- *Template strings:* `fmt.Sprintf` patterns instead of CFG. Simpler but loses grammar composability and the ability to mix figure-driven and generic rules. Rejected because CFG already exists.
-- *Pre-composed text in event generators:* Each role's `GenerateEvents()` returns final text. Bypasses the narrative engine entirely. Rejected.
+
+- _Template strings:_ `fmt.Sprintf` patterns instead of CFG. Simpler but loses grammar composability and the ability to mix figure-driven and generic rules. Rejected because CFG already exists.
+- _Pre-composed text in event generators:_ Each role's `GenerateEvents()` returns final text. Bypasses the narrative engine entirely. Rejected.
 
 **Rationale:** CFG production rules are the natural extension of the existing narrative engine. Figure-aware rules slot alongside generic rules without architectural change. The fallback mechanism preserves backward compatibility.
 
@@ -137,8 +145,9 @@ The engine tries figure-aware rules first (when variables are present), falls ba
 Cross-faction marriage is explicitly deferred to Epic 3 (faction dynamics) because it creates diplomatic implications that require faction-level agency to handle correctly.
 
 **Alternatives considered:**
-- *Cross-faction marriage:* Creates immediate complexity — which faction does the child belong to? How does the marriage affect inter-faction relations? Needs Epic 3 infrastructure. Deferred.
-- *No marriage system:* Already implemented (`FormMarriage` exists). Just needs wiring. No reason to skip.
+
+- _Cross-faction marriage:_ Creates immediate complexity — which faction does the child belong to? How does the marriage affect inter-faction relations? Needs Epic 3 infrastructure. Deferred.
+- _No marriage system:_ Already implemented (`FormMarriage` exists). Just needs wiring. No reason to skip.
 
 **Rationale:** Same-faction marriage is the minimal viable extension of existing code. It creates family trees within factions, supports heir-based succession, and defers cross-faction complexity to the appropriate epic.
 
@@ -147,6 +156,7 @@ Cross-faction marriage is explicitly deferred to Epic 3 (faction dynamics) becau
 **Choice:** `Master Smith` role is implemented now with `GenerateEvents` producing Settlement-category events referencing craftsmanship ("The master smith of Ashfield forged a new plow"). `CanTransitionTo` accepts nothing (terminal role — a Master Smith doesn't transition to other roles). Artifact forging is explicitly deferred to Epic 4.
 
 **Alternatives considered:**
-- *Skip role until Epic 4:* Avoids implementing a role with no real functionality. Rejected because: (a) the role adds world flavor immediately, (b) the export/grammar plumbing for a new role is needed now, (c) having the role in figures creates narrative hooks even without artifact generation.
+
+- _Skip role until Epic 4:_ Avoids implementing a role with no real functionality. Rejected because: (a) the role adds world flavor immediately, (b) the export/grammar plumbing for a new role is needed now, (c) having the role in figures creates narrative hooks even without artifact generation.
 
 **Rationale:** Early implementation means the grammar, export, and role registry are ready for Epic 4's artifact system. The role generates flavor events immediately, contributing to world richness.

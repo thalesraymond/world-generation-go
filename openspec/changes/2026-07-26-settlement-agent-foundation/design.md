@@ -9,6 +9,7 @@ The infrastructure for deterministic RNG isolation exists (`state.Engine.GetPRNG
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Add agent state vector to `Settlement`: MilitaryStrength (float), Wealth (float), Relations (map[string]float64), Goals ([]string).
 - Implement decision loop in `settlementEntity.Tick()`: evaluate state → score actions → select weighted random → execute → emit event.
 - Define six actions (Expand, Raid, Conquer, Fortify, Ally, Prosper) with preconditions, execution logic, consequences, event generation.
@@ -21,6 +22,7 @@ The infrastructure for deterministic RNG isolation exists (`state.Engine.GetPRNG
 - Maintain strict determinism: same seed = identical agent decisions, relations, expansions.
 
 **Non-Goals:**
+
 - Faction-level agency (Epic 3) — settlements act independently, no faction coordination.
 - Character-driven execution (Epic 2) — figures do not execute agent actions; actions are settlement-level decisions.
 - Artifacts (Epic 4) — no items, treasures, or masterworks created or transferred.
@@ -57,9 +59,10 @@ type Settlement struct {
 - `Goals`: slice of 2–3 strings from ["grow", "defend", "expand"], randomized at creation, static thereafter.
 
 **Alternatives considered:**
-- *Separate AgentState struct:* `Settlement` embeds `AgentState` struct. Adds indirection, complicates JSON serialization. Rejected for simplicity.
-- *Integer types for military/wealth:* `int` instead of `float64`. Loses granularity for incremental growth/decay. Rejected for precision.
-- *Relations as struct with metadata:* `map[string]Relation` with `Relation` struct containing value + history. Over-engineered for Epic 1; history can be added later. Rejected.
+
+- _Separate AgentState struct:_ `Settlement` embeds `AgentState` struct. Adds indirection, complicates JSON serialization. Rejected for simplicity.
+- _Integer types for military/wealth:_ `int` instead of `float64`. Loses granularity for incremental growth/decay. Rejected for precision.
+- _Relations as struct with metadata:_ `map[string]Relation` with `Relation` struct containing value + history. Over-engineered for Epic 1; history can be added later. Rejected.
 
 **Rationale:** Flat fields on `Settlement` minimize structural changes. `float64` supports incremental changes. Map for relations is simplest; slice would require O(N) lookup. Goals as string slice is extensible.
 
@@ -86,9 +89,10 @@ func (s *Settlement) chooseAction(allSettlements []Settlement, rng *randv2.Rand)
 Preconditions are boolean checks. Score is goal alignment. Weighted random selects from precondition-passing actions.
 
 **Alternatives considered:**
-- *Utility function:* Each action computes utility = w1×goalAlignment + w2×stateScore + w3×risk. Adds complexity without clear benefit. Rejected for simplicity.
-- *Deterministic ordering:* Sort by score, pick highest. Makes simulation predictable. Weighted random adds variety while remaining deterministic. Rejected for variety.
-- *Goal-only selection:* Filter actions by goals only. Too restrictive. Rejected.
+
+- _Utility function:_ Each action computes utility = w1×goalAlignment + w2×stateScore + w3×risk. Adds complexity without clear benefit. Rejected for simplicity.
+- _Deterministic ordering:_ Sort by score, pick highest. Makes simulation predictable. Weighted random adds variety while remaining deterministic. Rejected for variety.
+- _Goal-only selection:_ Filter actions by goals only. Too restrictive. Rejected.
 
 **Rationale:** Weighted random with preconditions balances determinism with variety. Goal alignment as score keeps it simple.
 
@@ -116,9 +120,10 @@ func initRelations(self Settlement, allSettlements []Settlement) map[string]floa
 Relation shifts per action: Raid −0.3 to −0.5, Conquer −0.8, Ally +0.4, Prosper +0.05. Capped at −1.0 to +1.0.
 
 **Alternatives considered:**
-- *Symmetric relations:* Single global map. Adds complexity. Asymmetric relations allow A to like B while B dislikes A. Rejected for complexity.
-- *Relations as events only:* Compute from event history. Requires scanning entire timeline. Rejected for performance.
-- *Faction-level relations:* Store per faction, not per settlement. Loses granularity. Rejected for Epic 1 scope.
+
+- _Symmetric relations:_ Single global map. Adds complexity. Asymmetric relations allow A to like B while B dislikes A. Rejected for complexity.
+- _Relations as events only:_ Compute from event history. Requires scanning entire timeline. Rejected for performance.
+- _Faction-level relations:_ Store per faction, not per settlement. Loses granularity. Rejected for Epic 1 scope.
 
 **Rationale:** Per-settlement map is simplest. Asymmetric relations add richness without complexity. Faction baseline captures "same faction = friendlier".
 
@@ -134,9 +139,10 @@ agentRNG := engine.GetPRNG("agent:" + settlement.Name)
 Figure RNG used for: births, deaths, role assignment, figure event generation. Agent RNG used for: action selection, relation shift magnitudes, expand target selection, raid/conquer outcomes.
 
 **Alternatives considered:**
-- *Shared RNG:* Use figure RNG for both. Figure events affect agent decision sequence. Rejected for coupling.
-- *Global agent RNG:* Single `engine.GetPRNG("agents")` for all. Settlement ordering affects RNG draws. Rejected for fragility.
-- *Per-action RNG:* Separate RNG per action type. Over-engineered. Rejected.
+
+- _Shared RNG:_ Use figure RNG for both. Figure events affect agent decision sequence. Rejected for coupling.
+- _Global agent RNG:_ Single `engine.GetPRNG("agents")` for all. Settlement ordering affects RNG draws. Rejected for fragility.
+- _Per-action RNG:_ Separate RNG per action type. Over-engineered. Rejected.
 
 **Rationale:** Separate agent RNG keeps agent decisions independent from figure lifecycle. Settlement-scoped preserves determinism.
 
@@ -145,9 +151,10 @@ Figure RNG used for: births, deaths, role assignment, figure event generation. A
 **Choice:** Each settlement executes exactly one action per simulation year, in settlement slice order. Expand action adds new settlement to slice immediately (affects subsequent years, not current year's loop).
 
 **Alternatives considered:**
-- *Multiple actions per year:* Adds complexity (action queuing, ordering within year). Rejected for simplicity.
-- *Parallel execution:* Requires two-phase commit. Rejected for complexity.
-- *Action skipping:* Settlement may choose "no action". Prosper serves as default fallback. Rejected.
+
+- _Multiple actions per year:_ Adds complexity (action queuing, ordering within year). Rejected for simplicity.
+- _Parallel execution:_ Requires two-phase commit. Rejected for complexity.
+- _Action skipping:_ Settlement may choose "no action". Prosper serves as default fallback. Rejected.
 
 **Rationale:** One action per year is simple, deterministic, and matches figure lifecycle granularity.
 
@@ -156,9 +163,10 @@ Figure RNG used for: births, deaths, role assignment, figure event generation. A
 **Choice:** Expand action finds unclaimed suitable tile via pointcrawl graph, creates new `Settlement` struct, appends to `worldState.Settlements` slice. New settlement gets agent state initialized. Uses parent's faction. Reduces parent's wealth.
 
 **Alternatives considered:**
-- *Expand marks tile for future settlement:* Two-phase creation. Rejected for immediacy.
-- *Expand without new settlement:* "Outpost" without full settlement. Loses richness. Rejected.
-- *Expand limited to N per simulation:* Unnecessary — preconditions naturally limit expansions. Rejected.
+
+- _Expand marks tile for future settlement:_ Two-phase creation. Rejected for immediacy.
+- _Expand without new settlement:_ "Outpost" without full settlement. Loses richness. Rejected.
+- _Expand limited to N per simulation:_ Unnecessary — preconditions naturally limit expansions. Rejected.
 
 **Rationale:** Immediate settlement creation is simplest. New settlements become full agents, creating emergent chains. Wealth cost prevents runaway expansion.
 
@@ -167,9 +175,10 @@ Figure RNG used for: births, deaths, role assignment, figure event generation. A
 **Choice:** New event categories: Expand → "Expansion", Raid → "Raid", Conquer → "Conquest", Fortify → "Economy", Ally → "Diplomacy", Prosper → "Economy". Event struct gains optional `TargetSettlement string` field.
 
 **Alternatives considered:**
-- *One category per action:* Six new categories. Creates category explosion. Rejected for grouping.
-- *Reuse existing categories:* Loses semantic clarity. Rejected.
-- *Separate AgentEvent type:* Fragments timeline handling. Rejected.
+
+- _One category per action:_ Six new categories. Creates category explosion. Rejected for grouping.
+- _Reuse existing categories:_ Loses semantic clarity. Rejected.
+- _Separate AgentEvent type:_ Fragments timeline handling. Rejected.
 
 **Rationale:** Grouping Fortify/Prosper under Economy reduces categories. New categories distinct from random events.
 
@@ -178,9 +187,10 @@ Figure RNG used for: births, deaths, role assignment, figure event generation. A
 **Choice:** Figure lifecycle (steps 1–4 in `Tick()`) remains unchanged. Agent decision loop replaces steps 5–6 (random settlement events). Both figure events and agent events emit to same `eventChan`. No causal link in Epic 1 — figures do not execute agent actions.
 
 **Alternatives considered:**
-- *Figures execute agent actions:* Epic 2 scope. Rejected for Epic 1.
-- *Separate timeline channels:* Adds complexity. Rejected.
-- *Agent decisions suppress figure events:* Loses figure richness. Rejected.
+
+- _Figures execute agent actions:_ Epic 2 scope. Rejected for Epic 1.
+- _Separate timeline channels:_ Adds complexity. Rejected.
+- _Agent decisions suppress figure events:_ Loses figure richness. Rejected.
 
 **Rationale:** Keeping figure lifecycle separate maintains Epic 1 scope. Both emit to same timeline for richer history without causal coupling.
 
@@ -189,9 +199,10 @@ Figure RNG used for: births, deaths, role assignment, figure event generation. A
 **Choice:** Narrative engine receives variables for agent events: `ActionType`, `TargetSettlement`, `Outcome`, `Amount`. Grammar gains `<AgentAction>` production. Fallback to `event.Description`.
 
 **Alternatives considered:**
-- *Separate grammar for agent events:* Requires maintaining two grammars. Rejected.
-- *Pre-composed descriptions:* Defeats purpose of grammar. Rejected.
-- *No variables:* Loses specificity. Rejected.
+
+- _Separate grammar for agent events:_ Requires maintaining two grammars. Rejected.
+- _Pre-composed descriptions:_ Defeats purpose of grammar. Rejected.
+- _No variables:_ Loses specificity. Rejected.
 
 **Rationale:** Variable injection already works for figure events. Agent actions naturally extend it.
 
@@ -200,8 +211,9 @@ Figure RNG used for: births, deaths, role assignment, figure event generation. A
 **Choice:** Settlement Markdown export gains: Military Strength (value + tier: Weak/Moderate/Strong/Mighty), Wealth (value + tier: Poor/Comfortable/Prosperous/Rich), Relations (top 5 allies + top 5 rivals with wiki-links), Goals list.
 
 **Alternatives considered:**
-- *Full relations matrix:* Too verbose. Rejected.
-- *No tiers:* Loses interpretability. Rejected.
-- *Separate agent state file:* Fragments export. Rejected.
+
+- _Full relations matrix:_ Too verbose. Rejected.
+- _No tiers:_ Loses interpretability. Rejected.
+- _Separate agent state file:_ Fragments export. Rejected.
 
 **Rationale:** Top 5 allies/rivals is readable. Tiers provide quick interpretation. Fits existing export pattern.

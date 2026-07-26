@@ -62,25 +62,25 @@ type Artifact struct {
 
 Artifact creation, transfer, and conflict are triggered by agent action outcomes. The following table maps Epic 1–3 actions to artifact effects:
 
-| Agent Action (from Epic 1–3) | Artifact Effect | Trigger Condition |
-|------------------------------|-----------------|-------------------|
-| **Raid** (settlement agent) | Transfer: raider may seize one artifact from target | Raid succeeds (RNG check vs. defense); random artifact selected from target's treasury |
-| **Conquer** (settlement agent) | Transfer: all target settlement artifacts transfer to conqueror | Conquest succeeds |
-| **Prosper** (settlement agent) | Low-probability artifact discovery ("unearthed relic") | Prosper action + settlement age > threshold + RNG check |
-| **General leads battle** (figure executor, Epic 2) | Creation: after N victories, General forges named weapon | Victory counter reaches threshold (e.g., 5) |
-| **Master Smith action** (figure role, Epic 2) | Creation: forges a new artifact of random type | Master Smith executes "Forge" action with sufficient settlement wealth |
-| **Leader death** (figure lifecycle, Epic 2) | Transfer: personal artifacts pass to heir or settlement treasury | Leader dies while owning artifacts |
-| **Declare war** (faction agent, Epic 3) | Conflict motivation: war may target artifact recovery | Faction A's artifact was seized by Faction B; narrative value > threshold |
-| **Form alliance** (faction agent, Epic 3) | Gift/dowry: artifact may transfer as alliance token | Alliance formed; small probability of artifact gift |
+| Agent Action (from Epic 1–3)                       | Artifact Effect                                                  | Trigger Condition                                                                      |
+| -------------------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **Raid** (settlement agent)                        | Transfer: raider may seize one artifact from target              | Raid succeeds (RNG check vs. defense); random artifact selected from target's treasury |
+| **Conquer** (settlement agent)                     | Transfer: all target settlement artifacts transfer to conqueror  | Conquest succeeds                                                                      |
+| **Prosper** (settlement agent)                     | Low-probability artifact discovery ("unearthed relic")           | Prosper action + settlement age > threshold + RNG check                                |
+| **General leads battle** (figure executor, Epic 2) | Creation: after N victories, General forges named weapon         | Victory counter reaches threshold (e.g., 5)                                            |
+| **Master Smith action** (figure role, Epic 2)      | Creation: forges a new artifact of random type                   | Master Smith executes "Forge" action with sufficient settlement wealth                 |
+| **Leader death** (figure lifecycle, Epic 2)        | Transfer: personal artifacts pass to heir or settlement treasury | Leader dies while owning artifacts                                                     |
+| **Declare war** (faction agent, Epic 3)            | Conflict motivation: war may target artifact recovery            | Faction A's artifact was seized by Faction B; narrative value > threshold              |
+| **Form alliance** (faction agent, Epic 3)          | Gift/dowry: artifact may transfer as alliance token              | Alliance formed; small probability of artifact gift                                    |
 
 ### Artifact Creation Thresholds
 
-| Creation Method | Threshold | RNG Derivation |
-|----------------|-----------|----------------|
-| General forges weapon | 5 victories threshold (configurable) | Derived from master seed + figure ID + "forge_weapon" |
-| Master Smith forges item | 1 Forge action, success probability ~60% | Derived from master seed + settlement ID + "master_smith_forge" |
-| Conquest captures crown | Automatic if target settlement has crown-type artifact | N/A (deterministic transfer) |
-| Archaeological discovery (Prosper) | Settlement age ≥ 200 years, probability ~2%/year | Derived from master seed + settlement ID + "artifact_discovery" |
+| Creation Method                    | Threshold                                              | RNG Derivation                                                  |
+| ---------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------- |
+| General forges weapon              | 5 victories threshold (configurable)                   | Derived from master seed + figure ID + "forge_weapon"           |
+| Master Smith forges item           | 1 Forge action, success probability ~60%               | Derived from master seed + settlement ID + "master_smith_forge" |
+| Conquest captures crown            | Automatic if target settlement has crown-type artifact | N/A (deterministic transfer)                                    |
+| Archaeological discovery (Prosper) | Settlement age ≥ 200 years, probability ~2%/year       | Derived from master seed + settlement ID + "artifact_discovery" |
 
 ---
 
@@ -111,12 +111,12 @@ type State struct {
 
 Artifact-related RNG is derived from the master seed using component-specific derivation:
 
-| Purpose | Derivation Key |
-|---------|---------------|
-| Artifact name generation | `masterSeed + "artifact_name" + artifactType + index` |
-| Artifact creation decision | `masterSeed + "artifact_create" + figureID/settlementID + year` |
+| Purpose                                   | Derivation Key                                                  |
+| ----------------------------------------- | --------------------------------------------------------------- |
+| Artifact name generation                  | `masterSeed + "artifact_name" + artifactType + index`           |
+| Artifact creation decision                | `masterSeed + "artifact_create" + figureID/settlementID + year` |
 | Artifact transfer (which artifact seized) | `masterSeed + "artifact_transfer" + raiderID + targetID + year` |
-| Narrative value decay | `masterSeed + "artifact_decay" + artifactID + year` |
+| Narrative value decay                     | `masterSeed + "artifact_decay" + artifactID + year`             |
 
 Each derivation produces an independent `*rand.Rand` scoped to that artifact operation. This ensures that changes to artifact generation logic do not perturb settlement placement, figure generation, or other subsystems.
 
@@ -173,6 +173,7 @@ tags:
 ### Artifact Body
 
 The Markdown body includes:
+
 1. A narrative description (CFG-generated from the artifact's type and origin).
 2. A provenance table listing each transfer chronologically.
 3. "Related Figures" section with wiki-links to all figures in provenance.
@@ -182,14 +183,14 @@ The Markdown body includes:
 
 ## Architecture Boundaries
 
-| Layer | Responsibility |
-|-------|---------------|
-| `internal/domain/artifact.go` | `Artifact`, `ArtifactType`, `ProvenanceEvent` structs; pure data, no imports beyond stdlib |
-| `internal/usecase/artifact_creator.go` | Interface `ArtifactCreator` + implementation; orchestrates creation thresholds, RNG derivation, transfer logic |
-| `internal/usecase/artifact_repository.go` | Interface for persisting/loading artifacts (implemented by infra) |
-| `internal/infra/artifact_serializer.go` | JSON serialization/deserialization of artifacts into world state |
-| `internal/infra/obsidian_artifact_writer.go` | Export artifact Markdown files with frontmatter and wiki-links |
-| `internal/adapter/` | No new adapter code; existing simulation pipeline gains artifact hooks |
+| Layer                                        | Responsibility                                                                                                 |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `internal/domain/artifact.go`                | `Artifact`, `ArtifactType`, `ProvenanceEvent` structs; pure data, no imports beyond stdlib                     |
+| `internal/usecase/artifact_creator.go`       | Interface `ArtifactCreator` + implementation; orchestrates creation thresholds, RNG derivation, transfer logic |
+| `internal/usecase/artifact_repository.go`    | Interface for persisting/loading artifacts (implemented by infra)                                              |
+| `internal/infra/artifact_serializer.go`      | JSON serialization/deserialization of artifacts into world state                                               |
+| `internal/infra/obsidian_artifact_writer.go` | Export artifact Markdown files with frontmatter and wiki-links                                                 |
+| `internal/adapter/`                          | No new adapter code; existing simulation pipeline gains artifact hooks                                         |
 
 ---
 

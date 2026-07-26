@@ -15,6 +15,7 @@ type Entity interface {
 ## Goals / Non-Goals
 
 **Goals:**
+
 1. Create a `Faction` domain entity in `internal/domain/faction/` with identity, leadership, treasury, goals, members, and relations.
 2. Implement `simulation.Entity` for factions — a strategic decision loop that evaluates faction state annually and chooses actions.
 3. Define three strategic actions: declare war, form alliance, set policy (expansion/defense/diplomacy).
@@ -23,6 +24,7 @@ type Entity interface {
 6. Update Obsidian export to show faction dynamics, membership changes, and strategic decisions.
 
 **Non-Goals:**
+
 - Artifacts (Epic 4) — factions will not manage artifact ownership.
 - Figure-level agency for factions beyond leadership assignment — individual figure agency is Epic 2.
 - Player interaction or faction configuration UI.
@@ -54,6 +56,7 @@ type Faction struct {
 **Rationale:** Clean architecture — domain entities belong in `internal/domain/`. Plain struct with exported fields keeps it simple; no interface wrappers needed for a single concrete type. Separation from `world.State` keeps the domain layer pure.
 
 **Alternatives considered:**
+
 - Embedding faction data in `world.State` directly — rejected because it couples persistence with domain logic.
 - Using an interface-based polymorphic faction type — rejected as premature; there is only one kind of faction.
 
@@ -62,6 +65,7 @@ type Faction struct {
 **Decision:** `Faction` implements `simulation.Entity`. Each year, the faction evaluates its state and may execute one strategic action.
 
 **Decision loop:**
+
 1. Evaluate faction health (member count, treasury, military aggregate, relations).
 2. Check action preconditions (e.g., war requires hostile relations + sufficient military).
 3. Choose action based on goals and heuristics (weighted random from eligible actions).
@@ -71,6 +75,7 @@ type Faction struct {
 **Rationale:** Mirrors the settlement agent pattern from Epic 1, keeping the architecture consistent. Factions operate at a higher strategic level — they decide _what_ (war, alliance, policy), while settlements decide _how_ (raid, fortify, expand).
 
 **Alternatives considered:**
+
 - Faction as a pure data container with no tick loop — rejected because it prevents emergent strategic behavior.
 - Running faction decisions inside the settlement tick — rejected because it breaks the entity boundary and creates coupling.
 
@@ -79,6 +84,7 @@ type Faction struct {
 **Decision:** Relations are stored as `map[string]float64` on each faction, ranging from −1.0 (hostile) to +1.0 (allied). Zero is neutral.
 
 **Update rules:**
+
 - War declaration: target relation drops to −1.0; reciprocal update on target faction.
 - Alliance formation: both factions set relation to +0.8; reciprocal.
 - Conquest of member: attacker faction relation with victim faction decreases by 0.3.
@@ -96,6 +102,7 @@ type Faction struct {
 3. **Faction collapse:** When a faction has zero member settlements, it is dissolved — removed from the registry, its ID preserved in history only.
 
 **Tracking:** Each `Faction` maintains a `History []MembershipChange` record:
+
 ```go
 type MembershipChange struct {
     Year      int
@@ -112,11 +119,11 @@ type MembershipChange struct {
 
 **Decision:** Three strategic actions with preconditions and consequences:
 
-| Action | Preconditions | Consequences | Events |
-|--------|--------------|--------------|--------|
-| **Declare War** | Target faction exists, relation < −0.3, faction military aggregate > target's | Target relation → −1.0, member settlements enter defensive posture, war drains treasury | "Faction A declared war on Faction B" |
-| **Form Alliance** | Target faction exists, relation > 0.5, no active war with target, treasury > threshold | Target relation → +0.8, shared defensive commitments, member settlements gain morale | "Faction A formed an alliance with Faction B" |
-| **Set Policy** | None always available | Changes faction policy (expansion/defense/diplomacy), influences member settlement decision weights | "Faction A adopted an expansionist policy" |
+| Action            | Preconditions                                                                          | Consequences                                                                                        | Events                                        |
+| ----------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| **Declare War**   | Target faction exists, relation < −0.3, faction military aggregate > target's          | Target relation → −1.0, member settlements enter defensive posture, war drains treasury             | "Faction A declared war on Faction B"         |
+| **Form Alliance** | Target faction exists, relation > 0.5, no active war with target, treasury > threshold | Target relation → +0.8, shared defensive commitments, member settlements gain morale                | "Faction A formed an alliance with Faction B" |
+| **Set Policy**    | None always available                                                                  | Changes faction policy (expansion/defense/diplomacy), influences member settlement decision weights | "Faction A adopted an expansionist policy"    |
 
 **Rationale:** Three actions provide meaningful strategic variation without overwhelming complexity. Preconditions prevent nonsensical decisions. Policy setting creates cascading effects on member settlements.
 
@@ -164,6 +171,7 @@ factionRNG := randv2.New(randv2.NewPCG(masterSeed, factionSeed))
 ```
 
 Where `factionSeed` is derived from the master seed + faction ID hash. This ensures:
+
 - Identical master seed → identical faction decisions.
 - Faction decisions are independent of each other's RNG state.
 - Adding/removing a faction does not change other factions' decisions (within the same tick order).
