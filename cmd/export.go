@@ -50,7 +50,7 @@ func newExportCommand() *cobra.Command {
 					return fmt.Errorf("parse timeline: %w", err)
 				}
 
-				if err := exporter.ExportTimeline(events, cfg.Output); err != nil {
+				if err := exporter.ExportTimeline(state, events, cfg.Output); err != nil {
 					return fmt.Errorf("export timeline: %w", err)
 				}
 			}

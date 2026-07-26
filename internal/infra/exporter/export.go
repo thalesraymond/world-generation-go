@@ -259,22 +259,32 @@ func edgesForNode(nodeID int, graph *pointcrawl.Graph) []pointcrawl.Edge {
 }
 
 // ExportTimeline generates a chronicle markdown file from timeline events.
-func ExportTimeline(events []simulation.Event, targetDir string) error {
+func ExportTimeline(state *world.State, events []simulation.Event, targetDir string) error {
 	if len(events) == 0 {
 		return nil
 	}
+
+	// Build figure ID → name lookup
+	figureNames := make(map[string]string)
+	if state != nil {
+		for _, s := range state.Settlements {
+			for _, f := range s.Figures {
+				figureNames[f.ID] = f.Name
+			}
+		}
+	}
+
+	// Sort events by year
+	sorted := make([]simulation.Event, len(events))
+	copy(sorted, events)
+	sort.Slice(sorted, func(i, j int) bool {
+		return sorted[i].Year < sorted[j].Year
+	})
 
 	chroniclesDir := filepath.Join(targetDir, "chronicles")
 	if err := os.MkdirAll(chroniclesDir, 0755); err != nil {
 		return fmt.Errorf("create chronicles directory: %w", err)
 	}
-
-	grouped := groupEventsByDecade(events)
-	decades := make([]int, 0, len(grouped))
-	for decade := range grouped {
-		decades = append(decades, decade)
-	}
-	sort.Ints(decades)
 
 	fields := []field{
 		{"type", "chronicle"},
@@ -285,20 +295,20 @@ func ExportTimeline(events []simulation.Event, targetDir string) error {
 	b.WriteString(frontmatter(fields))
 	b.WriteString("# Chronicle\n\n")
 
-	for _, decade := range decades {
-		fmt.Fprintf(&b, "## Decade %ds\n\n", decade)
-		decadeEvents := grouped[decade]
-		currentYear := -1
-		for _, event := range decadeEvents {
-			if event.Year != currentYear {
-				currentYear = event.Year
-				fmt.Fprintf(&b, "### Year %d\n", currentYear)
+	currentYear := -1
+	for _, event := range sorted {
+		if event.Year != currentYear {
+			currentYear = event.Year
+			fmt.Fprintf(&b, "### Year %d\n", currentYear)
+		}
+		if event.FigureID != "" {
+			name := figureNames[event.FigureID]
+			if name == "" {
+				name = event.FigureID
 			}
-			if event.FigureID != "" {
-				fmt.Fprintf(&b, "- [%s] %s *(by [[%s]])*\n\n", event.Category, event.Description, event.FigureID)
-			} else {
-				fmt.Fprintf(&b, "- [%s] %s\n\n", event.Category, event.Description)
-			}
+			fmt.Fprintf(&b, "- [%s] %s *(by [[%s]])*\n", event.Category, event.Description, name)
+		} else {
+			fmt.Fprintf(&b, "- [%s] %s\n", event.Category, event.Description)
 		}
 	}
 
@@ -308,18 +318,4 @@ func ExportTimeline(events []simulation.Event, targetDir string) error {
 	}
 
 	return nil
-}
-
-func groupEventsByDecade(events []simulation.Event) map[int][]simulation.Event {
-	grouped := make(map[int][]simulation.Event)
-	for _, event := range events {
-		decade := (event.Year / 10) * 10
-		grouped[decade] = append(grouped[decade], event)
-	}
-	for _, group := range grouped {
-		sort.Slice(group, func(i, j int) bool {
-			return group[i].Year < group[j].Year
-		})
-	}
-	return grouped
 }
