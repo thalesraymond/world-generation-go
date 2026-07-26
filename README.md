@@ -35,47 +35,40 @@ openspec/                 Source-of-truth specs and design documents
 
 Dependencies point inward: `cmd` → `usecase` → `domain`. `infra` implements interfaces from `usecase`. `domain` imports no framework or infrastructure packages.
 
-## What is implemented
+## Features & Implemented Capabilities
 
-### CLI
+### CLI Commands
 
-- **Cobra command tree** with `init`, `simulate`, `export` subcommands.
-- **Typed config** via Viper: flags, `WORLDGEN_*` env vars, and YAML config files.
-- `simulate` runs full world generation and timeline simulation. `init` and `export` currently acknowledge inputs; `export` backing logic is implemented in `internal/infra/exporter`.
+- **`init`**: Scaffolds and writes persistent project configuration (`worldgen.yaml`) with user-specified world name and size presets.
+- **`simulate`**: Executes full procedural world generation (terrain, biomes, demographics, settlements, pointcrawl graph) and runs phased timeline simulation streaming CFG narrative chronicle events. Saves `world_state.json` and `timeline.json`.
+- **`export`**: Translates world state and timeline data into an Obsidian-compatible Markdown vault containing YAML frontmatter metadata, sanitized filenames, wiki-links, and JSON pointcrawl graph data.
 
-### Generation pipeline
+### Generation & Simulation Pipeline
 
-- **Deterministic RNG** — master-seed engine derives isolated `math/rand/v2` PRNG streams per component.
-- **Terrain generation** — Perlin-noise elevation, latitude-aware temperature/humidity, biome classification (water, tundra, desert, forest, grassland).
-- **Spatial reasoning** — tile suitability scoring from water proximity, elevation, and biome.
-- **Demographic automata** — population seeding from suitability, diffusion, and faction influence spread.
-- **Settlement generation** — candidate selection from suitability/population thresholds with distance filtering.
-- **Pointcrawl network** — node placement from settlements, edge connection via nearest-neighbor routing.
-- **Simulation loop** — iterative year-by-year engine with tickable entities and channel-based event streaming.
-- **CFG narrative engine** — lexer, parser, and rule-expansion engine supporting variable injection and recursion protection.
-- **World state** — aggregate snapshot with JSON serialization/deserialization and validation.
+- **Deterministic PRNG Engine** — Master seed engine (`internal/domain/state`) deriving isolated `math/rand/v2` streams per component to ensure 100% byte-identical outputs given identical seeds.
+- **Geographical Genesis** — Perlin-noise elevation, latitude-aware climate (temperature & humidity), and biome classification (water, tundra, desert, forest, grassland).
+- **Spatial Reasoning & Demographics** — Tile suitability scoring, population seeding, diffusion, and faction influence spread via cellular automata.
+- **Settlements & Travel-Cost Pointcrawl** — Settlement placement based on suitability thresholds, network graph construction, nearest-neighbor edge routing, and travel cost heuristics measured in "watches" (factoring in terrain friction and elevation bonuses).
+- **CFG Narrative Engine & Chronicle Streaming** — Context-free grammar engine supporting BNF grammar loading, variable expansion, and event narration during timeline simulation streaming.
 
-### Export
+### Exporters
 
-- **Obsidian Markdown vault** — directory creation, YAML frontmatter, wiki-links, and sanitized filenames for settlements and factions.
+- **Obsidian Markdown Vault** — Structured directory output (`settlements/`, `factions/`, `pointcrawl.json`, `timeline.md`) with frontmatter metadata and relational wiki-links.
 
-### Testing
-
-Comprehensive unit and integration tests across all domain and use case packages, including determinism tests (same seed → identical output), CLI behavior, and export format correctness.
-
-## Getting started
+## Getting Started
 
 ```bash
-go run .                        # show help
+# Display help and usage
+go run . --help
+
+# Initialize a new world project
 go run . init --name "Ashtar" --size medium
-go run . simulate --years 500 --events dense
+
+# Generate world & simulate timeline
+go run . simulate --seed 42 --width 64 --height 64 --years 100 --events normal
+
+# Export generated state to an Obsidian markdown vault
 go run . export --format obsidian --output ./vault
-```
-
-The `simulate` command performs full world generation and runs the timeline:
-
-```bash
-go run . simulate --seed 42 --width 64 --height 64 --years 100
 ```
 
 ## Configuration
@@ -91,7 +84,7 @@ Command-specific flags:
 
 - `init` — `--name`, `--size`
 - `simulate` — `--width`, `--height`, `--years`, `--events`
-- `export` — `--format`
+- `export` — `--format`, `--output`
 
 ## Determinism
 
@@ -101,27 +94,21 @@ Identical seeds produce identical worlds. Enforced by:
 - Master-seed engine in `internal/domain/state` deriving stable sub-seeds from component identifiers.
 - No package-level random state or shared global RNG.
 
-## Testing
+## Testing & Quality Assurance
 
 ```bash
-go test ./...                     # run all tests
-go test ./... -race               # with race detector
-go test ./... -coverprofile=coverage.out  # coverage
+go test ./...                             # Run all tests
+go test ./... -race                       # Test with race detector
+go test ./... -coverprofile=coverage.out  # Code coverage
 go tool cover -func=coverage.out
 ```
 
-Coverage thresholds (from [AGENTS.md](AGENTS.md)):
+Coverage thresholds (enforced per [AGENTS.md](AGENTS.md)):
 
-- Repository-wide: ≥ 80%
+- Repository-wide statement coverage: ≥ 80%
 - `internal/domain` and `internal/usecase`: ≥ 90% each
+- Pure determinism assertion tests for all generation routines.
 
-## Roadmap
+## Project Status
 
-Completed items have moved into `openspec/changes/archive/`. Remaining work tracked in `openspec/changes/` includes:
-
-- **`init` project scaffolding** — persistent project file generation.
-- **`export` CLI integration** — wire the existing Obsidian exporter into the `export` command with a full world state input.
-- **Timeline streaming with CFG narratives** — route simulation events through the narrative engine for rich mythic text output.
-- **Travel cost calculator** — route-evaluation heuristics measured in "watches".
-
-For full requirements and design rationale, see the corresponding `design.md` and `spec.md` files under `openspec/specs/`.
+All planned specifications and architectural features defined under `openspec/specs/` are fully implemented, verified, and backed by test suites.
