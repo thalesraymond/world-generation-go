@@ -14,11 +14,11 @@ func TestInitCommandAcknowledgesInitialization(t *testing.T) {
 	}
 }
 
-func TestSimulateCommandReportsStatus(t *testing.T) {
-	output := executeCommand(t, "simulate", "--years", "500", "--events", "dense")
+func TestSimulateCommandRunsSimulation(t *testing.T) {
+	output := executeCommand(t, "simulate", "--years", "10", "--events", "normal")
 
-	if !strings.Contains(output, "status: queued") {
-		t.Fatalf("simulate output = %q, want status", output)
+	if !strings.Contains(output, "Starting simulation") || !strings.Contains(output, "Simulation completed successfully") {
+		t.Fatalf("simulate output = %q, want simulation execution output", output)
 	}
 }
 
