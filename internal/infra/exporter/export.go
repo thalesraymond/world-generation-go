@@ -44,6 +44,7 @@ func Export(state *world.State, targetDir string) error {
 			{"id", sanitizedName},
 			{"type", "settlement"},
 			{"name", s.Name},
+			{"subtype", s.Type},
 			{"faction", s.Faction},
 			{"x", fmt.Sprintf("%d", s.X)},
 			{"y", fmt.Sprintf("%d", s.Y)},
@@ -54,6 +55,7 @@ func Export(state *world.State, targetDir string) error {
 		content += fmt.Sprintf("**Faction:** [[%s]]\n", sanitizedFaction)
 		content += fmt.Sprintf("**Coordinates:** (%d, %d)\n", s.X, s.Y)
 		content += fmt.Sprintf("**Population:** %.0f\n", s.Population)
+		content += fmt.Sprintf("**Type:** %s\n\n", s.Type)
 
 		if err := os.WriteFile(path, []byte(frontmatter(fields)+content), 0644); err != nil {
 			return fmt.Errorf("write settlement file: %w", err)

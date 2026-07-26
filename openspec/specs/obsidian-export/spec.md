@@ -1,4 +1,10 @@
-## ADDED Requirements
+# obsidian-export Specification
+
+## Purpose
+
+Define how simulation data is exported to an Obsidian-compatible Markdown vault.
+
+## Requirements
 
 ### Requirement: Generate Relational Directory Structure
 The system SHALL export internal simulation structures into a relational directory hierarchy.
@@ -12,9 +18,15 @@ The system SHALL export internal simulation structures into a relational directo
 The system SHALL inject YAML frontmatter containing relevant metadata at the top of each generated Markdown file.
 
 #### Scenario: Metadata inclusion for querying
+
 - **WHEN** an entity file is generated
 - **THEN** it includes a YAML frontmatter block `---` at the very beginning
-- **THEN** the frontmatter includes key properties like `id`, `type`, `status`, and coordinates to enable Dataview queries
+- **THEN** the frontmatter includes key properties like `id`, `type`, `status`, `subtype`, and coordinates to enable Dataview queries
+
+#### Scenario: Settlement subtype in frontmatter
+
+- **WHEN** a settlement entity file is generated
+- **THEN** the frontmatter includes a `subtype` field with the settlement's classification (MajorCity, City, Village, or Abandoned)
 
 ### Requirement: Generate Bi-directional Wiki-links
 The system SHALL translate internal relationships between entities into Obsidian-compatible bi-directional wiki-links.

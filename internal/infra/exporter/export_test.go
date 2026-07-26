@@ -16,8 +16,8 @@ func TestExportCreatesExpectedFilesAndContent(t *testing.T) {
 		Width:  100,
 		Height: 100,
 		Settlements: []world.Settlement{
-			{Name: "Riverwatch", X: 10, Y: 20, Faction: " Ironbound", Population: 500},
-			{Name: "Oakhaven", X: 30, Y: 40, Faction: "Sylvani", Population: 1200},
+			{Name: "Riverwatch", Type: "Town", X: 10, Y: 20, Faction: " Ironbound", Population: 500},
+			{Name: "Oakhaven", Type: "City", X: 30, Y: 40, Faction: "Sylvani", Population: 1200},
 		},
 	}
 
@@ -88,6 +88,12 @@ func TestExportCreatesExpectedFilesAndContent(t *testing.T) {
 	if !strings.Contains(riverwatch, "name: Riverwatch") {
 		t.Errorf("settlement file missing name field")
 	}
+	if !strings.Contains(riverwatch, "subtype: Town") {
+		t.Errorf("settlement file missing subtype field")
+	}
+	if !strings.Contains(riverwatch, "**Type:** Town") {
+		t.Errorf("settlement file missing Type line in body")
+	}
 	if !strings.Contains(riverwatch, "faction:  Ironbound") {
 		t.Errorf("settlement file missing faction field")
 	}
@@ -101,6 +107,12 @@ func TestExportCreatesExpectedFilesAndContent(t *testing.T) {
 	}
 	oakhaven := string(oakhavenBytes)
 
+	if !strings.Contains(oakhaven, "subtype: City") {
+		t.Errorf("Oakhaven file missing subtype field")
+	}
+	if !strings.Contains(oakhaven, "**Type:** City") {
+		t.Errorf("Oakhaven file missing Type line in body")
+	}
 	if !strings.Contains(oakhaven, "faction: Sylvani") {
 		t.Errorf("Oakhaven file missing faction field")
 	}

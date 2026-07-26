@@ -10,6 +10,7 @@ import (
 // Settlement captures a founded settlement on the world grid.
 type Settlement struct {
 	Name       string  `json:"name"`
+	Type       string  `json:"type"`
 	X          int     `json:"x"`
 	Y          int     `json:"y"`
 	Faction    string  `json:"faction"`

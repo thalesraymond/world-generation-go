@@ -28,6 +28,10 @@ func TestGenerateFiltersBySuitabilityAndPopulation(t *testing.T) {
 	if state.Settlements[0].Faction == "" {
 		t.Fatalf("expected settlement faction assignment")
 	}
+
+	if state.Settlements[0].Type == "" {
+		t.Fatalf("expected settlement type assignment")
+	}
 }
 
 func TestGenerateEnforcesMinimumDistance(t *testing.T) {
@@ -52,6 +56,10 @@ func TestGenerateEnforcesMinimumDistance(t *testing.T) {
 	if state.Settlements[0].X == 0 && state.Settlements[1].X == 1 {
 		t.Fatalf("expected spacing to reject adjacent settlement at x=1")
 	}
+
+	if state.Settlements[0].Type == "" {
+		t.Fatalf("expected settlement type assignment")
+	}
 }
 
 func TestGenerateScalesPopulation(t *testing.T) {
@@ -75,6 +83,10 @@ func TestGenerateScalesPopulation(t *testing.T) {
 	if state.Settlements[0].Population != 700 {
 		t.Fatalf("population = %v, want 700", state.Settlements[0].Population)
 	}
+
+	if state.Settlements[0].Type == "" {
+		t.Fatalf("expected settlement type assignment")
+	}
 }
 
 func TestGenerateAssignsIndependentWhenNoDominantFaction(t *testing.T) {
@@ -96,5 +108,49 @@ func TestGenerateAssignsIndependentWhenNoDominantFaction(t *testing.T) {
 
 	if state.Settlements[0].Faction != "independent" {
 		t.Fatalf("faction = %q, want independent", state.Settlements[0].Faction)
+	}
+
+	if state.Settlements[0].Type == "" {
+		t.Fatalf("expected settlement type assignment")
+	}
+}
+
+func TestGenerateClassifiesSettlementTypes(t *testing.T) {
+	state := world.NewState(4, 1)
+
+	state.Suitability = []float64{0.7, 0.7, 0.7, 0.7}
+	state.PopulationDensity = []float64{0.9, 0.5, 0.1, 0.01}
+	state.FactionInfluence = []string{"faction", "faction", "faction", "faction"}
+
+	config := DefaultConfig()
+	config.MinSuitability = 0.1
+	config.MinPopulation = 0.005
+	config.MinDistance = 1
+
+	err := Generate(state, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(state.Settlements) != 4 {
+		t.Fatalf("expected 4 settlements, got %d", len(state.Settlements))
+	}
+
+	expectedTypes := map[int]string{
+		90000: TypeMajorCity,
+		50000: TypeMajorCity,
+		10000: TypeCity,
+		1000:  TypeVillage,
+	}
+
+	for _, s := range state.Settlements {
+		expType, ok := expectedTypes[int(s.Population)]
+		if !ok {
+			t.Errorf("unexpected population %.0f, got type %s", s.Population, s.Type)
+			continue
+		}
+		if s.Type != expType {
+			t.Errorf("population %.0f: expected type %s, got %s", s.Population, expType, s.Type)
+		}
 	}
 }

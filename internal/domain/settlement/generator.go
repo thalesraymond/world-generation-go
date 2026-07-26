@@ -9,17 +9,16 @@ import (
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 )
 
-// Config controls settlement candidate filtering and spacing.
 type Config struct {
 	MinSuitability float64
 	MinPopulation  float64
 	MinDistance    float64
 	MaxPopulation  float64
 	MaxSettlements int
+	MergeDistance  float64
 	RNG            *randv2.Rand
 }
 
-// DefaultConfig returns baseline settlement generation rules.
 func DefaultConfig() Config {
 	return Config{
 		MinSuitability: 0.65,
@@ -27,6 +26,8 @@ func DefaultConfig() Config {
 		MinDistance:    3,
 		MaxPopulation:  100000,
 		MaxSettlements: 0,
+		MergeDistance:  0,
+		RNG:            randv2.New(randv2.NewPCG(0, 0)),
 	}
 }
 
@@ -37,7 +38,6 @@ type candidate struct {
 	score float64
 }
 
-// Generate identifies candidates and creates settlement objects.
 func Generate(state *world.State, config Config) error {
 	if state == nil {
 		return fmt.Errorf("state is required")
@@ -50,21 +50,33 @@ func Generate(state *world.State, config Config) error {
 	candidates := findCandidates(state, config)
 	selected := filterByDistance(candidates, config.MinDistance, config.MaxSettlements)
 
+	usedNames := make(map[string]bool)
 	settlements := make([]world.Settlement, 0, len(selected))
-	for idx, c := range selected {
+	for _, c := range selected {
 		faction := state.FactionInfluence[c.index]
 		if faction == "" {
 			faction = "independent"
 		}
 
+		population := math.Round(state.PopulationDensity[c.index] * config.MaxPopulation)
+		name := EnsureUniqueName(config.RNG, usedNames)
+		usedNames[name] = true
+
 		settlements = append(settlements, world.Settlement{
-			Name:       fmt.Sprintf("Settlement-%03d", idx+1),
+			Name:       name,
+			Type:       Classify(population),
 			X:          c.x,
 			Y:          c.y,
 			Faction:    faction,
-			Population: math.Round(state.PopulationDensity[c.index] * config.MaxPopulation),
+			Population: population,
 		})
 	}
+
+	mergeDistance := config.MergeDistance
+	if mergeDistance <= 0 {
+		mergeDistance = config.MinDistance
+	}
+	settlements = ResolveProximityConflicts(settlements, mergeDistance)
 
 	state.Settlements = settlements
 	return nil
