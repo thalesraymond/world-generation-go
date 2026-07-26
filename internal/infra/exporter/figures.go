@@ -29,10 +29,17 @@ func ExportFigures(state *world.State, events []simulation.Event, targetDir stri
 
 	nameTracker := newNameTracker()
 
+	idToName := make(map[string]string)
 	for _, settlement := range state.Settlements {
 		for _, figure := range settlement.Figures {
-			fm := buildFigureFrontmatter(figure, settlement.Name, nameTracker)
-			body := buildFigureBody(figure, settlement.Name, events, nameTracker)
+			idToName[figure.ID] = figure.Name
+		}
+	}
+
+	for _, settlement := range state.Settlements {
+		for _, figure := range settlement.Figures {
+			fm := buildFigureFrontmatter(figure, settlement.Name, idToName, nameTracker)
+			body := buildFigureBody(figure, settlement.Name, events, idToName, nameTracker)
 
 			fileName := nameTracker.sanitize(figure.Name) + ".md"
 			content := fm + "\n" + body
@@ -45,7 +52,14 @@ func ExportFigures(state *world.State, events []simulation.Event, targetDir stri
 	return nil
 }
 
-func buildFigureFrontmatter(f figures.HistoricalFigure, settlementName string, nt *nameTracker) string {
+func resolveName(id string, idToName map[string]string, nt *nameTracker) string {
+	if name, ok := idToName[id]; ok {
+		return nt.sanitize(name)
+	}
+	return nt.sanitize(id)
+}
+
+func buildFigureFrontmatter(f figures.HistoricalFigure, settlementName string, idToName map[string]string, nt *nameTracker) string {
 	status := "alive"
 	var deathYearStr string
 	if !f.IsAlive() {
@@ -71,7 +85,7 @@ func buildFigureFrontmatter(f figures.HistoricalFigure, settlementName string, n
 	if len(f.Relationships.Parents) > 0 {
 		var parents []string
 		for _, p := range f.Relationships.Parents {
-			parents = append(parents, quoteIfNeeded("[["+nt.sanitize(p)+"]]"))
+			parents = append(parents, quoteIfNeeded("[["+resolveName(p, idToName, nt)+"]]"))
 		}
 		fields = append(fields, field{Key: "parents", Value: fmt.Sprintf("[%s]", join(parents, ", "))})
 	}
@@ -79,7 +93,7 @@ func buildFigureFrontmatter(f figures.HistoricalFigure, settlementName string, n
 	if len(f.Relationships.Children) > 0 {
 		var children []string
 		for _, c := range f.Relationships.Children {
-			children = append(children, quoteIfNeeded("[["+nt.sanitize(c)+"]]"))
+			children = append(children, quoteIfNeeded("[["+resolveName(c, idToName, nt)+"]]"))
 		}
 		fields = append(fields, field{Key: "children", Value: fmt.Sprintf("[%s]", join(children, ", "))})
 	}
@@ -87,7 +101,7 @@ func buildFigureFrontmatter(f figures.HistoricalFigure, settlementName string, n
 	if len(f.Relationships.Spouse) > 0 {
 		var spouses []string
 		for _, s := range f.Relationships.Spouse {
-			spouses = append(spouses, quoteIfNeeded("[["+nt.sanitize(s)+"]]"))
+			spouses = append(spouses, quoteIfNeeded("[["+resolveName(s, idToName, nt)+"]]"))
 		}
 		fields = append(fields, field{Key: "spouse", Value: fmt.Sprintf("[%s]", join(spouses, ", "))})
 	}
@@ -95,7 +109,7 @@ func buildFigureFrontmatter(f figures.HistoricalFigure, settlementName string, n
 	return frontmatter(fields)
 }
 
-func buildFigureBody(f figures.HistoricalFigure, settlementName string, events []simulation.Event, nt *nameTracker) string {
+func buildFigureBody(f figures.HistoricalFigure, settlementName string, events []simulation.Event, idToName map[string]string, nt *nameTracker) string {
 	body := "# " + f.Name + "\n\n"
 
 	body += "**Role:** " + f.Role + "  \n"
@@ -118,7 +132,7 @@ func buildFigureBody(f figures.HistoricalFigure, settlementName string, events [
 		body += "- **Parents:** "
 		var links []string
 		for _, p := range f.Relationships.Parents {
-			links = append(links, "[["+p+"]]")
+			links = append(links, "[["+resolveName(p, idToName, nt)+"]]")
 		}
 		body += join(links, ", ") + "\n"
 	}
@@ -126,7 +140,7 @@ func buildFigureBody(f figures.HistoricalFigure, settlementName string, events [
 		body += "- **Spouse:** "
 		var links []string
 		for _, s := range f.Relationships.Spouse {
-			links = append(links, "[["+s+"]]")
+			links = append(links, "[["+resolveName(s, idToName, nt)+"]]")
 		}
 		body += join(links, ", ") + "\n"
 	}
@@ -134,7 +148,7 @@ func buildFigureBody(f figures.HistoricalFigure, settlementName string, events [
 		body += "- **Children:** "
 		var links []string
 		for _, c := range f.Relationships.Children {
-			links = append(links, "[["+c+"]]")
+			links = append(links, "[["+resolveName(c, idToName, nt)+"]]")
 		}
 		body += join(links, ", ") + "\n"
 	}

@@ -235,7 +235,7 @@ func TestExportTimelineCreatesFiles(t *testing.T) {
 	}
 
 	tmpDir := t.TempDir()
-	err := ExportTimeline(events, tmpDir)
+	err := ExportTimeline(nil, events, tmpDir)
 	if err != nil {
 		t.Fatalf("ExportTimeline error: %v", err)
 	}
@@ -481,7 +481,7 @@ func TestExportFiguresNoCharactersDirWhenEmpty(t *testing.T) {
 
 func TestExportTimelineEmptyEvents(t *testing.T) {
 	tmpDir := t.TempDir()
-	if err := ExportTimeline(nil, tmpDir); err != nil {
+	if err := ExportTimeline(nil, nil, tmpDir); err != nil {
 		t.Fatalf("expected nil error for nil events, got: %v", err)
 	}
 
@@ -489,7 +489,7 @@ func TestExportTimelineEmptyEvents(t *testing.T) {
 		t.Fatal("expected chronicles directory NOT to be created for empty events")
 	}
 
-	if err := ExportTimeline([]simulation.Event{}, tmpDir); err != nil {
+	if err := ExportTimeline(nil, []simulation.Event{}, tmpDir); err != nil {
 		t.Fatalf("expected nil error for empty events, got: %v", err)
 	}
 
@@ -518,7 +518,7 @@ func TestJSONRoundTripReExportCycle(t *testing.T) {
 	if err := Export(original, dir1); err != nil {
 		t.Fatalf("Export original: %v", err)
 	}
-	if err := ExportTimeline(events, dir1); err != nil {
+	if err := ExportTimeline(original, events, dir1); err != nil {
 		t.Fatalf("ExportTimeline original: %v", err)
 	}
 	if err := ExportFigures(original, events, dir1); err != nil {
@@ -539,7 +539,7 @@ func TestJSONRoundTripReExportCycle(t *testing.T) {
 	if err := Export(roundtripped, dir2); err != nil {
 		t.Fatalf("Export roundtripped: %v", err)
 	}
-	if err := ExportTimeline(events, dir2); err != nil {
+	if err := ExportTimeline(roundtripped, events, dir2); err != nil {
 		t.Fatalf("ExportTimeline roundtripped: %v", err)
 	}
 	if err := ExportFigures(roundtripped, events, dir2); err != nil {
@@ -571,6 +571,119 @@ func TestJSONRoundTripReExportCycle(t *testing.T) {
 				t.Errorf("file %s/%s differs after JSON round-trip", sub, entries1[i].Name())
 			}
 		}
+	}
+}
+
+func TestExportFiguresRelationshipsUseDisplayNames(t *testing.T) {
+	// Two founders who are spouses of each other.
+	founderA := figures.HistoricalFigure{
+		ID:        "Eastfield-2-0",
+		Name:      "Aelar Blackwood",
+		BirthYear: 100,
+		Role:      "Leader",
+		Faction:   "Ironbound",
+		Relationships: figures.Relationships{
+			Spouse: []string{"Eastfield-2-1"},
+		},
+	}
+	founderB := figures.HistoricalFigure{
+		ID:        "Eastfield-2-1",
+		Name:      "Baelor Dawnwhisper",
+		BirthYear: 102,
+		Role:      "Healer",
+		Faction:   "Ironbound",
+		Relationships: figures.Relationships{
+			Spouse: []string{"Eastfield-2-0"},
+		},
+	}
+	// Newborn whose parents are the two founders.
+	newborn := figures.HistoricalFigure{
+		ID:        "born-2",
+		Name:      "Caius Stormborn",
+		BirthYear: 130,
+		Role:      "Child",
+		Faction:   "Ironbound",
+		Relationships: figures.Relationships{
+			Parents: []string{"Eastfield-2-0", "Eastfield-2-1"},
+		},
+	}
+	// Add children back-references to founders.
+	founderA.Relationships.Children = []string{"born-2"}
+	founderB.Relationships.Children = []string{"born-2"}
+
+	state := &world.State{
+		Width:  10,
+		Height: 10,
+		Settlements: []world.Settlement{
+			{
+				Name:    "Eastfield-2",
+				Figures: []figures.HistoricalFigure{founderA, founderB, newborn},
+			},
+		},
+	}
+
+	tmpDir := t.TempDir()
+	targetDir := filepath.Join(tmpDir, "vault")
+
+	if err := ExportFigures(state, nil, targetDir); err != nil {
+		t.Fatalf("ExportFigures failed: %v", err)
+	}
+
+	newbornBytes, err := os.ReadFile(filepath.Join(targetDir, "characters", "Caius Stormborn.md"))
+	if err != nil {
+		t.Fatalf("read newborn file: %v", err)
+	}
+	newbornContent := string(newbornBytes)
+
+	if !strings.Contains(newbornContent, "[[Aelar Blackwood]]") {
+		t.Errorf("newborn file should contain wiki-link to parent Aelar Blackwood, got:\n%s", newbornContent)
+	}
+	if !strings.Contains(newbornContent, "[[Baelor Dawnwhisper]]") {
+		t.Errorf("newborn file should contain wiki-link to parent Baelor Dawnwhisper, got:\n%s", newbornContent)
+	}
+	if strings.Contains(newbornContent, "[[Eastfield-2-0]]") {
+		t.Errorf("newborn file contains placeholder ID [[Eastfield-2-0]] instead of display name")
+	}
+	if strings.Contains(newbornContent, "[[Eastfield-2-1]]") {
+		t.Errorf("newborn file contains placeholder ID [[Eastfield-2-1]] instead of display name")
+	}
+
+	parentABytes, err := os.ReadFile(filepath.Join(targetDir, "characters", "Aelar Blackwood.md"))
+	if err != nil {
+		t.Fatalf("read founder A file: %v", err)
+	}
+	parentAContent := string(parentABytes)
+
+	if !strings.Contains(parentAContent, "[[Baelor Dawnwhisper]]") {
+		t.Errorf("founder A file should contain wiki-link to spouse Baelor Dawnwhisper")
+	}
+	if strings.Contains(parentAContent, "[[Eastfield-2-1]]") {
+		t.Errorf("founder A file contains placeholder ID [[Eastfield-2-1]] instead of display name")
+	}
+	if !strings.Contains(parentAContent, "[[Caius Stormborn]]") {
+		t.Errorf("founder A file should contain wiki-link to child Caius Stormborn")
+	}
+	if strings.Contains(parentAContent, "[[born-2]]") {
+		t.Errorf("founder A file contains placeholder ID [[born-2]] instead of display name")
+	}
+
+	parentBBytes, err := os.ReadFile(filepath.Join(targetDir, "characters", "Baelor Dawnwhisper.md"))
+	if err != nil {
+		t.Fatalf("read founder B file: %v", err)
+	}
+	parentBContent := string(parentBBytes)
+
+	if !strings.Contains(parentBContent, "[[Aelar Blackwood]]") {
+		t.Errorf("founder B file should contain wiki-link to spouse Aelar Blackwood")
+	}
+	if strings.Contains(parentBContent, "[[Eastfield-2-0]]") {
+		t.Errorf("founder B file contains placeholder ID [[Eastfield-2-0]] instead of display name")
+	}
+	if !strings.Contains(parentBContent, "[[Caius Stormborn]]") {
+		t.Errorf("founder B file should contain wiki-link to child Caius Stormborn")
+	}
+	if strings.Contains(parentBContent, "[[born-2]]") {
+		t.Errorf("founder B file contains placeholder ID [[born-2]] instead of display name")
 	}
 }
 
@@ -606,7 +719,7 @@ func TestExportFiguresIntegration(t *testing.T) {
 	if err := Export(state, tmpDir); err != nil {
 		t.Fatalf("Export failed: %v", err)
 	}
-	if err := ExportTimeline(events, tmpDir); err != nil {
+	if err := ExportTimeline(state, events, tmpDir); err != nil {
 		t.Fatalf("ExportTimeline failed: %v", err)
 	}
 	if err := ExportFigures(state, events, tmpDir); err != nil {
@@ -700,7 +813,52 @@ func TestExportFiguresIntegration(t *testing.T) {
 	}
 	chronicle := string(chronicleBytes)
 
-	if !strings.Contains(chronicle, "*(by [[riverwatch-0]])*") {
+	if !strings.Contains(chronicle, "*(by [[Aldric Bronzefist]])*") {
 		t.Errorf("chronicle missing figure reference for event with FigureID")
+	}
+}
+
+func TestExportTimelineUsesFigureNames(t *testing.T) {
+	state := &world.State{
+		Width:  10,
+		Height: 10,
+		Settlements: []world.Settlement{
+			{
+				Name: "Greenvale",
+				Figures: []figures.HistoricalFigure{
+					{ID: "greenvale-0", Name: "Garrick Thorne", BirthYear: 100, Role: "Leader", Faction: "Ironbound"},
+					{ID: "greenvale-1", Name: "Helia Fairwind", BirthYear: 102, Role: "Healer", Faction: "Ironbound"},
+				},
+			},
+		},
+	}
+
+	events := []simulation.Event{
+		{Year: 105, Category: "politics", Description: "Garrick declares a feast", FigureID: "greenvale-0"},
+		{Year: 110, Category: "discovery", Description: "Helia maps the valley", FigureID: "greenvale-1"},
+	}
+
+	tmpDir := t.TempDir()
+	if err := ExportTimeline(state, events, tmpDir); err != nil {
+		t.Fatalf("ExportTimeline failed: %v", err)
+	}
+
+	chronicleBytes, err := os.ReadFile(filepath.Join(tmpDir, "chronicles", "Chronicle.md"))
+	if err != nil {
+		t.Fatalf("read chronicle: %v", err)
+	}
+	chronicle := string(chronicleBytes)
+
+	if !strings.Contains(chronicle, "*(by [[Garrick Thorne]])*") {
+		t.Errorf("chronicle should use figure name [[Garrick Thorne]], got:\n%s", chronicle)
+	}
+	if !strings.Contains(chronicle, "*(by [[Helia Fairwind]])*") {
+		t.Errorf("chronicle should use figure name [[Helia Fairwind]], got:\n%s", chronicle)
+	}
+	if strings.Contains(chronicle, "[[greenvale-0]]") {
+		t.Errorf("chronicle contains placeholder ID [[greenvale-0]]")
+	}
+	if strings.Contains(chronicle, "[[greenvale-1]]") {
+		t.Errorf("chronicle contains placeholder ID [[greenvale-1]]")
 	}
 }

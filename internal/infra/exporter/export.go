@@ -259,9 +259,18 @@ func edgesForNode(nodeID int, graph *pointcrawl.Graph) []pointcrawl.Edge {
 }
 
 // ExportTimeline generates a chronicle markdown file from timeline events.
-func ExportTimeline(events []simulation.Event, targetDir string) error {
+func ExportTimeline(state *world.State, events []simulation.Event, targetDir string) error {
 	if len(events) == 0 {
 		return nil
+	}
+
+	idToName := make(map[string]string)
+	if state != nil {
+		for _, settlement := range state.Settlements {
+			for _, figure := range settlement.Figures {
+				idToName[figure.ID] = figure.Name
+			}
+		}
 	}
 
 	chroniclesDir := filepath.Join(targetDir, "chronicles")
@@ -290,7 +299,11 @@ func ExportTimeline(events []simulation.Event, targetDir string) error {
 		for _, event := range grouped[decade] {
 			fmt.Fprintf(&b, "### Year %d\n", event.Year)
 			if event.FigureID != "" {
-				fmt.Fprintf(&b, "- [%s] %s *(by [[%s]])*\n\n", event.Category, event.Description, event.FigureID)
+				figureName := event.FigureID
+				if name, ok := idToName[event.FigureID]; ok {
+					figureName = name
+				}
+				fmt.Fprintf(&b, "- [%s] %s *(by [[%s]])*\n\n", event.Category, event.Description, figureName)
 			} else {
 				fmt.Fprintf(&b, "- [%s] %s\n\n", event.Category, event.Description)
 			}
