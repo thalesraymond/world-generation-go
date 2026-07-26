@@ -169,18 +169,15 @@ func newSimulateCommand() *cobra.Command {
 	cmd.Flags().String("events", "normal", "Event density preset")
 	cmd.Flags().Int("width", 64, "World map width")
 	cmd.Flags().Int("height", 64, "World map height")
-	cmd.Flags().String("output", "./output", "Output directory")
 
 	viper.SetDefault("years", 100)
 	viper.SetDefault("events", "normal")
 	viper.SetDefault("width", 64)
 	viper.SetDefault("height", 64)
-	viper.SetDefault("output", "./output")
 	bindCommandFlag(cmd, "years")
 	bindCommandFlag(cmd, "events")
 	bindCommandFlag(cmd, "width")
 	bindCommandFlag(cmd, "height")
-	bindCommandFlag(cmd, "output")
 
 	return cmd
 }

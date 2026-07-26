@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
@@ -44,7 +45,7 @@ func NewRootCommand() *cobra.Command {
 	mustBindFlag(rootCmd, "output")
 
 	cobra.OnInitialize(func() {
-		if err := initConfig(); err != nil {
+		if err := initConfig(rootCmd); err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err)
 		}
 	})
@@ -56,7 +57,7 @@ func NewRootCommand() *cobra.Command {
 	return rootCmd
 }
 
-func initConfig() error {
+func initConfig(cmd *cobra.Command) error {
 	configPath := viper.GetString("config")
 	if configPath != "" {
 		viper.SetConfigFile(configPath)
@@ -77,7 +78,26 @@ func initConfig() error {
 		return fmt.Errorf("read config: %w", err)
 	}
 
+	// viper.ReadInConfig uses viper.Set() internally, placing values in the
+	// overrides map (highest priority). Re-apply explicit flag values so they
+	// take precedence over config file values.
+	walkFlags(cmd, func(f *pflag.Flag) {
+		if f.Changed {
+			viper.Set(f.Name, f.Value.String())
+		}
+	})
+
 	return nil
+}
+
+// walkFlags visits every flag in the command tree (persistent + local) for
+// the given command and all its subcommands.
+func walkFlags(cmd *cobra.Command, fn func(*pflag.Flag)) {
+	cmd.PersistentFlags().VisitAll(fn)
+	cmd.LocalFlags().VisitAll(fn)
+	for _, sub := range cmd.Commands() {
+		walkFlags(sub, fn)
+	}
 }
 
 func mustBindFlag(cmd *cobra.Command, name string) {

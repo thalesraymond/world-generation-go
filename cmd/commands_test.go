@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -52,6 +53,22 @@ func TestExportCommandAcknowledgesDestination(t *testing.T) {
 
 	if !strings.Contains(output, "Export complete:") {
 		t.Fatalf("export output = %q, want export complete message", output)
+	}
+}
+
+func TestConfigFlagDoesNotOverrideExplicitFlag(t *testing.T) {
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "worldgen.yaml")
+	configContent := "output: /should/not/use/this\n"
+	if err := os.WriteFile(configPath, []byte(configContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	viper.Set("output", tmpDir)
+	executeCommand(t, "simulate", "--config", configPath, "--output", tmpDir, "--years", "10", "--width", "16", "--height", "16")
+
+	if _, err := os.Stat(filepath.Join(tmpDir, "world_state.json")); err != nil {
+		t.Fatalf("world_state.json not found in flag-specified output dir (config tried to redirect to /should/not/use/this): %v", err)
 	}
 }
 
