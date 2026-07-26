@@ -1,5 +1,7 @@
 package terrain
 
+import randv2 "math/rand/v2"
+
 // GeneratorConfig defines the inputs required to construct a terrain map.
 type GeneratorConfig struct {
 	Width            int
@@ -8,23 +10,23 @@ type GeneratorConfig struct {
 	ElevationCooling float64
 	ElevationNoise   NoiseConfig
 	HumidityNoise    NoiseConfig
+	TerrainRNG       *randv2.Rand
+	ClimateRNG       *randv2.Rand
 }
 
 // DefaultGeneratorConfig provides a deterministic baseline configuration.
-func DefaultGeneratorConfig(seed int64, width, height int) GeneratorConfig {
+func DefaultGeneratorConfig(width, height int) GeneratorConfig {
 	return GeneratorConfig{
 		Width:            width,
 		Height:           height,
 		WaterThreshold:   DefaultWaterThreshold,
 		ElevationCooling: DefaultElevationCooling,
 		ElevationNoise: NoiseConfig{
-			Seed:        seed,
 			Octaves:     4,
 			Persistence: 2,
 			Scale:       48,
 		},
 		HumidityNoise: NoiseConfig{
-			Seed:        seed + 1,
 			Octaves:     4,
 			Persistence: 2,
 			Scale:       32,
@@ -93,8 +95,17 @@ func GenerateMap(config GeneratorConfig) Map {
 		config.ElevationCooling = DefaultElevationCooling
 	}
 
-	elevationGenerator := NewNoiseGenerator(config.ElevationNoise)
-	humidityGenerator := NewNoiseGenerator(config.HumidityNoise)
+	noiseConfig := config.ElevationNoise
+	if config.TerrainRNG != nil {
+		noiseConfig.Seed = config.TerrainRNG.Int64()
+	}
+	elevationGenerator := NewNoiseGenerator(noiseConfig)
+
+	humidityConfig := config.HumidityNoise
+	if config.ClimateRNG != nil {
+		humidityConfig.Seed = config.ClimateRNG.Int64()
+	}
+	humidityGenerator := NewNoiseGenerator(humidityConfig)
 
 	tiles := make([]Tile, 0, config.Width*config.Height)
 	for y := 0; y < config.Height; y++ {

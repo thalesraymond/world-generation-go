@@ -10,20 +10,6 @@ import (
 	ucsim "github.com/thalesraymond/world-generation-go/internal/usecase/simulation"
 )
 
-type dummyEntity struct {
-	name string
-}
-
-func (d dummyEntity) Tick(year int, eventChan chan<- domsim.Event) {
-	if year == 1 || year%10 == 0 || year == 100 {
-		eventChan <- domsim.Event{
-			Year:        year,
-			Category:    "Chronicle",
-			Description: fmt.Sprintf("%s notes events in the realm during year %d.", d.name, year),
-		}
-	}
-}
-
 func newSimulateCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "simulate",
@@ -34,12 +20,28 @@ func newSimulateCommand() *cobra.Command {
 				return fmt.Errorf("load config: %w", err)
 			}
 
-			cmd.Printf("Starting simulation for %d years with event density %q.\n", cfg.Years, cfg.Events)
+			width := viper.GetInt("width")
+			height := viper.GetInt("height")
 
-			entities := []domsim.Entity{
-				dummyEntity{name: "Realm of Eldoria"},
-				dummyEntity{name: "The Iron Syndicate"},
+			cmd.Printf("Generating world: %dx%d with seed %d ...\n", width, height, cfg.Seed)
+
+			worldConfig := ucsim.WorldGenConfig{
+				Seed:   cfg.Seed,
+				Width:  width,
+				Height: height,
+				Years:  cfg.Years,
 			}
+
+			worldState, err := ucsim.GenerateWorld(worldConfig)
+			if err != nil {
+				return fmt.Errorf("generate world: %w", err)
+			}
+
+			cmd.Printf("World generated: %d x %d, %d settlements.\n", worldState.Width, worldState.Height, len(worldState.Settlements))
+
+			cmd.Printf("Starting timeline simulation for %d years with event density %q.\n", cfg.Years, cfg.Events)
+
+			entities := []domsim.Entity{}
 
 			if err := ucsim.RunSimulation(1, cfg.Years, entities, cmd.OutOrStdout()); err != nil {
 				return fmt.Errorf("run simulation: %w", err)
@@ -52,11 +54,17 @@ func newSimulateCommand() *cobra.Command {
 
 	cmd.Flags().Int("years", 100, "Number of years to simulate")
 	cmd.Flags().String("events", "normal", "Event density preset")
+	cmd.Flags().Int("width", 64, "World map width")
+	cmd.Flags().Int("height", 64, "World map height")
 
 	viper.SetDefault("years", 100)
 	viper.SetDefault("events", "normal")
+	viper.SetDefault("width", 64)
+	viper.SetDefault("height", 64)
 	bindCommandFlag(cmd, "years")
 	bindCommandFlag(cmd, "events")
+	bindCommandFlag(cmd, "width")
+	bindCommandFlag(cmd, "height")
 
 	return cmd
 }

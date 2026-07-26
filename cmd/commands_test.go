@@ -17,7 +17,7 @@ func TestInitCommandAcknowledgesInitialization(t *testing.T) {
 func TestSimulateCommandRunsSimulation(t *testing.T) {
 	output := executeCommand(t, "simulate", "--years", "10", "--events", "normal")
 
-	if !strings.Contains(output, "Starting simulation") || !strings.Contains(output, "Simulation completed successfully") {
+	if !strings.Contains(output, "World generated") || !strings.Contains(output, "Simulation completed successfully") {
 		t.Fatalf("simulate output = %q, want simulation execution output", output)
 	}
 }

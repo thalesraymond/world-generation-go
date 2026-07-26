@@ -2,6 +2,7 @@ package demographics
 
 import (
 	"fmt"
+	randv2 "math/rand/v2"
 
 	"github.com/thalesraymond/world-generation-go/internal/domain/spatial"
 	"github.com/thalesraymond/world-generation-go/internal/domain/terrain"
@@ -14,6 +15,7 @@ type SimulatorConfig struct {
 	DiffusionRate float64
 	MinPopulation float64
 	FactionNames  []string
+	RNG           *randv2.Rand
 }
 
 // DefaultConfig returns a deterministic baseline simulation config.

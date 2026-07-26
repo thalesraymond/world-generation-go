@@ -3,6 +3,8 @@ package terrain
 import (
 	"reflect"
 	"testing"
+
+	randv2 "math/rand/v2"
 )
 
 func TestBaseTemperatureForLatitudePeaksAtEquator(t *testing.T) {
@@ -71,9 +73,15 @@ func TestDetermineBiomeMappings(t *testing.T) {
 }
 
 func TestGenerateMapIsDeterministicAndPopulated(t *testing.T) {
-	config := DefaultGeneratorConfig(42, 12, 8)
+	config := DefaultGeneratorConfig(12, 8)
+	config.TerrainRNG = randv2.New(randv2.NewPCG(42, 42))
+	config.ClimateRNG = randv2.New(randv2.NewPCG(99, 99))
 
 	first := GenerateMap(config)
+
+	config.TerrainRNG = randv2.New(randv2.NewPCG(42, 42))
+	config.ClimateRNG = randv2.New(randv2.NewPCG(99, 99))
+
 	second := GenerateMap(config)
 
 	if first.Width != 12 || first.Height != 8 {

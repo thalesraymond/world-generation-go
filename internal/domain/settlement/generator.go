@@ -3,6 +3,7 @@ package settlement
 import (
 	"fmt"
 	"math"
+	randv2 "math/rand/v2"
 	"sort"
 
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
@@ -14,6 +15,7 @@ type Config struct {
 	MinPopulation  float64
 	MinDistance    float64
 	MaxSettlements int
+	RNG            *randv2.Rand
 }
 
 // DefaultConfig returns baseline settlement generation rules.
