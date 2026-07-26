@@ -150,8 +150,8 @@ func newSimulateCommand() *cobra.Command {
 			}
 			narrativeRNG := engine.GetPRNG("narrative")
 
-			fmt.Fprintln(cmd.OutOrStdout())
-			fmt.Fprintln(cmd.OutOrStdout(), "--- Chronicle ---")
+			_, _ = fmt.Fprintln(cmd.OutOrStdout())
+			_, _ = fmt.Fprintln(cmd.OutOrStdout(), "--- Chronicle ---")
 			for _, event := range events {
 				text, err := narrativeEngine.Narrate(event, nil, narrativeRNG)
 				if err != nil {
