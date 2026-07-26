@@ -1,17 +1,21 @@
 package simulation
 
+import randv2 "math/rand/v2"
+
 // Simulation manages entities and advances time chronologically.
 type Simulation struct {
 	startYear int
 	endYear   int
 	entities  []Entity
+	rng       *randv2.Rand
 }
 
 // New creates a new Simulation engine for the given year range.
-func New(startYear, endYear int) *Simulation {
+func New(startYear, endYear int, rng *randv2.Rand) *Simulation {
 	return &Simulation{
 		startYear: startYear,
 		endYear:   endYear,
+		rng:       rng,
 	}
 }
 
@@ -27,7 +31,7 @@ func (s *Simulation) Run(eventChan chan<- Event) {
 
 	for year := s.startYear; year <= s.endYear; year++ {
 		for _, entity := range s.entities {
-			entity.Tick(year, eventChan)
+			entity.Tick(year, eventChan, s.rng)
 		}
 	}
 }

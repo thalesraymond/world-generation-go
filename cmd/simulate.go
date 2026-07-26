@@ -2,13 +2,30 @@ package cmd
 
 import (
 	"fmt"
+	randv2 "math/rand/v2"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	appconfig "github.com/thalesraymond/world-generation-go/config"
 	domsim "github.com/thalesraymond/world-generation-go/internal/domain/simulation"
+	"github.com/thalesraymond/world-generation-go/internal/domain/state"
+	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 	ucsim "github.com/thalesraymond/world-generation-go/internal/usecase/simulation"
 )
+
+type settlementEntity struct {
+	settlement world.Settlement
+}
+
+func (s settlementEntity) Tick(year int, eventChan chan<- domsim.Event, rng *randv2.Rand) {
+	if rng.IntN(10) < 3 {
+		eventChan <- domsim.Event{
+			Year:        year,
+			Category:    "Settlement",
+			Description: fmt.Sprintf("%s prospers", s.settlement.Name),
+		}
+	}
+}
 
 func newSimulateCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -41,9 +58,15 @@ func newSimulateCommand() *cobra.Command {
 
 			cmd.Printf("Starting timeline simulation for %d years with event density %q.\n", cfg.Years, cfg.Events)
 
-			entities := []domsim.Entity{}
+			engine := state.NewEngine(uint64(cfg.Seed))
+			timelineRNG := engine.GetPRNG("timeline")
 
-			if err := ucsim.RunSimulation(1, cfg.Years, entities, cmd.OutOrStdout()); err != nil {
+			entities := make([]domsim.Entity, 0, len(worldState.Settlements))
+			for _, settlement := range worldState.Settlements {
+				entities = append(entities, settlementEntity{settlement: settlement})
+			}
+
+			if err := ucsim.RunSimulation(1, cfg.Years, entities, cmd.OutOrStdout(), timelineRNG); err != nil {
 				return fmt.Errorf("run simulation: %w", err)
 			}
 

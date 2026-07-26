@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	randv2 "math/rand/v2"
+
 	domsim "github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 )
 
@@ -13,7 +15,7 @@ type testEntity struct {
 	name string
 }
 
-func (t testEntity) Tick(year int, eventChan chan<- domsim.Event) {
+func (t testEntity) Tick(year int, eventChan chan<- domsim.Event, rng *randv2.Rand) {
 	eventChan <- domsim.Event{
 		Year:        year,
 		Category:    "Test",
@@ -27,7 +29,7 @@ func TestRunSimulation(t *testing.T) {
 		testEntity{name: "FactionA"},
 	}
 
-	err := RunSimulation(1, 2, entities, &buf)
+	err := RunSimulation(1, 2, entities, &buf, randv2.New(randv2.NewPCG(1, 0)))
 	if err != nil {
 		t.Fatalf("RunSimulation error = %v", err)
 	}
@@ -47,7 +49,7 @@ func TestRunSimulation(t *testing.T) {
 
 func TestRunSimulationInvalidRange(t *testing.T) {
 	var buf bytes.Buffer
-	err := RunSimulation(2, 1, nil, &buf)
+	err := RunSimulation(2, 1, nil, &buf, randv2.New(randv2.NewPCG(1, 0)))
 	if err == nil {
 		t.Fatalf("expected error for startYear > endYear, got nil")
 	}

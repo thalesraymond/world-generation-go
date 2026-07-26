@@ -3,18 +3,19 @@ package simulation
 import (
 	"fmt"
 	"io"
+	randv2 "math/rand/v2"
 	"sync"
 
 	domsim "github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 )
 
 // RunSimulation runs the simulation from startYear to endYear, streaming formatted events to out.
-func RunSimulation(startYear, endYear int, entities []domsim.Entity, out io.Writer) error {
+func RunSimulation(startYear, endYear int, entities []domsim.Entity, out io.Writer, timelineRNG *randv2.Rand) error {
 	if startYear > endYear {
 		return fmt.Errorf("start year %d cannot be greater than end year %d", startYear, endYear)
 	}
 
-	sim := domsim.New(startYear, endYear)
+	sim := domsim.New(startYear, endYear, timelineRNG)
 	for _, e := range entities {
 		sim.AddEntity(e)
 	}
