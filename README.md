@@ -68,7 +68,7 @@ go run . init --name "Ashtar" --size medium
 go run . simulate --seed 42 --width 64 --height 64 --years 100 --events normal
 
 # Export generated state to an Obsidian markdown vault
-go run . export --format obsidian --output ./vault
+go run . export --format obsidian --output ./output
 ```
 
 ## Configuration
