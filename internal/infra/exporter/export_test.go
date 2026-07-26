@@ -235,7 +235,7 @@ func TestExportTimelineCreatesFiles(t *testing.T) {
 	}
 
 	tmpDir := t.TempDir()
-	err := ExportTimeline(events, tmpDir)
+	err := ExportTimeline(nil, events, tmpDir)
 	if err != nil {
 		t.Fatalf("ExportTimeline error: %v", err)
 	}
@@ -481,7 +481,7 @@ func TestExportFiguresNoCharactersDirWhenEmpty(t *testing.T) {
 
 func TestExportTimelineEmptyEvents(t *testing.T) {
 	tmpDir := t.TempDir()
-	if err := ExportTimeline(nil, tmpDir); err != nil {
+	if err := ExportTimeline(nil, nil, tmpDir); err != nil {
 		t.Fatalf("expected nil error for nil events, got: %v", err)
 	}
 
@@ -489,7 +489,7 @@ func TestExportTimelineEmptyEvents(t *testing.T) {
 		t.Fatal("expected chronicles directory NOT to be created for empty events")
 	}
 
-	if err := ExportTimeline([]simulation.Event{}, tmpDir); err != nil {
+	if err := ExportTimeline(nil, []simulation.Event{}, tmpDir); err != nil {
 		t.Fatalf("expected nil error for empty events, got: %v", err)
 	}
 
@@ -518,7 +518,7 @@ func TestJSONRoundTripReExportCycle(t *testing.T) {
 	if err := Export(original, dir1); err != nil {
 		t.Fatalf("Export original: %v", err)
 	}
-	if err := ExportTimeline(events, dir1); err != nil {
+	if err := ExportTimeline(original, events, dir1); err != nil {
 		t.Fatalf("ExportTimeline original: %v", err)
 	}
 	if err := ExportFigures(original, events, dir1); err != nil {
@@ -539,7 +539,7 @@ func TestJSONRoundTripReExportCycle(t *testing.T) {
 	if err := Export(roundtripped, dir2); err != nil {
 		t.Fatalf("Export roundtripped: %v", err)
 	}
-	if err := ExportTimeline(events, dir2); err != nil {
+	if err := ExportTimeline(roundtripped, events, dir2); err != nil {
 		t.Fatalf("ExportTimeline roundtripped: %v", err)
 	}
 	if err := ExportFigures(roundtripped, events, dir2); err != nil {
@@ -606,7 +606,7 @@ func TestExportFiguresIntegration(t *testing.T) {
 	if err := Export(state, tmpDir); err != nil {
 		t.Fatalf("Export failed: %v", err)
 	}
-	if err := ExportTimeline(events, tmpDir); err != nil {
+	if err := ExportTimeline(state, events, tmpDir); err != nil {
 		t.Fatalf("ExportTimeline failed: %v", err)
 	}
 	if err := ExportFigures(state, events, tmpDir); err != nil {
@@ -700,7 +700,122 @@ func TestExportFiguresIntegration(t *testing.T) {
 	}
 	chronicle := string(chronicleBytes)
 
-	if !strings.Contains(chronicle, "*(by [[riverwatch-0]])*") {
-		t.Errorf("chronicle missing figure reference for event with FigureID")
+	if !strings.Contains(chronicle, "*(by [[Aldric Bronzefist]])*") {
+		t.Errorf("chronicle missing figure name reference for event with FigureID")
+	}
+}
+
+func TestExportTimelineUsesFigureNames(t *testing.T) {
+	state := &world.State{
+		Width:  10,
+		Height: 10,
+		Settlements: []world.Settlement{
+			{
+				Name: "Greenvale",
+				Figures: []figures.HistoricalFigure{
+					{ID: "greenvale-0", Name: "Garrick Thorne", BirthYear: 100, Role: "Leader", Faction: "Ironbound"},
+					{ID: "greenvale-1", Name: "Helia Fairwind", BirthYear: 102, Role: "Healer", Faction: "Ironbound"},
+				},
+			},
+		},
+	}
+
+	events := []simulation.Event{
+		{Year: 105, Category: "politics", Description: "Garrick declares a feast", FigureID: "greenvale-0"},
+		{Year: 110, Category: "discovery", Description: "Helia maps the valley", FigureID: "greenvale-1"},
+	}
+
+	tmpDir := t.TempDir()
+	if err := ExportTimeline(state, events, tmpDir); err != nil {
+		t.Fatalf("ExportTimeline failed: %v", err)
+	}
+
+	chronicleBytes, err := os.ReadFile(filepath.Join(tmpDir, "chronicles", "Chronicle.md"))
+	if err != nil {
+		t.Fatalf("read chronicle: %v", err)
+	}
+	chronicle := string(chronicleBytes)
+
+	if !strings.Contains(chronicle, "*(by [[Garrick Thorne]])*") {
+		t.Errorf("chronicle should use figure name [[Garrick Thorne]], got:\n%s", chronicle)
+	}
+	if !strings.Contains(chronicle, "*(by [[Helia Fairwind]])*") {
+		t.Errorf("chronicle should use figure name [[Helia Fairwind]], got:\n%s", chronicle)
+	}
+	if strings.Contains(chronicle, "[[greenvale-0]]") {
+		t.Errorf("chronicle contains placeholder ID [[greenvale-0]]")
+	}
+	if strings.Contains(chronicle, "[[greenvale-1]]") {
+		t.Errorf("chronicle contains placeholder ID [[greenvale-1]]")
+	}
+}
+
+func TestExportTimelineGroupsEventsByYear(t *testing.T) {
+	events := []simulation.Event{
+		{Year: 5, Category: "Birth", Description: "Jorah Pryor is born in Deephold", FigureID: "qo"},
+		{Year: 5, Category: "Discovery", Description: "Deephold uncovers ancient secrets nearby"},
+		{Year: 12, Category: "Founding", Description: "Riverwatch is established"},
+		{Year: 12, Category: "War", Description: "Battle of Riverwatch"},
+		{Year: 15, Category: "Famine", Description: "Great famine strikes the land"},
+	}
+
+	state := &world.State{
+		Width:  100,
+		Height: 100,
+		Settlements: []world.Settlement{
+			{
+				Name: "Deephold",
+				Figures: []figures.HistoricalFigure{
+					{ID: "qo", Name: "Quillon Oakenshield"},
+				},
+			},
+		},
+	}
+
+	tmpDir := t.TempDir()
+	err := ExportTimeline(state, events, tmpDir)
+	if err != nil {
+		t.Fatalf("ExportTimeline error: %v", err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(tmpDir, "chronicles", "Chronicle.md"))
+	if err != nil {
+		t.Fatalf("read Chronicle.md: %v", err)
+	}
+	body := string(content)
+
+	// Year 5 should appear exactly once as a heading
+	count := strings.Count(body, "### Year 5\n")
+	if count != 1 {
+		t.Errorf("expected exactly 1 '### Year 5' heading, got %d", count)
+	}
+
+	// Year 12 should appear exactly once as a heading
+	count = strings.Count(body, "### Year 12\n")
+	if count != 1 {
+		t.Errorf("expected exactly 1 '### Year 12' heading, got %d", count)
+	}
+
+	// Verify events are listed under Year 5
+	idx5 := strings.Index(body, "### Year 5\n")
+	idx12 := strings.Index(body, "### Year 12\n")
+	if idx5 < 0 || idx12 < 0 {
+		t.Fatalf("missing year headings: idx5=%d, idx12=%d", idx5, idx12)
+	}
+	if idx5 > idx12 {
+		t.Error("Year 5 heading should appear before Year 12 heading")
+	}
+
+	year5Block := body[idx5:idx12]
+	if !strings.Contains(year5Block, "- [Birth] Jorah Pryor is born in Deephold") {
+		t.Error("Year 5 block missing Birth event")
+	}
+	if !strings.Contains(year5Block, "- [Discovery] Deephold uncovers ancient secrets nearby") {
+		t.Error("Year 5 block missing Discovery event")
+	}
+
+	// Verify wiki-link to figure
+	if !strings.Contains(year5Block, "(by [[Quillon Oakenshield]])") {
+		t.Error("Year 5 Birth event missing figure wiki-link")
 	}
 }

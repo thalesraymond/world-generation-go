@@ -287,8 +287,13 @@ func ExportTimeline(events []simulation.Event, targetDir string) error {
 
 	for _, decade := range decades {
 		fmt.Fprintf(&b, "## Decade %ds\n\n", decade)
-		for _, event := range grouped[decade] {
-			fmt.Fprintf(&b, "### Year %d\n", event.Year)
+		decadeEvents := grouped[decade]
+		currentYear := -1
+		for _, event := range decadeEvents {
+			if event.Year != currentYear {
+				currentYear = event.Year
+				fmt.Fprintf(&b, "### Year %d\n", currentYear)
+			}
 			if event.FigureID != "" {
 				fmt.Fprintf(&b, "- [%s] %s *(by [[%s]])*\n\n", event.Category, event.Description, event.FigureID)
 			} else {
