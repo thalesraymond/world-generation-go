@@ -162,3 +162,17 @@ When acting as a coding agent:
 - Preserve determinism and architecture constraints above convenience.
 - Add or update tests with every behavior change.
 - Call out trade-offs and residual risks clearly in final summaries.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical triage roles use their default label names. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout (repo root). See `docs/agents/domain.md`.
