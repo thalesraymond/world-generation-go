@@ -58,6 +58,8 @@ func Export(state *world.State, targetDir string) error {
 		content += fmt.Sprintf("**Population:** %.0f\n", s.Population)
 		content += fmt.Sprintf("**Type:** %s\n\n", s.Type)
 
+		content += agentStateSection(s, tracker)
+
 		if len(s.Figures) > 0 {
 			content += "## Characters\n\n"
 			var leaders, explorers, others []figures.HistoricalFigure
@@ -256,6 +258,141 @@ func edgesForNode(nodeID int, graph *pointcrawl.Graph) []pointcrawl.Edge {
 		return edges[i].To < edges[j].To
 	})
 	return edges
+}
+
+// Military strength tiers per the Epic 1 design.
+const (
+	militaryTierModerate = 100.0
+	militaryTierStrong   = 300.0
+	militaryTierMighty   = 600.0
+)
+
+// MilitaryTier maps a military strength value to its display tier:
+// Weak (<100), Moderate (100–299), Strong (300–599), Mighty (600+).
+func MilitaryTier(strength float64) string {
+	switch {
+	case strength >= militaryTierMighty:
+		return "Mighty"
+	case strength >= militaryTierStrong:
+		return "Strong"
+	case strength >= militaryTierModerate:
+		return "Moderate"
+	default:
+		return "Weak"
+	}
+}
+
+// Wealth tiers per the Epic 1 design.
+const (
+	wealthTierComfortable = 200.0
+	wealthTierProsperous  = 500.0
+	wealthTierRich        = 1000.0
+)
+
+// WealthTier maps a wealth value to its display tier:
+// Poor (<200), Comfortable (200–499), Prosperous (500–999), Rich (1000+).
+func WealthTier(wealth float64) string {
+	switch {
+	case wealth >= wealthTierRich:
+		return "Rich"
+	case wealth >= wealthTierProsperous:
+		return "Prosperous"
+	case wealth >= wealthTierComfortable:
+		return "Comfortable"
+	default:
+		return "Poor"
+	}
+}
+
+// relationEntry couples a settlement name with its relation value for
+// deterministic sorting.
+type relationEntry struct {
+	name  string
+	value float64
+}
+
+// sortRelationsDesc returns relation entries sorted by value descending
+// (ties broken by name) and sortedRelationsAsc by value ascending.
+func sortedRelations(relations map[string]float64, ascending bool) []relationEntry {
+	entries := make([]relationEntry, 0, len(relations))
+	for name, value := range relations {
+		entries = append(entries, relationEntry{name: name, value: value})
+	}
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].value == entries[j].value {
+			return entries[i].name < entries[j].name
+		}
+		if ascending {
+			return entries[i].value < entries[j].value
+		}
+		return entries[i].value > entries[j].value
+	})
+	return entries
+}
+
+// agentStateSection renders the Military Strength, Wealth, Relations, and
+// Goals sections for a settlement export. Sections are only included when
+// the settlement carries agent state.
+func agentStateSection(s world.Settlement, tracker *nameTracker) string {
+	var b strings.Builder
+
+	hasAgentState := s.MilitaryStrength != 0 || s.Wealth != 0 || len(s.Relations) > 0 || len(s.Goals) > 0
+	if !hasAgentState {
+		return ""
+	}
+
+	fmt.Fprintf(&b, "## Military Strength\n\n%.0f (%s)\n\n", s.MilitaryStrength, MilitaryTier(s.MilitaryStrength))
+	fmt.Fprintf(&b, "## Wealth\n\n%.0f (%s)\n\n", s.Wealth, WealthTier(s.Wealth))
+
+	if len(s.Relations) > 0 {
+		b.WriteString("## Relations\n\n")
+
+		allies := sortedRelations(s.Relations, false)
+		b.WriteString("### Allies\n\n")
+		wroteAlly := false
+		count := 0
+		for _, entry := range allies {
+			if entry.value <= 0 || count >= 5 {
+				continue
+			}
+			fmt.Fprintf(&b, "- [[%s]] (%+.2f)\n", tracker.sanitize(entry.name), entry.value)
+			wroteAlly = true
+			count++
+		}
+		if !wroteAlly {
+			b.WriteString("- None\n")
+		}
+		b.WriteString("\n")
+
+		rivals := sortedRelations(s.Relations, true)
+		b.WriteString("### Rivals\n\n")
+		wroteRival := false
+		count = 0
+		for _, entry := range rivals {
+			if entry.value >= 0 || count >= 5 {
+				continue
+			}
+			fmt.Fprintf(&b, "- [[%s]] (%+.2f)\n", tracker.sanitize(entry.name), entry.value)
+			wroteRival = true
+			count++
+		}
+		if !wroteRival {
+			b.WriteString("- None\n")
+		}
+		b.WriteString("\n")
+	}
+
+	if len(s.Goals) > 0 {
+		b.WriteString("## Goals\n\n")
+		goals := append([]string(nil), s.Goals...)
+		sort.Strings(goals)
+		for _, goal := range goals {
+			fmt.Fprintf(&b, "- %s\n", goal)
+		}
+		b.WriteString("\n")
+	}
+
+	return b.String()
 }
 
 // ExportTimeline generates a chronicle markdown file from timeline events.

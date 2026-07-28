@@ -6,7 +6,16 @@ import (
 	randv2 "math/rand/v2"
 	"sort"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/agent"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
+)
+
+// Agent state initialization defaults for newly generated settlements.
+const (
+	// MilitaryPopulationRatio derives initial military strength from population.
+	MilitaryPopulationRatio = 0.1
+	// InitialWealth is the default starting wealth for a new settlement.
+	InitialWealth = 100.0
 )
 
 type Config struct {
@@ -63,12 +72,15 @@ func Generate(state *world.State, config Config) error {
 		usedNames[name] = true
 
 		settlements = append(settlements, world.Settlement{
-			Name:       name,
-			Type:       Classify(population),
-			X:          c.x,
-			Y:          c.y,
-			Faction:    faction,
-			Population: population,
+			Name:             name,
+			Type:             Classify(population),
+			X:                c.x,
+			Y:                c.y,
+			Faction:          faction,
+			Population:       population,
+			MilitaryStrength: population * MilitaryPopulationRatio,
+			Wealth:           InitialWealth,
+			Goals:            agent.RandomGoals(config.RNG),
 		})
 	}
 
@@ -77,6 +89,12 @@ func Generate(state *world.State, config Config) error {
 		mergeDistance = config.MinDistance
 	}
 	settlements = ResolveProximityConflicts(settlements, mergeDistance)
+
+	// Relations are initialized after the full settlement list is known so
+	// every settlement sees every other settlement, including merged ones.
+	for i := range settlements {
+		settlements[i].Relations = world.InitRelations(settlements[i], settlements)
+	}
 
 	state.Settlements = settlements
 	return nil

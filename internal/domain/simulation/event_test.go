@@ -109,3 +109,89 @@ func TestEventBackwardCompat(t *testing.T) {
 		t.Errorf("unmarshaled event = %+v, want %+v", got, want)
 	}
 }
+
+func TestFormatEventWithTargetSettlement(t *testing.T) {
+	e := Event{
+		Year:             100,
+		Category:         "Raid",
+		Description:      "Alpha raided Beta",
+		SettlementName:   "Alpha",
+		TargetSettlement: "Beta",
+	}
+
+	got := FormatEvent(e)
+	want := "[100] (Raid) Alpha → Beta: Alpha raided Beta"
+
+	if got != want {
+		t.Errorf("FormatEvent() = %q, want %q", got, want)
+	}
+}
+
+func TestFormatEventWithoutTargetSettlementBackwardCompat(t *testing.T) {
+	e := Event{
+		Year:        100,
+		Category:    "Economy",
+		Description: "Alpha prospers",
+	}
+
+	got := FormatEvent(e)
+	want := "[100] (Economy) Alpha prospers"
+
+	if got != want {
+		t.Errorf("FormatEvent() = %q, want %q", got, want)
+	}
+}
+
+func TestEventJSONRoundTripWithTargetSettlement(t *testing.T) {
+	e := Event{
+		Year:             105,
+		Category:         "Conquest",
+		Description:      "Alpha conquered Beta",
+		SettlementName:   "Alpha",
+		TargetSettlement: "Beta",
+	}
+
+	data, err := json.Marshal(e)
+	if err != nil {
+		t.Fatalf("json.Marshal() error = %v", err)
+	}
+
+	if !strings.Contains(string(data), "targetSettlement") {
+		t.Errorf("json.Marshal() output %q missing targetSettlement", string(data))
+	}
+
+	var got Event
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("json.Unmarshal() error = %v", err)
+	}
+
+	if !reflect.DeepEqual(got, e) {
+		t.Errorf("round-trip mismatch = %+v, want %+v", got, e)
+	}
+}
+
+func TestEventJSONRoundTripWithoutTargetSettlement(t *testing.T) {
+	e := Event{
+		Year:        110,
+		Category:    "Economy",
+		Description: "Alpha prospers",
+	}
+
+	data, err := json.Marshal(e)
+	if err != nil {
+		t.Fatalf("json.Marshal() error = %v", err)
+	}
+
+	if strings.Contains(string(data), "targetSettlement") {
+		t.Errorf("json.Marshal() output %q unexpectedly contains targetSettlement", string(data))
+	}
+
+	var got Event
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("json.Unmarshal() error = %v", err)
+	}
+
+	if !reflect.DeepEqual(got, e) {
+		t.Errorf("round-trip mismatch = %+v, want %+v", got, e)
+	}
+}
