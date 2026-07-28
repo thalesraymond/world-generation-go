@@ -193,20 +193,9 @@ func newSimulateCommand() *cobra.Command {
 
 			cmd.Printf("World generated: %d x %d, %d settlements.\n", worldState.Width, worldState.Height, len(worldState.Settlements))
 
-			stateJSON, err := json.Marshal(worldState)
-			if err != nil {
-				return fmt.Errorf("marshal world state: %w", err)
-			}
-
 			if err := os.MkdirAll(outputDir, 0755); err != nil {
 				return fmt.Errorf("create output directory: %w", err)
 			}
-
-			statePath := filepath.Join(outputDir, "world_state.json")
-			if err := os.WriteFile(statePath, stateJSON, 0644); err != nil {
-				return fmt.Errorf("write world state: %w", err)
-			}
-			cmd.Printf("World state saved to %s\n", statePath)
 
 			cmd.Printf("Starting timeline simulation for %d years with event density %q.\n", cfg.Years, cfg.Events)
 
@@ -268,6 +257,17 @@ func newSimulateCommand() *cobra.Command {
 			}()
 			sim.Run(eventChan)
 			wg.Wait()
+
+			stateJSON, err := json.Marshal(worldState)
+			if err != nil {
+				return fmt.Errorf("marshal world state: %w", err)
+			}
+
+			statePath := filepath.Join(outputDir, "world_state.json")
+			if err := os.WriteFile(statePath, stateJSON, 0644); err != nil {
+				return fmt.Errorf("write world state: %w", err)
+			}
+			cmd.Printf("World state saved to %s\n", statePath)
 
 			timelineJSON, err := json.Marshal(events)
 			if err != nil {

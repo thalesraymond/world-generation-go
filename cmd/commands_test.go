@@ -2,12 +2,14 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/spf13/viper"
+	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 )
 
@@ -40,6 +42,50 @@ func TestSimulateCommandRunsSimulation(t *testing.T) {
 
 	if !strings.Contains(output, "Chronicle") {
 		t.Fatalf("simulate output = %q, want chronicle output", output)
+	}
+
+	statePath := filepath.Join(tmpDir, "world_state.json")
+	stateData, err := os.ReadFile(statePath)
+	if err != nil {
+		t.Fatalf("failed to read world_state.json: %v", err)
+	}
+
+	var state world.State
+	if err := json.Unmarshal(stateData, &state); err != nil {
+		t.Fatalf("failed to unmarshal world_state.json: %v", err)
+	}
+
+	timelinePath := filepath.Join(tmpDir, "timeline.json")
+	timelineData, err := os.ReadFile(timelinePath)
+	if err != nil {
+		t.Fatalf("failed to read timeline.json: %v", err)
+	}
+
+	var events []simulation.Event
+	if err := json.Unmarshal(timelineData, &events); err != nil {
+		t.Fatalf("failed to unmarshal timeline.json: %v", err)
+	}
+
+	stateFigs := make(map[[2]string]struct{ deathYear int })
+	for _, s := range state.Settlements {
+		for _, fig := range s.Figures {
+			stateFigs[[2]string{s.Name, fig.ID}] = struct{ deathYear int }{deathYear: fig.DeathYear}
+		}
+	}
+
+	for _, e := range events {
+		if e.Category != "Death" {
+			continue
+		}
+		key := [2]string{e.SettlementName, e.FigureID}
+		fig, ok := stateFigs[key]
+		if !ok {
+			t.Errorf("death event for missing figure: %v", key)
+			continue
+		}
+		if fig.deathYear == 0 {
+			t.Errorf("death event for %v (year %d) but figure deathYear is 0", key, e.Year)
+		}
 	}
 }
 
