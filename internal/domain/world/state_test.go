@@ -67,6 +67,78 @@ func TestStateJSONRoundTripWithNilPointcrawlGraph(t *testing.T) {
 	}
 }
 
+func TestSettlementJSONRoundTripIncludesAgentFields(t *testing.T) {
+	state := NewState(2, 2)
+	state.Settlements = []Settlement{{
+		Name:             "Ironforge",
+		Type:             "Town",
+		X:                1,
+		Y:                1,
+		Faction:          "auric",
+		Population:       500,
+		MilitaryStrength: 50.5,
+		Wealth:           125.25,
+		Relations:        map[string]float64{"Oakhaven": -0.4},
+		Goals:            []string{"grow", "expand"},
+	}}
+
+	data, err := state.ToJSON()
+	if err != nil {
+		t.Fatalf("ToJSON() error = %v", err)
+	}
+
+	decoded, err := FromJSON(data)
+	if err != nil {
+		t.Fatalf("FromJSON() error = %v", err)
+	}
+
+	if !reflect.DeepEqual(state, decoded) {
+		t.Fatalf("state mismatch after round trip: got %+v want %+v", decoded, state)
+	}
+}
+
+func TestSettlementJSONBackwardCompatibilityWithoutAgentFields(t *testing.T) {
+	legacy := `{
+		"width": 2,
+		"height": 2,
+		"populationDensity": [0, 0, 0, 0],
+		"factionInfluence": ["", "", "", ""],
+		"suitability": [0, 0, 0, 0],
+		"settlements": [{
+			"name": "Ironforge",
+			"type": "Town",
+			"x": 1,
+			"y": 1,
+			"faction": "auric",
+			"population": 500,
+			"figures": null
+		}]
+	}`
+
+	decoded, err := FromJSON([]byte(legacy))
+	if err != nil {
+		t.Fatalf("FromJSON() error = %v", err)
+	}
+
+	if len(decoded.Settlements) != 1 {
+		t.Fatalf("decoded %d settlements, want 1", len(decoded.Settlements))
+	}
+
+	s := decoded.Settlements[0]
+	if s.MilitaryStrength != 0.0 {
+		t.Fatalf("MilitaryStrength = %v, want 0.0", s.MilitaryStrength)
+	}
+	if s.Wealth != 0.0 {
+		t.Fatalf("Wealth = %v, want 0.0", s.Wealth)
+	}
+	if s.Relations != nil {
+		t.Fatalf("Relations = %v, want nil", s.Relations)
+	}
+	if s.Goals != nil {
+		t.Fatalf("Goals = %v, want nil", s.Goals)
+	}
+}
+
 func TestStateCellCountInvalidDimensions(t *testing.T) {
 	state := NewState(0, 5)
 	if state.CellCount() != 0 {

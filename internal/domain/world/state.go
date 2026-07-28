@@ -10,13 +10,17 @@ import (
 
 // Settlement captures a founded settlement on the world grid.
 type Settlement struct {
-	Name       string                     `json:"name"`
-	Type       string                     `json:"type"`
-	X          int                        `json:"x"`
-	Y          int                        `json:"y"`
-	Faction    string                     `json:"faction"`
-	Population float64                    `json:"population"`
-	Figures    []figures.HistoricalFigure `json:"figures"`
+	Name             string                     `json:"name"`
+	Type             string                     `json:"type"`
+	X                int                        `json:"x"`
+	Y                int                        `json:"y"`
+	Faction          string                     `json:"faction"`
+	Population       float64                    `json:"population"`
+	Figures          []figures.HistoricalFigure `json:"figures"`
+	MilitaryStrength float64                    `json:"militaryStrength"`
+	Wealth           float64                    `json:"wealth"`
+	Relations        map[string]float64         `json:"relations"`
+	Goals            []string                   `json:"goals"`
 }
 
 // State stores simulation layers aligned to a terrain grid.

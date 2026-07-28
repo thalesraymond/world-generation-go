@@ -1,8 +1,10 @@
 package narrative
 
 // DefaultGrammar is the default CFG grammar string for the narrative engine.
-// Rules map to Event.Category values: Settlement, Conflict, Disaster, Politics, Discovery, Birth, Death.
-// Available context variables: $year, $category, $description, $FigureName, $FigureRole, $SettlementName.
+// Rules map to Event.Category values: Settlement, Conflict, Disaster, Politics, Discovery, Birth, Death,
+// plus agent categories: Expansion, Raid, Conquest, Diplomacy, Economy.
+// Available context variables: $year, $category, $description, $FigureName, $FigureRole, $SettlementName,
+// and for agent events: $ActionType, $TargetSettlement, $Outcome, $Amount.
 const DefaultGrammar = `# Mythic Fantasy Default Grammar
 # Maps directly to Event.Category values
 
@@ -234,4 +236,33 @@ Birth ::= "In " $year ", " $FigureName " was born in " $SettlementName "."
 Death ::= "In " $year ", " $FigureName " the " $FigureRole " of " $SettlementName " passed into memory."
 	| "The " $FigureRole " " $FigureName " of " $SettlementName " was laid to rest in " $year "."
 	| $SettlementName " mourned " $FigureName " throughout " $year "."
+
+# ── Agent Actions ───────────────────────────────────────
+# Expansion, Raid, Conquest, Diplomacy, and Economy events produced by the
+# settlement agent decision loop. Variables: $ActionType, $TargetSettlement,
+# $Outcome, $Amount, $SettlementName.
+
+Expansion ::= <AgentAction>
+	| "In " $year ", the people of " $SettlementName " raised new banners beyond their walls: " $Outcome "."
+	| $SettlementName " looked outward in " $year ", and " $Outcome "."
+
+Raid ::= <AgentAction>
+	| "War-bands from " $SettlementName " fell upon " $TargetSettlement " in " $year ": " $Outcome "."
+	| "In " $year ", " $Outcome ", and the feud between " $SettlementName " and " $TargetSettlement " deepened."
+
+Conquest ::= <AgentAction>
+	| "In " $year ", the banners of " $SettlementName " rose over " $TargetSettlement ": " $Outcome "."
+	| $Outcome " — so ended the independence of " $TargetSettlement " in " $year "."
+
+Diplomacy ::= <AgentAction>
+	| "In " $year ", envoys between " $SettlementName " and " $TargetSettlement " sealed their pact: " $Outcome "."
+	| $Outcome ", and the bards of " $year " sang of the accord."
+
+Economy ::= <AgentAction>
+	| "In " $year ", the coffers of " $SettlementName " told their own story: " $Outcome "."
+	| $SettlementName " tended its wealth in " $year " — " $Outcome "."
+
+AgentAction ::= "In " $year ", " $Outcome
+	| $Outcome " (" $year ")"
+	| "It is recorded that in " $year ", " $Outcome
 `
