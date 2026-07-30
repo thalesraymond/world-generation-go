@@ -1,6 +1,7 @@
 package world
 
 import (
+	randv2 "math/rand/v2"
 	"testing"
 )
 
@@ -127,5 +128,150 @@ func TestShiftRelationsAsymmetric(t *testing.T) {
 	}
 	if got := b.Relations["Alpha"]; got != -0.5 {
 		t.Fatalf("b->Alpha = %v, want -0.5 (unchanged)", got)
+	}
+}
+
+func TestApplyCrossFactionFriction(t *testing.T) {
+	rng := randv2.New(randv2.NewPCG(42, 99))
+	settlements := []Settlement{
+		{Name: "Alpha", Faction: "auric", Relations: map[string]float64{}},
+		{Name: "Beta", Faction: "auric", Relations: map[string]float64{}},
+		{Name: "Gamma", Faction: "sylvani", Relations: map[string]float64{}},
+		{Name: "Delta", Faction: "verdant", Relations: map[string]float64{}},
+	}
+
+	// Init relations first.
+	for i := range settlements {
+		settlements[i].Relations = InitRelations(settlements[i], settlements)
+	}
+
+	ApplyCrossFactionFriction(settlements, rng)
+
+	// Same-faction pair: Alpha <-> Beta must remain +0.3.
+	if got := settlements[0].Relations["Beta"]; got != RelationShiftSameFactionBaseline {
+		t.Errorf("Alpha->Beta (same faction) = %v, want %v", got, RelationShiftSameFactionBaseline)
+	}
+	if got := settlements[1].Relations["Alpha"]; got != RelationShiftSameFactionBaseline {
+		t.Errorf("Beta->Alpha (same faction) = %v, want %v", got, RelationShiftSameFactionBaseline)
+	}
+
+	// Cross-faction pairs must be negative.
+	checkNegative := func(a, b int) {
+		got := settlements[a].Relations[settlements[b].Name]
+		if got >= 0 {
+			t.Errorf("%s->%s (cross-faction) = %v, want negative", settlements[a].Name, settlements[b].Name, got)
+		}
+	}
+	checkNegative(0, 2) // Alpha -> Gamma
+	checkNegative(0, 3) // Alpha -> Delta
+	checkNegative(2, 3) // Gamma -> Delta
+}
+
+func TestApplyCrossFactionFrictionExcludesSameFaction(t *testing.T) {
+	rng := randv2.New(randv2.NewPCG(77, 13))
+	settlements := []Settlement{
+		{Name: "Alpha", Faction: "auric", Relations: map[string]float64{}},
+		{Name: "Beta", Faction: "auric", Relations: map[string]float64{}},
+	}
+
+	for i := range settlements {
+		settlements[i].Relations = InitRelations(settlements[i], settlements)
+	}
+
+	ApplyCrossFactionFriction(settlements, rng)
+
+	// Same-faction relations must remain unchanged at +0.3.
+	if got := settlements[0].Relations["Beta"]; got != RelationShiftSameFactionBaseline {
+		t.Errorf("same-faction relation modified by friction: %v, want %v", got, RelationShiftSameFactionBaseline)
+	}
+}
+
+func TestApplyCrossFactionFrictionExcludesIndependent(t *testing.T) {
+	rng := randv2.New(randv2.NewPCG(77, 13))
+	settlements := []Settlement{
+		{Name: "Alpha", Faction: "auric", Relations: map[string]float64{}},
+		{Name: "Beta", Faction: "independent", Relations: map[string]float64{}},
+	}
+
+	for i := range settlements {
+		settlements[i].Relations = InitRelations(settlements[i], settlements)
+	}
+
+	ApplyCrossFactionFriction(settlements, rng)
+
+	// Independent faction must not be modified by friction.
+	if got := settlements[0].Relations["Beta"]; got != 0.0 {
+		t.Errorf("independent relation modified by friction: %v, want 0.0", got)
+	}
+	if got := settlements[1].Relations["Alpha"]; got != 0.0 {
+		t.Errorf("independent relation modified by friction: %v, want 0.0", got)
+	}
+}
+
+func TestApplyCrossFactionFrictionDeterministic(t *testing.T) {
+	seed := uint64(42)
+	run := func() float64 {
+		rng := randv2.New(randv2.NewPCG(seed, seed^0x9e3779b9))
+		settlements := []Settlement{
+			{Name: "Alpha", Faction: "auric", Relations: map[string]float64{}},
+			{Name: "Beta", Faction: "sylvani", Relations: map[string]float64{}},
+		}
+		for i := range settlements {
+			settlements[i].Relations = InitRelations(settlements[i], settlements)
+		}
+		ApplyCrossFactionFriction(settlements, rng)
+		return settlements[0].Relations["Beta"]
+	}
+
+	first := run()
+	for i := 0; i < 10; i++ {
+		if got := run(); got != first {
+			t.Fatalf("non-deterministic friction at iteration %d: %v vs %v", i, got, first)
+		}
+	}
+}
+
+func TestApplySettlementCrossFactionFriction(t *testing.T) {
+	rng := randv2.New(randv2.NewPCG(42, 99))
+	existing := []Settlement{
+		{Name: "Alpha", Faction: "auric", Relations: map[string]float64{}},
+		{Name: "Beta", Faction: "sylvani", Relations: map[string]float64{}},
+		{Name: "Gamma", Faction: "verdant", Relations: map[string]float64{}},
+	}
+
+	// Init relations for existing settlements.
+	for i := range existing {
+		existing[i].Relations = InitRelations(existing[i], existing)
+	}
+	// Apply bulk friction.
+	ApplyCrossFactionFriction(existing, rng)
+
+	// Add a new settlement mid-simulation (like ExpandAction does).
+	childRNG := randv2.New(randv2.NewPCG(1, 1))
+	child := Settlement{Name: "Newhold", Faction: "auric", Relations: map[string]float64{}}
+	child.Relations = InitRelations(child, existing)
+	ApplySettlementCrossFactionFriction(&child, existing, childRNG)
+
+	// Same-faction: Alpha (auric) <-> Newhold (auric) should be +0.3.
+	if got := child.Relations["Alpha"]; got != RelationShiftSameFactionBaseline {
+		t.Errorf("Newhold->Alpha (same faction) = %v, want %v", got, RelationShiftSameFactionBaseline)
+	}
+
+	// Cross-faction: Newhold -> Beta/Gamma must be negative.
+	for _, name := range []string{"Beta", "Gamma"} {
+		if got := child.Relations[name]; got >= 0 {
+			t.Errorf("Newhold->%s (cross-faction) = %v, want negative", name, got)
+		}
+	}
+
+	// Symmetry: existing settlements should have friction toward Newhold.
+	for _, name := range []string{"Beta", "Gamma"} {
+		for _, other := range existing {
+			if other.Name == name {
+				if got := other.Relations["Newhold"]; got >= 0 {
+					t.Errorf("%s->Newhold (cross-faction) = %v, want negative", name, got)
+				}
+			}
+		}
 	}
 }

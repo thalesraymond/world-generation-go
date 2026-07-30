@@ -95,6 +95,8 @@ func Generate(state *world.State, config Config) error {
 	for i := range settlements {
 		settlements[i].Relations = world.InitRelations(settlements[i], settlements)
 	}
+	// Apply cross-faction friction so rivalries can emerge naturally.
+	world.ApplyCrossFactionFriction(settlements, config.RNG)
 
 	state.Settlements = settlements
 	return nil

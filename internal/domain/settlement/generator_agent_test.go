@@ -62,19 +62,24 @@ func TestGenerateInitializesAgentState(t *testing.T) {
 		}
 	}
 
-	// Same-faction pairs share the +0.3 baseline; cross-faction pairs are 0.0.
+	// Same-faction pairs share the +0.3 baseline; cross-faction pairs are
+	// negative after ApplyCrossFactionFriction.
 	for _, s := range state.Settlements {
 		for _, other := range state.Settlements {
 			if other.Name == s.Name {
 				continue
 			}
 			got := s.Relations[other.Name]
-			want := 0.0
 			if other.Faction == s.Faction && s.Faction != "independent" {
-				want = world.RelationShiftSameFactionBaseline
-			}
-			if got != want {
-				t.Errorf("%s relations toward %s = %v, want %v", s.Name, other.Name, got, want)
+				want := world.RelationShiftSameFactionBaseline
+				if got != want {
+					t.Errorf("%s relations toward %s = %v, want %v", s.Name, other.Name, got, want)
+				}
+			} else {
+				// Cross-faction (or independent) — must be ≤ 0 after friction.
+				if got > 0 {
+					t.Errorf("%s relations toward %s = %v, want ≤ 0", s.Name, other.Name, got)
+				}
 			}
 		}
 	}

@@ -508,7 +508,7 @@ func TestProsperScore(t *testing.T) {
 
 func TestProsperExecuteGrowthScaledBySuitability(t *testing.T) {
 	self := baseSettlement()
-	other := world.Settlement{Name: "Beta", Faction: "sylvani", Relations: map[string]float64{}}
+	other := world.Settlement{Name: "Beta", Faction: "auric", Relations: map[string]float64{}}
 	all := []world.Settlement{self, other}
 	env := &testEnv{suitability: 0.8}
 
@@ -527,6 +527,20 @@ func TestProsperExecuteGrowthScaledBySuitability(t *testing.T) {
 	}
 	if event.Category != "Economy" || event.Description != "Alpha prospers" {
 		t.Fatalf("event = %+v", event)
+	}
+}
+
+func TestProsperExecuteDoesNotShiftCrossFactionRelations(t *testing.T) {
+	self := baseSettlement()
+	other := world.Settlement{Name: "Beta", Faction: "sylvani", Relations: map[string]float64{}}
+	all := []world.Settlement{self, other}
+	env := &testEnv{suitability: 0.8}
+
+	(ProsperAction{}).Execute(&all[0], &all, env, newTestRNG())
+
+	// Prosper must NOT affect relations with different-faction settlements.
+	if _, exists := all[0].Relations["Beta"]; exists {
+		t.Fatalf("Prosper affected cross-faction relations: %v", all[0].Relations["Beta"])
 	}
 }
 
