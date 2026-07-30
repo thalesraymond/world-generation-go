@@ -4,6 +4,7 @@ import (
 	"fmt"
 	randv2 "math/rand/v2"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 )
@@ -51,8 +52,9 @@ func (ExpandAction) Execute(self *world.Settlement, all *[]world.Settlement, env
 		return event
 	}
 
+	childName := env.GenerateName(rng)
 	child := world.Settlement{
-		Name:             env.GenerateName(rng),
+		Name:             childName,
 		Type:             "Outpost",
 		X:                x,
 		Y:                y,
@@ -60,9 +62,12 @@ func (ExpandAction) Execute(self *world.Settlement, all *[]world.Settlement, env
 		Population:       self.Population * 0.2,
 		MilitaryStrength: self.MilitaryStrength * 0.2,
 		Wealth:           self.Wealth * 0.3,
+		Figures:          figures.GenerateFounders(rng, childName, self.Faction, 0),
 		Goals:            RandomGoals(rng),
 	}
 	child.Relations = world.InitRelations(child, *all)
+	// Apply cross-faction friction for the new settlement.
+	world.ApplySettlementCrossFactionFriction(&child, *all, rng)
 
 	self.Wealth -= ExpandCost
 
@@ -369,7 +374,9 @@ func (ProsperAction) Execute(self *world.Settlement, all *[]world.Settlement, en
 		if other.Name == self.Name {
 			continue
 		}
-		world.ShiftRelations(self, other.Name, world.RelationShiftProsper)
+		if other.Faction == self.Faction {
+			world.ShiftRelations(self, other.Name, world.RelationShiftProsper)
+		}
 	}
 
 	return simulation.Event{

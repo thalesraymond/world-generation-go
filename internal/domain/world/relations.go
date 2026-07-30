@@ -1,5 +1,13 @@
 package world
 
+import (
+	randv2 "math/rand/v2"
+)
+
+// CrossFactionFrictionMax is the maximum negative friction magnitude applied
+// to cross-faction settlement pairs so rivalries can emerge naturally.
+const CrossFactionFrictionMax = 0.6
+
 // Relation shift magnitudes per action type.
 const (
 	// RelationShiftSameFactionBaseline is the initial relations bonus for
@@ -76,4 +84,40 @@ func clampRelation(value float64) float64 {
 		return RelationMax
 	}
 	return value
+}
+
+// ApplyCrossFactionFriction applies random negative friction to cross-faction
+// settlement pairs so rivalries can emerge naturally. Independent factions
+// are excluded. Must be called after InitRelations.
+func ApplyCrossFactionFriction(settlements []Settlement, rng *randv2.Rand) {
+	for i := range settlements {
+		for j := i + 1; j < len(settlements); j++ {
+			applyFrictionPair(&settlements[i], &settlements[j], rng)
+		}
+	}
+}
+
+// ApplySettlementCrossFactionFriction applies cross-faction friction from a
+// single settlement toward all others. Used when a new settlement is founded
+// mid-simulation via expansion.
+func ApplySettlementCrossFactionFriction(self *Settlement, all []Settlement, rng *randv2.Rand) {
+	for i := range all {
+		other := &all[i]
+		if other.Name == self.Name {
+			continue
+		}
+		applyFrictionPair(self, other, rng)
+	}
+}
+
+func applyFrictionPair(a, b *Settlement, rng *randv2.Rand) {
+	if a.Faction == b.Faction {
+		return
+	}
+	if a.Faction == "independent" || b.Faction == "independent" {
+		return
+	}
+	friction := -rng.Float64() * CrossFactionFrictionMax
+	a.Relations[b.Name] = friction
+	b.Relations[a.Name] = friction
 }
