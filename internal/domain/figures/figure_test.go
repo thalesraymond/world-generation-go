@@ -209,3 +209,224 @@ func TestRelationshipsSerializationRoundTrip(t *testing.T) {
 		t.Errorf("Spouse = %v, want %v", decoded.Spouse, original.Spouse)
 	}
 }
+
+func TestGenerateStats_Determinism(t *testing.T) {
+	rng1 := newTestRNG(42)
+	rng2 := newTestRNG(42)
+	s1 := GenerateStats(rng1, "General")
+	s2 := GenerateStats(rng2, "General")
+	if s1 != s2 {
+		t.Errorf("same seed produced different stats: %+v vs %+v", s1, s2)
+	}
+}
+
+func TestGenerateStats_RoleBias(t *testing.T) {
+	genMartialZero, diplZero := 0, 0
+	for i := 0; i < 100; i++ {
+		g := GenerateStats(randv2.New(randv2.NewPCG(uint64(i*2), uint64(i*2+1))), "General")
+		d := GenerateStats(randv2.New(randv2.NewPCG(uint64(i*2+1000), uint64(i*2+1001))), "Diplomat")
+		if g.Martial < 3 {
+			genMartialZero++
+		}
+		if d.Diplomatic < 3 {
+			diplZero++
+		}
+	}
+	if genMartialZero > 0 || diplZero > 0 {
+		t.Errorf("stats with role bias should not be below 3")
+	}
+}
+
+func TestStats_Normalize(t *testing.T) {
+	s := Stats{Martial: 25, Diplomatic: -5, Infamy: 10}
+	s = s.Normalize()
+	if s.Martial != 20 || s.Diplomatic != 1 || s.Infamy != 10 {
+		t.Errorf("normalized stats: %+v, want Martial=20 Diplomatic=1 Infamy=10", s)
+	}
+}
+
+func TestStats_Copy(t *testing.T) {
+	s := Stats{Martial: 15, Diplomatic: 10, Infamy: 5}
+	c := s.Copy()
+	c.Martial = 20
+	if s.Martial == 20 {
+		t.Errorf("copy should not affect original")
+	}
+	if c.Diplomatic != 10 {
+		t.Errorf("copy Diplomatic = %d, want 10", c.Diplomatic)
+	}
+}
+
+func TestStats_InfluenceOutcome(t *testing.T) {
+	s := Stats{Martial: 20, Diplomatic: 0, Infamy: 0}
+	rng := newTestRNG(1)
+	conflictSuccesses := 0
+	for i := 0; i < 100; i++ {
+		if s.InfluenceOutcome("Conflict", rng) {
+			conflictSuccesses++
+		}
+	}
+	if conflictSuccesses != 100 {
+		t.Errorf("Martial 20 should always succeed on Conflict, got %d/100", conflictSuccesses)
+	}
+
+	s2 := Stats{Martial: 1, Diplomatic: 0, Infamy: 0}
+	rng2 := newTestRNG(1)
+	if s2.InfluenceOutcome("Conflict", rng2) {
+		t.Errorf("Martial 1 should have low chance of success")
+	}
+
+	s3 := Stats{Martial: 0, Diplomatic: 20, Infamy: 0}
+	rng3 := newTestRNG(1)
+	politicsSuccesses := 0
+	for i := 0; i < 100; i++ {
+		if s3.InfluenceOutcome("Politics", rng3) {
+			politicsSuccesses++
+		}
+	}
+	if politicsSuccesses != 100 {
+		t.Errorf("Diplomatic 20 should always succeed on Politics, got %d/100", politicsSuccesses)
+	}
+
+	// Default category uses 50% chance.
+	s4 := Stats{Martial: 0, Diplomatic: 0, Infamy: 0}
+	rng4 := newTestRNG(1)
+	s4.InfluenceOutcome("Other", rng4)
+}
+
+func TestReputation_AddAndTotal(t *testing.T) {
+	f := &HistoricalFigure{Stats: Stats{Infamy: 1}}
+	f.AddReputation(ReputationEntry{Year: 100, Event: "Battle", Delta: 5, Description: "Won a battle"})
+	f.AddReputation(ReputationEntry{Year: 105, Event: "Raid", Delta: -3, Description: "Led a raid"})
+	if f.TotalReputation() != 2 {
+		t.Errorf("total reputation = %d, want 2", f.TotalReputation())
+	}
+	if len(f.Reputation) != 2 {
+		t.Errorf("reputation entries = %d, want 2", len(f.Reputation))
+	}
+	if f.Stats.Infamy != 4 {
+		t.Errorf("infamy = %d, want 4 (1 + 3)", f.Stats.Infamy)
+	}
+}
+
+func TestReputation_RecentEntries(t *testing.T) {
+	f := &HistoricalFigure{}
+	f.AddReputation(ReputationEntry{Year: 100, Delta: 1, Description: "old"})
+	f.AddReputation(ReputationEntry{Year: 195, Delta: 2, Description: "recent"})
+	f.AddReputation(ReputationEntry{Year: 200, Delta: 3, Description: "current"})
+	recent := f.RecentReputation(200, 10)
+	if len(recent) != 2 {
+		t.Errorf("recent entries = %d, want 2", len(recent))
+	}
+}
+
+func TestReputation_Empty(t *testing.T) {
+	f := &HistoricalFigure{}
+	if f.TotalReputation() != 0 {
+		t.Errorf("empty total = %d, want 0", f.TotalReputation())
+	}
+	if len(f.RecentReputation(100, 50)) != 0 {
+		t.Errorf("empty recent = %d entries, want 0", len(f.RecentReputation(100, 50)))
+	}
+}
+
+func TestSetRole_GetRole(t *testing.T) {
+	f := &HistoricalFigure{}
+	f.SetRole(&Leader{})
+	r := f.GetRole()
+	if r.Name() != "Leader" {
+		t.Errorf("GetRole().Name() = %q, want Leader", r.Name())
+	}
+	if f.Role != "Leader" {
+		t.Errorf("string Role = %q, want Leader", f.Role)
+	}
+
+	f.SetRole(nil)
+	if f.GetRole() != nil {
+		t.Error("expected nil role after SetRole(nil)")
+	}
+	if f.Role != "" {
+		t.Errorf("string Role = %q, want empty", f.Role)
+	}
+}
+
+func TestGetRole_LazyInit(t *testing.T) {
+	f := &HistoricalFigure{Role: "Explorer"}
+	r := f.GetRole()
+	if r == nil {
+		t.Fatal("GetRole returned nil for Explorer string")
+	}
+	if r.Name() != "Explorer" {
+		t.Errorf("GetRole().Name() = %q, want Explorer", r.Name())
+	}
+}
+
+func TestGetRole_UnknownRole(t *testing.T) {
+	f := &HistoricalFigure{Role: "Bogus"}
+	r := f.GetRole()
+	if r != nil {
+		t.Errorf("GetRole returned non-nil for unknown role: %T", r)
+	}
+}
+
+func TestGenerateFounders_HasStats(t *testing.T) {
+	rng := newTestRNG(42)
+	founders := GenerateFounders(rng, "Test", "faction", 0)
+	for _, f := range founders {
+		if f.Stats.Martial < 1 || f.Stats.Martial > 20 {
+			t.Errorf("founder %s has invalid Martial: %d", f.Name, f.Stats.Martial)
+		}
+		if f.Stats.Diplomatic < 1 || f.Stats.Diplomatic > 20 {
+			t.Errorf("founder %s has invalid Diplomatic: %d", f.Name, f.Stats.Diplomatic)
+		}
+	}
+}
+
+func TestCheckBirths_HasStats(t *testing.T) {
+	rng := newTestRNG(1)
+	child := CheckBirths(nil, 20000, 100, rng)
+	if child == nil {
+		t.Fatal("no birth")
+	}
+	if child.Stats.Martial < 1 || child.Stats.Martial > 20 {
+		t.Errorf("newborn has invalid stats: %+v", child.Stats)
+	}
+}
+
+func TestStringMethod(t *testing.T) {
+	f := HistoricalFigure{Name: "Aldric", Role: "Leader", BirthYear: 50, Stats: Stats{Martial: 15, Diplomatic: 10, Infamy: 3}}
+	s := f.String()
+	if !strings.Contains(s, "Aldric") || !strings.Contains(s, "Leader") || !strings.Contains(s, "M:15") {
+		t.Errorf("String() = %q, missing expected content", s)
+	}
+}
+
+func TestJSONRoundTrip_WithNewFields(t *testing.T) {
+	original := HistoricalFigure{
+		ID:    "fig-1", Name: "Test", BirthYear: 100, Role: "Leader",
+		Faction: "f", Stats: Stats{Martial: 15, Diplomatic: 10, Infamy: 5},
+		Reputation:        []ReputationEntry{{Year: 100, Event: "E", Delta: 1, Description: "test"}},
+		ParentID:          "parent-1",
+		TransitionHistory: []TransitionEntry{{Year: 105, FromRole: "Explorer", ToRole: "Leader", Reason: "promotion"}},
+	}
+	data, err := json.Marshal(original)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var decoded HistoricalFigure
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if decoded.Stats.Martial != 15 {
+		t.Errorf("stats Martial = %d", decoded.Stats.Martial)
+	}
+	if len(decoded.Reputation) != 1 {
+		t.Errorf("reputation len = %d", len(decoded.Reputation))
+	}
+	if decoded.ParentID != original.ParentID {
+		t.Errorf("parentID = %q, want %q", decoded.ParentID, original.ParentID)
+	}
+	if len(decoded.TransitionHistory) != 1 {
+		t.Errorf("transitionHistory len = %d", len(decoded.TransitionHistory))
+	}
+}

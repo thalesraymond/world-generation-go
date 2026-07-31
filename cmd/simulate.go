@@ -133,7 +133,16 @@ func (s *settlementEntity) Tick(year int, eventChan chan<- domsim.Event, rng *ra
 		eventChan <- e
 	}
 
+	// 4.5 Check marriages
+	marriageEvents := figures.CheckMarriages(s.settlement.Figures, s.settlement.Name, s.settlement.Faction, year, s.figureRNG)
+	for _, e := range marriageEvents {
+		e.Year = year
+		e.SettlementName = s.settlement.Name
+		eventChan <- e
+	}
+
 	// 5. Generate role events for figures with roles
+	var generatedEvents []domsim.Event
 	for i := range s.settlement.Figures {
 		if !s.settlement.Figures[i].IsAlive() {
 			continue
@@ -148,11 +157,23 @@ func (s *settlementEntity) Tick(year int, eventChan chan<- domsim.Event, rng *ra
 		roleEvents := role.GenerateEvents(&s.settlement.Figures[i], s.settlement.Name, s.settlement.Population, s.pointcrawlGraph, s.settlement.X, s.settlement.Y, s.figureRNG)
 		for _, e := range roleEvents {
 			e.Year = year
-			eventChan <- e
 		}
+		generatedEvents = append(generatedEvents, roleEvents...)
 	}
 
-	// 5. Agent decision loop: evaluate state, pick a goal-aligned action,
+	// 5.5 Check role transitions driven by recent events
+	transEvents := figures.CheckTransitions(s.settlement.Figures, generatedEvents, s.figureRNG)
+	for _, e := range transEvents {
+		e.Year = year
+		e.SettlementName = s.settlement.Name
+		eventChan <- e
+	}
+
+	for _, e := range generatedEvents {
+		eventChan <- e
+	}
+
+	// 6. Agent decision loop: evaluate state, pick a goal-aligned action,
 	// execute it, and emit the resulting event. Expand may append a new
 	// settlement to allSettlements, affecting subsequent years.
 	if s.allSettlements != nil && s.agentRNG != nil {
@@ -318,9 +339,22 @@ func newSimulateCommand() *cobra.Command {
 					extra["Outcome"] = event.Description
 					extra["Amount"] = extractAmount(event.Description)
 				}
-				text, err := narrativeEngine.Narrate(event, extra, narrativeRNG)
-				if err != nil {
-					text = event.Description
+				var text string
+				var err error
+				if extra != nil && extra["FigureName"] != "" {
+					switch event.Category {
+					case "Conflict", "Politics", "Discovery":
+						text, err = narrativeEngine.NarrateWithRule(event, extra, narrativeRNG, event.Category+".figure")
+						if err != nil {
+							text = ""
+						}
+					}
+				}
+				if text == "" {
+					text, err = narrativeEngine.Narrate(event, extra, narrativeRNG)
+					if err != nil {
+						text = event.Description
+					}
 				}
 				_, _ = fmt.Fprintln(cmd.OutOrStdout(), text)
 			}

@@ -294,7 +294,7 @@ func (l *Lexer) readIdentifier() Token {
 	var buf strings.Builder
 	for l.pos < len(l.input) {
 		ch := l.input[l.pos]
-		if unicode.IsLetter(ch) || ch == '_' || ch == '-' || unicode.IsDigit(ch) {
+		if unicode.IsLetter(ch) || ch == '_' || ch == '-' || ch == '.' || unicode.IsDigit(ch) {
 			buf.WriteRune(ch)
 			l.advance()
 		} else {

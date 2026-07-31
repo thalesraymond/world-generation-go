@@ -33,6 +33,8 @@ Each character file SHALL include YAML frontmatter with all figure identity and 
 - **THEN** the frontmatter SHALL include `id`, `type: character`, `name`, `role`, `faction`, `birthYear`, `deathYear` (or omit if alive), `settlement`
 - **THEN** the frontmatter SHALL include `parents`, `children`, and `spouse` as YAML lists of wiki-linked names
 - **THEN** the frontmatter SHALL include `status` ("alive" when `deathYear` is zero, "deceased" otherwise)
+- **THEN** the frontmatter SHALL include `martial`, `diplomatic`, and `infamy` fields when any stat is non-zero
+- **THEN** the frontmatter SHALL include a `reputation` field when total reputation is non-zero
 
 #### Scenario: Frontmatter for alive figure
 
@@ -47,16 +49,34 @@ Each character file SHALL include a Markdown body with human-readable figure inf
 #### Scenario: Character file body
 
 - **WHEN** a figure file is generated
-- **THEN** the body SHALL include sections for role, faction, settlement, lifespan, relationships, and chronicle
+- **THEN** the body SHALL include sections for role, faction, settlement, lifespan, stats, relationships, chronicle, notable deeds, and role transition history
 - **THEN** the faction SHALL be a wiki-link (`[[faction-name]]`)
 - **THEN** the settlement SHALL be a wiki-link (`[[settlement-name]]`)
 - **THEN** parents, children, and spouse SHALL be wiki-links to their respective character files
+
+#### Scenario: Stats section
+
+- **WHEN** a character file is generated
+- **THEN** the body SHALL include a `## Stats` section
+- **THEN** the section SHALL list Martial, Diplomatic, Infamy, and Total Reputation values
 
 #### Scenario: Chronicle section with figure events
 
 - **WHEN** a figure has associated timeline events (identified by `figureId` or `relatedFigures`)
 - **THEN** the character file SHALL include a "Chronicle" section listing these events by year
 - **THEN** each chronicle entry SHALL include the year and event description
+
+#### Scenario: Notable Deeds section
+
+- **WHEN** a figure has reputation entries
+- **THEN** the character file SHALL include a "Notable Deeds" section
+- **THEN** each entry SHALL include the year, description, delta, and optional event name
+
+#### Scenario: Role Transition History section
+
+- **WHEN** a figure has role transition entries
+- **THEN** the character file SHALL include a "Role Transition History" section
+- **THEN** each entry SHALL include the year, previous role, new role, and reason
 
 ### Requirement: Wiki-link Integration with Existing Exports
 
@@ -67,6 +87,7 @@ Settlement and faction files SHALL link to the figures that belong to them.
 - **WHEN** a settlement file is generated and the settlement has figures
 - **THEN** a "Characters" section SHALL be added to the settlement file body
 - **THEN** figures SHALL be listed as wiki-links grouped by role (Leader section, Explorer section, Others)
+- **THEN** each listing SHALL include a compact stats summary (e.g., `M:15 D:10 I:3`)
 
 #### Scenario: Faction file references figure leaders
 

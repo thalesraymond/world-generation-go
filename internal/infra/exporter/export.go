@@ -76,21 +76,21 @@ func Export(state *world.State, targetDir string) error {
 			if len(leaders) > 0 {
 				content += "### Leader\n"
 				for _, f := range leaders {
-					content += fmt.Sprintf("- [[%s]] (%s)\n", tracker.sanitize(f.Name), f.Role)
+					content += fmt.Sprintf("- [[%s]] (%s) — M:%d D:%d I:%d\n", tracker.sanitize(f.Name), f.Role, f.Stats.Martial, f.Stats.Diplomatic, f.Stats.Infamy)
 				}
 				content += "\n"
 			}
 			if len(explorers) > 0 {
 				content += "### Explorers\n"
 				for _, f := range explorers {
-					content += fmt.Sprintf("- [[%s]] (%s)\n", tracker.sanitize(f.Name), f.Role)
+					content += fmt.Sprintf("- [[%s]] (%s) — M:%d D:%d I:%d\n", tracker.sanitize(f.Name), f.Role, f.Stats.Martial, f.Stats.Diplomatic, f.Stats.Infamy)
 				}
 				content += "\n"
 			}
 			if len(others) > 0 {
 				content += "### Others\n"
 				for _, f := range others {
-					content += fmt.Sprintf("- [[%s]] (%s)\n", tracker.sanitize(f.Name), f.Role)
+					content += fmt.Sprintf("- [[%s]] (%s) — M:%d D:%d I:%d\n", tracker.sanitize(f.Name), f.Role, f.Stats.Martial, f.Stats.Diplomatic, f.Stats.Infamy)
 				}
 				content += "\n"
 			}

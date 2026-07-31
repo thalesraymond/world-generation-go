@@ -22,17 +22,23 @@ func GenerateFounders(rng *randv2.Rand, settlementName, faction string, founding
 	for i := range count {
 		birthYear := foundingYear - rng.IntN(maxFounderAgeOffset)
 		maxAge := 70 + rng.IntN(21) // 70-90
+		name := GenerateName(rng)
 		founders[i] = HistoricalFigure{
 			ID:            fmt.Sprintf("%s-%d", settlementName, i),
-			Name:          GenerateName(rng),
+			Name:          name,
 			BirthYear:     birthYear,
 			MaxAge:        maxAge,
 			Faction:       faction,
 			Relationships: Relationships{},
 		}
+		// First founder is always Leader; others have no role.
+		role := ""
+		if i == 0 {
+			role = "Leader"
+			founders[i].SetRole(&Leader{})
+		}
+		founders[i].Stats = GenerateStats(rng, role)
 	}
-	// First founder is always Leader
-	founders[0].Role = "Leader"
 	return founders
 }
 
@@ -63,6 +69,27 @@ func CheckDeaths(figures []HistoricalFigure, currentYear int, rng *randv2.Rand) 
 				FigureID:       figures[i].ID,
 				SettlementName: figures[i].Faction,
 			})
+
+			// Heir-first succession when a Leader dies.
+			if figures[i].Role == "Leader" || (figures[i].RoleRole != nil && figures[i].RoleRole.Name() == "Leader") {
+				heir := GetHeir(figures, figures[i].ID)
+				if heir != nil {
+					heir.SetRole(&Leader{})
+					s := heir.Stats
+					s.Martial = clamp(s.Martial + 1)
+					s.Diplomatic = clamp(s.Diplomatic + 1)
+					s.Infamy = clamp(s.Infamy + 1)
+					heir.Stats = s
+					heir.ParentID = figures[i].ID
+					events = append(events, simulation.Event{
+						Year:           currentYear,
+						Category:       "Succession",
+						Description:    fmt.Sprintf("%s inherits leadership from %s", heir.Name, figures[i].Name),
+						FigureID:       heir.ID,
+						SettlementName: figures[i].Faction,
+					})
+				}
+			}
 		}
 	}
 	return events
@@ -92,6 +119,7 @@ func CheckBirths(figures []HistoricalFigure, population float64, currentYear int
 		BirthYear:     currentYear,
 		MaxAge:        maxAge,
 		Relationships: Relationships{},
+		Stats:         GenerateStats(rng, ""),
 	}
 	return figure
 }
@@ -115,7 +143,7 @@ func AssignRoles(figures []HistoricalFigure, graph *pointcrawl.Graph, settlement
 			}
 		}
 		if successor != nil {
-			successor.Role = "Leader"
+			successor.SetRole(&Leader{})
 			events = append(events, simulation.Event{
 				Year:        successor.BirthYear + adultAge,
 				Category:    "Politics",
@@ -125,4 +153,112 @@ func AssignRoles(figures []HistoricalFigure, graph *pointcrawl.Graph, settlement
 		}
 	}
 	return events
+}
+
+// CheckMarriages evaluates eligible figures and forms marriages within the same faction.
+func CheckMarriages(figures []HistoricalFigure, settlementName, faction string, year int, rng *randv2.Rand) []simulation.Event {
+	var events []simulation.Event
+	for i := range figures {
+		if !figures[i].IsAlive() {
+			continue
+		}
+		age := figures[i].Age(year)
+		if age < 20 || age > 25 {
+			continue
+		}
+		if len(figures[i].Relationships.Spouse) > 0 {
+			continue
+		}
+
+		for j := range figures {
+			if i == j {
+				continue
+			}
+			if !figures[j].IsAlive() {
+				continue
+			}
+			ageJ := figures[j].Age(year)
+			if ageJ < 20 || ageJ > 25 {
+				continue
+			}
+			if len(figures[j].Relationships.Spouse) > 0 {
+				continue
+			}
+			if figures[i].Faction != figures[j].Faction {
+				continue
+			}
+
+			if rng.IntN(3) == 0 {
+				event, ok := FormMarriage(&figures[i], &figures[j], year)
+				if ok {
+					events = append(events, event)
+				}
+			}
+		}
+	}
+	return events
+}
+
+// CheckTransitions evaluates role transitions driven by recent events.
+func CheckTransitions(figures []HistoricalFigure, events []simulation.Event, rng *randv2.Rand) []simulation.Event {
+	var transitionEvents []simulation.Event
+	for i := range figures {
+		if !figures[i].IsAlive() {
+			continue
+		}
+		role := figures[i].GetRole()
+		if role == nil {
+			continue
+		}
+
+		if role.Name() == "Explorer" {
+			for _, e := range events {
+				if e.Category == "Discovery" && e.FigureID == figures[i].ID && rng.IntN(3) == 0 {
+					leaderRole, _ := NewRole("Leader")
+					if role.CanTransitionTo(leaderRole) {
+						from := role.Name()
+						figures[i].SetRole(leaderRole)
+						figures[i].TransitionHistory = append(figures[i].TransitionHistory, TransitionEntry{Year: 0, FromRole: from, ToRole: "Leader", Reason: "founded settlement"})
+						transitionEvents = append(transitionEvents, simulation.Event{
+							Category: "RoleTransition", Description: fmt.Sprintf("%s becomes Leader after founding a settlement", figures[i].Name),
+							FigureID: figures[i].ID, SettlementName: figures[i].Faction,
+						})
+					}
+					break
+				}
+			}
+		}
+
+		if role.Name() == "Leader" && rng.IntN(50) == 0 {
+			explorerRole, _ := NewRole("Explorer")
+			if role.CanTransitionTo(explorerRole) {
+				from := role.Name()
+				figures[i].SetRole(explorerRole)
+				figures[i].TransitionHistory = append(figures[i].TransitionHistory, TransitionEntry{Year: 0, FromRole: from, ToRole: "Explorer", Reason: "exiled"})
+				transitionEvents = append(transitionEvents, simulation.Event{
+					Category: "RoleTransition", Description: fmt.Sprintf("%s becomes Explorer after exile", figures[i].Name),
+					FigureID: figures[i].ID, SettlementName: figures[i].Faction,
+				})
+			}
+		}
+
+		if role.Name() == "General" {
+			for _, e := range events {
+				if e.Category == "Conflict" && e.FigureID == figures[i].ID && !figures[i].Stats.InfluenceOutcome("Conflict", rng) && rng.IntN(3) == 0 {
+					explorerRole, _ := NewRole("Explorer")
+					if role.CanTransitionTo(explorerRole) {
+						from := role.Name()
+						figures[i].SetRole(explorerRole)
+						figures[i].TransitionHistory = append(figures[i].TransitionHistory, TransitionEntry{Year: 0, FromRole: from, ToRole: "Explorer", Reason: "defeat"})
+						transitionEvents = append(transitionEvents, simulation.Event{
+							Category: "RoleTransition", Description: fmt.Sprintf("%s becomes Explorer after defeat", figures[i].Name),
+							FigureID: figures[i].ID, SettlementName: figures[i].Faction,
+						})
+					}
+					break
+				}
+			}
+		}
+	}
+	return transitionEvents
 }

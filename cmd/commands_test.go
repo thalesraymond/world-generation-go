@@ -114,8 +114,15 @@ func TestSimulateCommandPopulatesSettlementFigures(t *testing.T) {
 			t.Errorf("settlement %q has no figures", settlement.Name)
 			continue
 		}
-		if settlement.Figures[0].Role != "Leader" {
-			t.Errorf("settlement %q first figure role = %q, want Leader", settlement.Name, settlement.Figures[0].Role)
+		hasLeader := false
+		for _, fig := range settlement.Figures {
+			if fig.Role == "Leader" {
+				hasLeader = true
+				break
+			}
+		}
+		if !hasLeader {
+			t.Errorf("settlement %q has no Leader figure", settlement.Name)
 		}
 	}
 }

@@ -36,6 +36,10 @@ Epic 2 transforms figures from passive records into active characters with perso
 
 ## Decisions
 
+### Decision 0: Scope of this design document
+
+This design covers the full Epic 2 change. Tasks 10–12 (the current implementation slice) cover grammar, export, and simulation-loop integration; they are documented in the relevant sections below.
+
 ### Decision 1: Stats as value-type struct on HistoricalFigure
 
 **Choice:** `Stats` is a plain struct embedded in `HistoricalFigure`:
@@ -122,21 +126,23 @@ If no heir, fall back to existing `AssignRoles()` (first roleless adult). The st
 
 ### Decision 5: Grammar — figure-aware narrative rules
 
-**Choice:** Add CFG production rules for each event category that reference `$FigureName`, `$FigureRole`, `$SettlementName`. Keep backward-compatible fallback for events without figure references. Example additions:
+**Choice:** Add CFG production rules for Conflict, Politics, and Discovery that reference `$FigureName`, `$FigureRole`, `$SettlementName`, and `$TargetSettlement`. Keep backward-compatible generic rules as fallback. Rule names use a dotted suffix (e.g., `Conflict.figure`) resolved by a new `NarrateWithRule` method. Also add rules for Marriage, RoleTransition, Succession, and ReputationChange.
 
 ```
-Conflict.figure = "$FigureRole $FigureName of $SettlementName led a raid on $TargetSettlement"
-Conflict.generic = "A conflict erupted near $SettlementName"
+Conflict.figure ::= $FigureRole " " $FigureName " of " $SettlementName " led a raid on " $TargetSettlement "."
+    | $FigureName " the " $FigureRole " commanded the forces of " $SettlementName " against " $TargetSettlement "."
+    | "Under " $FigureName "'s command, " $SettlementName "'s army clashed with " $TargetSettlement "."
 ```
 
-The engine tries figure-aware rules first (when variables are present), falls back to generic rules.
+The simulation command calls `NarrateWithRule(event, extra, rng, event.Category+".figure")` when figure context is present for Conflict/Politics/Discovery. If the dotted rule is missing or resolves to an empty string, the engine falls back to `Narrate()` using the base category. The lexer was updated to accept `.` in rule identifiers.
 
 **Alternatives considered:**
 
 - _Template strings:_ `fmt.Sprintf` patterns instead of CFG. Simpler but loses grammar composability and the ability to mix figure-driven and generic rules. Rejected because CFG already exists.
 - _Pre-composed text in event generators:_ Each role's `GenerateEvents()` returns final text. Bypasses the narrative engine entirely. Rejected.
+- _Underscore rule names:_ `Conflict_figure` would work without lexer changes. Rejected to keep the dotted namespace convention readable.
 
-**Rationale:** CFG production rules are the natural extension of the existing narrative engine. Figure-aware rules slot alongside generic rules without architectural change. The fallback mechanism preserves backward compatibility.
+**Rationale:** CFG production rules are the natural extension of the existing narrative engine. Figure-aware rules slot alongside generic rules without architectural change. The dotted suffix and explicit rule method keep the selection logic in the adapter layer rather than complicating the engine.
 
 ### Decision 6: Marriage — same-faction, adult-age gate
 

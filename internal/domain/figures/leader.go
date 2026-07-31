@@ -37,6 +37,8 @@ func (l *Leader) GenerateEvents(figure *HistoricalFigure, settlementName string,
 		desc = fmt.Sprintf("%s %s %s", figure.Name, actions[rng.IntN(len(actions))], settlementName)
 	}
 
+	figure.AddReputation(ReputationEntry{Year: 0, Event: category, Delta: 1, Description: desc})
+
 	return []simulation.Event{
 		{
 			Category:       category,

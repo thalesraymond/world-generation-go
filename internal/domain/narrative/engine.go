@@ -64,6 +64,13 @@ func (e *Engine) Resolve(ruleName string, context map[string]string, rng *randv2
 }
 
 func (e *Engine) Narrate(event simulation.Event, extraContext map[string]string, rng *randv2.Rand) (string, error) {
+	return e.NarrateWithRule(event, extraContext, rng, event.Category)
+}
+
+// NarrateWithRule expands an event using a specific grammar rule instead of the
+// event's category. It falls back to the event description if the rule is not
+// found.
+func (e *Engine) NarrateWithRule(event simulation.Event, extraContext map[string]string, rng *randv2.Rand, ruleName string) (string, error) {
 	ctx := make(map[string]string, len(extraContext)+3)
 	for k, v := range extraContext {
 		ctx[k] = v
@@ -72,7 +79,7 @@ func (e *Engine) Narrate(event simulation.Event, extraContext map[string]string,
 	ctx["category"] = event.Category
 	ctx["description"] = event.Description
 
-	text, err := e.Resolve(event.Category, ctx, rng)
+	text, err := e.Resolve(ruleName, ctx, rng)
 	if err != nil {
 		if errors.Is(err, ErrRuleNotFound) {
 			return event.Description, nil
