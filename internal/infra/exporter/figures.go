@@ -53,11 +53,16 @@ func buildFigureFrontmatter(f figures.HistoricalFigure, settlementName string, n
 		deathYearStr = strconv.Itoa(f.DeathYear)
 	}
 
+	roleName := f.Role
+	if f.RoleRole != nil {
+		roleName = f.RoleRole.Name()
+	}
+
 	fields := []field{
 		{Key: "id", Value: f.ID},
 		{Key: "type", Value: "character"},
 		{Key: "name", Value: f.Name},
-		{Key: "role", Value: f.Role},
+		{Key: "role", Value: roleName},
 		{Key: "faction", Value: f.Faction},
 		{Key: "birthYear", Value: strconv.Itoa(f.BirthYear)},
 		{Key: "settlement", Value: "[[" + settlementName + "]]"},
@@ -66,6 +71,16 @@ func buildFigureFrontmatter(f figures.HistoricalFigure, settlementName string, n
 
 	if deathYearStr != "" {
 		fields = append(fields, field{Key: "deathYear", Value: deathYearStr})
+	}
+
+	if f.Stats.Martial > 0 || f.Stats.Diplomatic > 0 || f.Stats.Infamy > 0 {
+		fields = append(fields, field{Key: "martial", Value: strconv.Itoa(f.Stats.Martial)})
+		fields = append(fields, field{Key: "diplomatic", Value: strconv.Itoa(f.Stats.Diplomatic)})
+		fields = append(fields, field{Key: "infamy", Value: strconv.Itoa(f.Stats.Infamy)})
+	}
+
+	if f.TotalReputation() != 0 {
+		fields = append(fields, field{Key: "reputation", Value: strconv.Itoa(f.TotalReputation())})
 	}
 
 	if len(f.Relationships.Parents) > 0 {
@@ -110,6 +125,12 @@ func buildFigureBody(f figures.HistoricalFigure, settlementName string, events [
 	}
 	body += "**Lived:** " + lifespan + "  \n\n"
 
+	body += "## Stats\n\n"
+	body += "- **Martial:** " + strconv.Itoa(f.Stats.Martial) + "\n"
+	body += "- **Diplomatic:** " + strconv.Itoa(f.Stats.Diplomatic) + "\n"
+	body += "- **Infamy:** " + strconv.Itoa(f.Stats.Infamy) + "\n"
+	body += "- **Total Reputation:** " + strconv.Itoa(f.TotalReputation()) + "\n\n"
+
 	body += "## Relationships\n\n"
 	if len(f.Relationships.Parents) > 0 {
 		body += "- **Parents:** "
@@ -144,6 +165,28 @@ func buildFigureBody(f figures.HistoricalFigure, settlementName string, events [
 	} else {
 		for _, e := range figureEvents {
 			body += fmt.Sprintf("- Year %d: %s\n", e.Year, e.Description)
+		}
+	}
+
+	body += "\n## Notable Deeds\n\n"
+	if len(f.Reputation) == 0 {
+		body += "_No notable deeds recorded._\n"
+	} else {
+		for _, r := range f.Reputation {
+			body += fmt.Sprintf("- Year %d: %s (_%+d reputation_)", r.Year, r.Description, r.Delta)
+			if r.Event != "" {
+				body += fmt.Sprintf(" [%s]", r.Event)
+			}
+			body += "\n"
+		}
+	}
+
+	body += "\n## Role Transition History\n\n"
+	if len(f.TransitionHistory) == 0 {
+		body += "_No role transitions recorded._\n"
+	} else {
+		for _, t := range f.TransitionHistory {
+			body += fmt.Sprintf("- Year %d: %s → %s (%s)\n", t.Year, t.FromRole, t.ToRole, t.Reason)
 		}
 	}
 

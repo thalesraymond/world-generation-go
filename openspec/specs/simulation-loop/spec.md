@@ -37,4 +37,4 @@ Each settlement entity SHALL process its figure lifecycle as part of its `Tick()
 
 - **WHEN** a settlement entity ticks for a year
 - **THEN** figure processing SHALL occur after the core settlement events and before returning
-- **THEN** the order SHALL be: age figures, check deaths, check births, assign roles, generate events
+- **THEN** the order SHALL be: age figures, check deaths, check births, assign roles, check marriages, generate role events, check role transitions, run settlement agent decision loop

@@ -237,6 +237,43 @@ Death ::= "In " $year ", " $FigureName " the " $FigureRole " of " $SettlementNam
 	| "The " $FigureRole " " $FigureName " of " $SettlementName " was laid to rest in " $year "."
 	| $SettlementName " mourned " $FigureName " throughout " $year "."
 
+# ── Conflict (figure-driven) ───────────────────────────
+# Figure-driven alternatives use $FigureName, $FigureRole, $SettlementName.
+# Fallback to generic rules above when variables are absent.
+Conflict.figure ::= $FigureRole " " $FigureName " of " $SettlementName " led a raid on " $TargetSettlement "."
+	| $FigureName " the " $FigureRole " commanded the forces of " $SettlementName " against " $TargetSettlement "."
+	| "Under " $FigureName "'s command, " $SettlementName "'s army clashed with " $TargetSettlement "."
+
+# ── Politics (figure-driven) ───────────────────────────
+Politics.figure ::= $FigureRole " " $FigureName " of " $SettlementName " negotiated a treaty with " $TargetSettlement "."
+	| $FigureName " the " $FigureRole " brokered peace between " $SettlementName " and " $TargetSettlement "."
+	| "Through " $FigureName "'s diplomacy, " $SettlementName " secured an alliance."
+
+# ── Discovery (figure-driven) ──────────────────────────
+Discovery.figure ::= $FigureRole " " $FigureName " of " $SettlementName " discovered " $TargetSettlement "."
+	| $FigureName " the " $FigureRole " charted the unexplored reaches beyond " $SettlementName "."
+	| $FigureName " ventured forth from " $SettlementName " and returned with maps of new lands."
+
+# ── Marriage ──────────────────────────────────────────
+Marriage ::= "In " $year ", " $FigureName " wed, uniting two families of " $SettlementName "."
+	| "The people of " $SettlementName " celebrated the marriage of " $FigureName " in " $year "."
+	| $FigureName " of " $SettlementName " was joined in marriage during " $year "."
+
+# ── RoleTransition ────────────────────────────────────
+RoleTransition ::= "In " $year ", " $FigureName " was no longer content with their old role, and instead became known as " $FigureRole " of " $SettlementName "."
+	| $FigureName " of " $SettlementName " changed their destiny in " $year ", rising as " $FigureRole "."
+	| "The people of " $SettlementName " witnessed " $FigureName " take on a new path as " $FigureRole " in " $year "."
+
+# ── Succession ────────────────────────────────────────
+Succession ::= "In " $year ", " $FigureName " succeeded as the new " $FigureRole " of " $SettlementName "."
+	| $FigureName " inherited the mantle of leadership over " $SettlementName " in " $year "."
+	| $SettlementName " gained a new " $FigureRole " in " $year " when " $FigureName " rose to power."
+
+# ── ReputationChange ──────────────────────────────────
+ReputationChange ::= "In " $year ", word spread of " $FigureName "'s deeds in " $SettlementName "."
+	| "The bards of " $year " sang of " $FigureName " the " $FigureRole " of " $SettlementName "."
+	| $FigureName "'s reputation grew across " $SettlementName " after the events of " $year "."
+
 # ── Agent Actions ───────────────────────────────────────
 # Expansion, Raid, Conquest, Diplomacy, and Economy events produced by the
 # settlement agent decision loop. Variables: $ActionType, $TargetSettlement,

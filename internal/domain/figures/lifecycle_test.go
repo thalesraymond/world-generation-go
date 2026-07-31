@@ -296,3 +296,150 @@ func TestDeathTriggersSuccession(t *testing.T) {
 		t.Fatalf("expected exactly 1 leader after death+succession, got %d", leaderCount)
 	}
 }
+
+func TestCheckDeaths_SuccessionWithHeir(t *testing.T) {
+	parent := HistoricalFigure{ID: "leader-1", Name: "King Alaric", BirthYear: 0, MaxAge: 50, Faction: "f", Role: "Leader", Stats: Stats{Martial: 10, Diplomatic: 10, Infamy: 5}}
+	child := HistoricalFigure{ID: "heir-1", Name: "Prince Aldric", BirthYear: 20, MaxAge: 70, Faction: "f", Stats: Stats{Martial: 5, Diplomatic: 5, Infamy: 1}}
+	AddParentChild(&parent, &child)
+
+	figures := []HistoricalFigure{parent, child}
+	events := CheckDeaths(figures, 60, newTestRNG(1))
+
+	hasDeath := false
+	hasSuccession := false
+	for _, e := range events {
+		if e.Category == "Death" {
+			hasDeath = true
+		}
+		if e.Category == "Succession" {
+			hasSuccession = true
+		}
+	}
+	if !hasDeath {
+		t.Error("expected Death event")
+	}
+	if !hasSuccession {
+		t.Error("expected Succession event")
+	}
+
+	if figures[1].Role != "Leader" {
+		t.Errorf("heir Role = %q, want Leader", figures[1].Role)
+	}
+	if figures[1].Stats.Martial != 6 || figures[1].Stats.Diplomatic != 6 || figures[1].Stats.Infamy != 2 {
+		t.Errorf("heir stats = %+v, want Martial=6 Diplomatic=6 Infamy=2", figures[1].Stats)
+	}
+	if figures[1].ParentID != parent.ID {
+		t.Errorf("heir ParentID = %q, want %q", figures[1].ParentID, parent.ID)
+	}
+}
+
+func TestCheckDeaths_NoHeirFallback(t *testing.T) {
+	parent := HistoricalFigure{ID: "leader-2", Name: "Queen Elara", BirthYear: 0, MaxAge: 50, Faction: "f", Role: "Leader"}
+	other := HistoricalFigure{ID: "oth-1", Name: "Stranger", BirthYear: 10, MaxAge: 70, Faction: "f", Role: "Explorer"}
+
+	figures := []HistoricalFigure{parent, other}
+	events := CheckDeaths(figures, 60, newTestRNG(1))
+
+	hasSuccession := false
+	for _, e := range events {
+		if e.Category == "Succession" {
+			hasSuccession = true
+		}
+	}
+	if hasSuccession {
+		t.Error("should not have succession when leader had no heir")
+	}
+}
+
+func TestCheckDeaths_StatInheritanceCap(t *testing.T) {
+	parent := HistoricalFigure{ID: "leader-3", Name: "Legend", BirthYear: 0, MaxAge: 50, Faction: "f", Role: "Leader", Stats: Stats{Martial: 20, Diplomatic: 20, Infamy: 20}}
+	child := HistoricalFigure{ID: "heir-3", Name: "Prodigy", BirthYear: 20, MaxAge: 70, Faction: "f", Stats: Stats{Martial: 19, Diplomatic: 19, Infamy: 19}}
+	AddParentChild(&parent, &child)
+
+	figures := []HistoricalFigure{parent, child}
+	CheckDeaths(figures, 60, newTestRNG(1))
+
+	if figures[1].Stats.Martial != 20 {
+		t.Errorf("heir stats capped at 20, got %d", figures[1].Stats.Martial)
+	}
+}
+
+func TestCheckMarriages_SameFaction(t *testing.T) {
+	figures := []HistoricalFigure{
+		{ID: "a", Name: "A", BirthYear: 0, MaxAge: 70, Faction: "Iron"},
+		{ID: "b", Name: "B", BirthYear: 0, MaxAge: 70, Faction: "Iron"},
+	}
+	rng := newTestRNG(42)
+	events := CheckMarriages(figures, "settle", "Iron", 25, rng)
+	for _, e := range events {
+		if e.Category != "Marriage" {
+			t.Errorf("unexpected event category: %q", e.Category)
+		}
+	}
+}
+
+func TestCheckMarriages_CrossFaction(t *testing.T) {
+	figures := []HistoricalFigure{
+		{ID: "a", Name: "A", BirthYear: 0, MaxAge: 70, Faction: "Iron"},
+		{ID: "b", Name: "B", BirthYear: 0, MaxAge: 70, Faction: "Wood"},
+	}
+	rng := newTestRNG(42)
+	events := CheckMarriages(figures, "settle", "Iron", 25, rng)
+	if len(events) != 0 {
+		t.Errorf("expected no cross-faction marriages, got %d", len(events))
+	}
+}
+
+func TestCheckMarriages_AgeGate(t *testing.T) {
+	figures := []HistoricalFigure{
+		{ID: "a", Name: "Young", BirthYear: 15, MaxAge: 70, Faction: "Iron"},
+		{ID: "b", Name: "Old", BirthYear: 30, MaxAge: 70, Faction: "Iron"},
+	}
+	rng := newTestRNG(42)
+	events := CheckMarriages(figures, "settle", "Iron", 35, rng)
+	if len(events) != 0 {
+		t.Errorf("expected no marriages outside 20-25 age, got %d", len(events))
+	}
+}
+
+func TestCheckMarriages_Determinism(t *testing.T) {
+	figures1 := []HistoricalFigure{
+		{ID: "a", Name: "A", BirthYear: 0, MaxAge: 70, Faction: "Iron"},
+		{ID: "b", Name: "B", BirthYear: 0, MaxAge: 70, Faction: "Iron"},
+	}
+	figures2 := []HistoricalFigure{
+		{ID: "a", Name: "A", BirthYear: 0, MaxAge: 70, Faction: "Iron"},
+		{ID: "b", Name: "B", BirthYear: 0, MaxAge: 70, Faction: "Iron"},
+	}
+	rng1 := newTestRNG(42)
+	rng2 := newTestRNG(42)
+	e1 := CheckMarriages(figures1, "s", "Iron", 25, rng1)
+	e2 := CheckMarriages(figures2, "s", "Iron", 25, rng2)
+	if len(e1) != len(e2) {
+		t.Errorf("determinism failed: %d vs %d marriages", len(e1), len(e2))
+	}
+}
+
+func TestCheckMarriages_SkipsDead(t *testing.T) {
+	figures := []HistoricalFigure{
+		{ID: "a", Name: "A", BirthYear: 0, MaxAge: 24, Faction: "Iron", DeathYear: 25},
+		{ID: "b", Name: "B", BirthYear: 0, MaxAge: 70, Faction: "Iron"},
+	}
+	rng := newTestRNG(42)
+	events := CheckMarriages(figures, "settle", "Iron", 25, rng)
+	if len(events) != 0 {
+		t.Errorf("expected no marriages involving dead figures, got %d", len(events))
+	}
+}
+
+func TestCheckMarriages_SkipsMarried(t *testing.T) {
+	figures := []HistoricalFigure{
+		{ID: "a", Name: "A", BirthYear: 0, MaxAge: 70, Faction: "Iron", Relationships: Relationships{Spouse: []string{"b"}}},
+		{ID: "b", Name: "B", BirthYear: 0, MaxAge: 70, Faction: "Iron", Relationships: Relationships{Spouse: []string{"a"}}},
+	}
+	rng := newTestRNG(42)
+	events := CheckMarriages(figures, "settle", "Iron", 25, rng)
+	if len(events) != 0 {
+		t.Errorf("expected no marriages for already-married figures, got %d", len(events))
+	}
+}

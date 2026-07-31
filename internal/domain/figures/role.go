@@ -22,6 +22,12 @@ func NewRole(name string) (Role, error) {
 		return &Leader{}, nil
 	case "Explorer":
 		return &Explorer{}, nil
+	case "General":
+		return &General{}, nil
+	case "Diplomat":
+		return &Diplomat{}, nil
+	case "Master Smith":
+		return &MasterSmith{}, nil
 	default:
 		return nil, fmt.Errorf("unknown role: %q", name)
 	}

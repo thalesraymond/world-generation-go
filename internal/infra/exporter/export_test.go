@@ -456,6 +456,119 @@ func TestExportFiguresWikiLinks(t *testing.T) {
 	}
 }
 
+func TestExportFiguresStatsInFrontmatter(t *testing.T) {
+	f := figures.HistoricalFigure{
+		ID:        "char-stats",
+		Name:      "Kara Ironhand",
+		BirthYear: 100,
+		Role:      "General",
+		Faction:   "Ironbound",
+		Stats: figures.Stats{
+			Martial:    15,
+			Diplomatic: 8,
+			Infamy:     3,
+		},
+	}
+	state := &world.State{
+		Width: 10, Height: 10,
+		Settlements: []world.Settlement{{Name: "Riverwatch", Figures: []figures.HistoricalFigure{f}}},
+	}
+
+	tmpDir := t.TempDir()
+	if err := ExportFigures(state, nil, filepath.Join(tmpDir, "vault")); err != nil {
+		t.Fatalf("ExportFigures failed: %v", err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(tmpDir, "vault", "characters", "Kara Ironhand.md"))
+	if err != nil {
+		t.Fatalf("read figure file: %v", err)
+	}
+	body := string(content)
+
+	for _, want := range []string{"martial: 15", "diplomatic: 8", "infamy: 3"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("missing stats frontmatter field: %s", want)
+		}
+	}
+}
+
+func TestExportFiguresReputationSection(t *testing.T) {
+	f := figures.HistoricalFigure{
+		ID:        "char-rep",
+		Name:      "Milo Silver",
+		BirthYear: 100,
+		Role:      "Leader",
+		Faction:   "Ironbound",
+		Reputation: []figures.ReputationEntry{
+			{Year: 120, Event: "Battle", Delta: 5, Description: "Led a daring defense"},
+			{Year: 125, Event: "Scandal", Delta: -2, Description: "Accused of favoritism"},
+		},
+	}
+	state := &world.State{
+		Width: 10, Height: 10,
+		Settlements: []world.Settlement{{Name: "Riverwatch", Figures: []figures.HistoricalFigure{f}}},
+	}
+
+	tmpDir := t.TempDir()
+	if err := ExportFigures(state, nil, filepath.Join(tmpDir, "vault")); err != nil {
+		t.Fatalf("ExportFigures failed: %v", err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(tmpDir, "vault", "characters", "Milo Silver.md"))
+	if err != nil {
+		t.Fatalf("read figure file: %v", err)
+	}
+	body := string(content)
+
+	if !strings.Contains(body, "## Notable Deeds") {
+		t.Errorf("missing Notable Deeds section")
+	}
+	if !strings.Contains(body, "Year 120: Led a daring defense (_+5 reputation_) [Battle]") {
+		t.Errorf("missing positive reputation entry")
+	}
+	if !strings.Contains(body, "Year 125: Accused of favoritism (_-2 reputation_) [Scandal]") {
+		t.Errorf("missing negative reputation entry")
+	}
+	if !strings.Contains(body, "reputation: 3") {
+		t.Errorf("missing total reputation frontmatter")
+	}
+}
+
+func TestExportFiguresTransitionHistory(t *testing.T) {
+	f := figures.HistoricalFigure{
+		ID:        "char-trans",
+		Name:      "Elara Swift",
+		BirthYear: 100,
+		Role:      "Explorer",
+		Faction:   "Sylvani",
+		TransitionHistory: []figures.TransitionEntry{
+			{Year: 130, FromRole: "Explorer", ToRole: "Leader", Reason: "founded settlement"},
+		},
+	}
+	state := &world.State{
+		Width: 10, Height: 10,
+		Settlements: []world.Settlement{{Name: "Oakhaven", Figures: []figures.HistoricalFigure{f}}},
+	}
+
+	tmpDir := t.TempDir()
+	if err := ExportFigures(state, nil, filepath.Join(tmpDir, "vault")); err != nil {
+		t.Fatalf("ExportFigures failed: %v", err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(tmpDir, "vault", "characters", "Elara Swift.md"))
+	if err != nil {
+		t.Fatalf("read figure file: %v", err)
+	}
+	body := string(content)
+
+	if !strings.Contains(body, "## Role Transition History") {
+		t.Errorf("missing Role Transition History section")
+	}
+	if !strings.Contains(body, "Year 130: Explorer → Leader (founded settlement)") {
+		t.Errorf("missing transition entry")
+	}
+}
+
 func TestExportFiguresNoCharactersDirWhenEmpty(t *testing.T) {
 	state := &world.State{
 		Width:  10,
