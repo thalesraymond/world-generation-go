@@ -113,7 +113,7 @@ func (s *settlementEntity) Tick(year int, eventChan chan<- domsim.Event, rng *ra
 	}
 
 	// 3. Check births
-	newborn := figures.CheckBirths(s.settlement.Figures, s.settlement.Population, year, s.figureRNG)
+	newborn := figures.CheckBirths(s.settlement.Figures, s.settlement.Population, year, s.settlement.Name, s.figureRNG)
 	if newborn != nil {
 		s.settlement.Figures = append(s.settlement.Figures, *newborn)
 		eventChan <- domsim.Event{
@@ -155,8 +155,9 @@ func (s *settlementEntity) Tick(year int, eventChan chan<- domsim.Event, rng *ra
 			continue
 		}
 		roleEvents := role.GenerateEvents(&s.settlement.Figures[i], s.settlement.Name, s.settlement.Population, s.pointcrawlGraph, s.settlement.X, s.settlement.Y, s.figureRNG)
-		for _, e := range roleEvents {
-			e.Year = year
+		for j := range roleEvents {
+			roleEvents[j].Year = year
+			roleEvents[j].SettlementName = s.settlement.Name
 		}
 		generatedEvents = append(generatedEvents, roleEvents...)
 	}

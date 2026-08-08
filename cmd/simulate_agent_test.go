@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	dompointcrawl "github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 	domsim "github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/state"
@@ -252,6 +253,41 @@ func TestAgentRNGAbsenceSkipsDecisionLoop(t *testing.T) {
 	for event := range eventChan {
 		if isAgentCategory(event.Category) {
 			t.Errorf("legacy entity without agentRNG must not emit agent events, got %+v", event)
+		}
+	}
+}
+
+// TestSettlementTickNoYearZeroEvents verifies that role-generated events are
+// stamped with the current year rather than left as year 0.
+func TestSettlementTickNoYearZeroEvents(t *testing.T) {
+	s := newAgentTestSettlement("Haven", 1000)
+	s.Figures = []figures.HistoricalFigure{
+		{ID: "Haven-0", Name: "Aldric", BirthYear: 0, MaxAge: 70, Role: "Leader"},
+	}
+	settlements := []world.Settlement{s}
+
+	engine := state.NewEngine(1)
+	env := &agentEnv{all: &settlements, usedNames: map[string]bool{"Haven": true}}
+	entity := &settlementEntity{
+		settlement:      &settlements[0],
+		figureRNG:       engine.GetPRNG("figures:Haven"),
+		agentRNG:        engine.GetPRNG("agent:Haven"),
+		pointcrawlGraph: dompointcrawl.NewGraph(),
+		allSettlements:  &settlements,
+		env:             env,
+	}
+
+	eventChan := make(chan domsim.Event, 512)
+	go func() {
+		for year := 1; year <= 50; year++ {
+			entity.Tick(year, eventChan, engine.GetPRNG("timeline"))
+		}
+		close(eventChan)
+	}()
+
+	for event := range eventChan {
+		if event.Year == 0 {
+			t.Fatalf("event has year 0: %+v", event)
 		}
 	}
 }
