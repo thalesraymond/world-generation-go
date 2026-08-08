@@ -45,4 +45,3 @@ domain.out
 test_output.txt
 agent_coverage.out
 coverage_report.txt
-graphify-out/cache
