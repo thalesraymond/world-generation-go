@@ -384,7 +384,7 @@ func TestGenerateFounders_HasStats(t *testing.T) {
 
 func TestCheckBirths_HasStats(t *testing.T) {
 	rng := newTestRNG(1)
-	child := CheckBirths(nil, 20000, 100, rng)
+	child := CheckBirths(nil, 20000, 100, "Haven", rng)
 	if child == nil {
 		t.Fatal("no birth")
 	}
