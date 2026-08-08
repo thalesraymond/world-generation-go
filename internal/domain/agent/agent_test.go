@@ -165,7 +165,7 @@ func TestExpandExecuteNoTargets(t *testing.T) {
 
 	event := (ExpandAction{}).Execute(&all[0], &all, env, newTestRNG())
 
-	if event.Description != "Alpha expansion failed: no suitable targets" {
+	if event.Description != "Alpha found no site to settle" {
 		t.Fatalf("event description = %q", event.Description)
 	}
 	if len(all) != 1 {
@@ -281,7 +281,7 @@ func TestRaidExecuteNoTarget(t *testing.T) {
 	env := &testEnv{maxRange: 10}
 
 	event := (RaidAction{}).Execute(&all[0], &all, env, newTestRNG())
-	if event.Description != "Alpha found no worthwhile raid targets" {
+	if event.Description != "Alpha sought war in vain" {
 		t.Fatalf("event description = %q", event.Description)
 	}
 	if event.TargetSettlement != "" {
