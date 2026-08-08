@@ -82,12 +82,12 @@ func TestEngine_Resolve_MissingVariable(t *testing.T) {
 	})
 
 	rng := randv2.New(randv2.NewPCG(7, 8))
-	got, err := eng.Resolve("say", nil, rng)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	_, err := eng.Resolve("say", nil, rng)
+	if err == nil {
+		t.Fatal("expected error for missing variable")
 	}
-	if got != "$missing" {
-		t.Fatalf("expected %q, got %q", "$missing", got)
+	if !errors.Is(err, ErrNoEligibleAlternative) {
+		t.Fatalf("expected ErrNoEligibleAlternative, got %v", err)
 	}
 }
 
@@ -219,6 +219,90 @@ func TestNewEngineFromString_ParseError(t *testing.T) {
 	_, err := NewEngineFromString("not a grammar")
 	if err == nil {
 		t.Fatal("expected parse error")
+	}
+}
+
+func TestEngine_Resolve_NoEligibleAlternative(t *testing.T) {
+	eng := NewEngine(&Grammar{
+		Rules: map[string]Rule{
+			"greet": {Name: "greet", Alternatives: []Alternative{
+				{Variable{Name: "name"}},
+			}},
+		},
+	})
+
+	rng := randv2.New(randv2.NewPCG(1, 2))
+	_, err := eng.Resolve("greet", map[string]string{}, rng)
+	if err == nil {
+		t.Fatal("expected error for no eligible alternative")
+	}
+	if !errors.Is(err, ErrNoEligibleAlternative) {
+		t.Fatalf("expected ErrNoEligibleAlternative, got %v", err)
+	}
+}
+
+func TestEngine_Resolve_EligibilityFiltersIneligible(t *testing.T) {
+	eng := NewEngine(&Grammar{
+		Rules: map[string]Rule{
+			"greet": {Name: "greet", Alternatives: []Alternative{
+				{Terminal{Text: "hello, "}, Variable{Name: "name"}},
+				{Terminal{Text: "hi there"}},
+			}},
+		},
+	})
+
+	rng := randv2.New(randv2.NewPCG(1, 2))
+	// Without name, only the second alternative is eligible.
+	got, err := eng.Resolve("greet", nil, rng)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got != "hi there" {
+		t.Fatalf("expected %q, got %q", "hi there", got)
+	}
+}
+
+func TestEngine_Resolve_EmptyVariableTreatedAsMissing(t *testing.T) {
+	eng := NewEngine(&Grammar{
+		Rules: map[string]Rule{
+			"greet": {Name: "greet", Alternatives: []Alternative{
+				{Terminal{Text: "hello, "}, Variable{Name: "name"}},
+				{Terminal{Text: "hi there"}},
+			}},
+		},
+	})
+
+	rng := randv2.New(randv2.NewPCG(1, 2))
+	got, err := eng.Resolve("greet", map[string]string{"name": ""}, rng)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got != "hi there" {
+		t.Fatalf("expected %q, got %q", "hi there", got)
+	}
+}
+
+func TestEngine_Narrate_NoEligibleAlternative(t *testing.T) {
+	eng := NewEngine(&Grammar{
+		Rules: map[string]Rule{
+			"plague": {Name: "plague", Alternatives: []Alternative{
+				{Terminal{Text: "In "}, Variable{Name: "year"}, Terminal{Text: ", "}, Variable{Name: "location"}, Terminal{Text: " suffered."}},
+			}},
+		},
+	})
+
+	event := simulation.Event{
+		Year:        450,
+		Category:    "plague",
+		Description: "Disease swept the land.",
+	}
+	rng := randv2.New(randv2.NewPCG(1, 2))
+	_, err := eng.Narrate(event, nil, rng)
+	if err == nil {
+		t.Fatal("expected error for no eligible alternative")
+	}
+	if !errors.Is(err, ErrNoEligibleAlternative) {
+		t.Fatalf("expected ErrNoEligibleAlternative, got %v", err)
 	}
 }
 

@@ -16,6 +16,9 @@ const defaultMaxDepth = 10
 var (
 	// ErrRuleNotFound is returned when Resolve targets a rule absent from the grammar.
 	ErrRuleNotFound = fmt.Errorf("rule not found in grammar")
+	// ErrNoEligibleAlternative is returned when no alternative of a rule has all
+	// of its direct variables present and non-empty in the context.
+	ErrNoEligibleAlternative = fmt.Errorf("no eligible alternative")
 )
 
 // Engine expands context-free grammar rules into narrative text.
@@ -57,7 +60,11 @@ func (e *Engine) SetMaxDepth(d int) {
 
 // Resolve expands the named rule into narrative text.
 //
-// Variables are substituted from context; missing variables emit "$name".
+// An alternative is eligible when every direct variable it references is
+// present and non-empty in context; the RNG draws uniformly among the
+// eligible alternatives only. If no alternative is eligible, the error
+// ErrNoEligibleAlternative (wrapped with the rule name) is returned and
+// no backtracking is attempted — callers implement the fallback chain.
 // If recursion exceeds maxDepth, the expansion falls back to "[...]".
 func (e *Engine) Resolve(ruleName string, context map[string]string, rng *randv2.Rand) (string, error) {
 	return e.resolve(ruleName, context, rng, 0)
@@ -89,6 +96,29 @@ func (e *Engine) NarrateWithRule(event simulation.Event, extraContext map[string
 	return text, nil
 }
 
+// alternativeVariables returns the names of all direct variables referenced
+// in an alternative.
+func alternativeVariables(alt Alternative) []string {
+	var names []string
+	for _, sym := range alt {
+		if v, ok := sym.(Variable); ok {
+			names = append(names, v.Name)
+		}
+	}
+	return names
+}
+
+// isAlternativeEligible reports whether every direct variable referenced by
+// the alternative is present and non-empty in the context.
+func isAlternativeEligible(alt Alternative, context map[string]string) bool {
+	for _, name := range alternativeVariables(alt) {
+		if v, ok := context[name]; !ok || v == "" {
+			return false
+		}
+	}
+	return true
+}
+
 func (e *Engine) resolve(ruleName string, context map[string]string, rng *randv2.Rand, depth int) (string, error) {
 	rule, ok := e.grammar.Rules[ruleName]
 	if !ok {
@@ -103,7 +133,17 @@ func (e *Engine) resolve(ruleName string, context map[string]string, rng *randv2
 		return "", fmt.Errorf("rule %q has no alternatives", ruleName)
 	}
 
-	alt := rule.Alternatives[rng.IntN(len(rule.Alternatives))]
+	var eligible []Alternative
+	for _, alt := range rule.Alternatives {
+		if isAlternativeEligible(alt, context) {
+			eligible = append(eligible, alt)
+		}
+	}
+	if len(eligible) == 0 {
+		return "", fmt.Errorf("%w: %q", ErrNoEligibleAlternative, ruleName)
+	}
+
+	alt := eligible[rng.IntN(len(eligible))]
 
 	var out strings.Builder
 	for _, sym := range alt {
