@@ -42,13 +42,13 @@ func (ExpandAction) Execute(self *world.Settlement, all *[]world.Settlement, env
 	event := simulation.Event{Year: -1, Category: "Expansion", SettlementName: self.Name}
 
 	if env == nil {
-		event.Description = fmt.Sprintf("%s expansion failed: no suitable targets", self.Name)
+		event.Description = fmt.Sprintf("%s found no site to settle", self.Name)
 		return event
 	}
 
 	x, y, ok := env.FindExpansionTarget(self, rng)
 	if !ok {
-		event.Description = fmt.Sprintf("%s expansion failed: no suitable targets", self.Name)
+		event.Description = fmt.Sprintf("%s found no site to settle", self.Name)
 		return event
 	}
 
@@ -111,7 +111,7 @@ func (RaidAction) Execute(self *world.Settlement, all *[]world.Settlement, env A
 
 	target := raidTarget(self, *all, env.MaxActionRange())
 	if target == "" {
-		event.Description = fmt.Sprintf("%s found no worthwhile raid targets", self.Name)
+		event.Description = fmt.Sprintf("%s sought war in vain", self.Name)
 		return event
 	}
 
@@ -190,7 +190,7 @@ func (ConquerAction) Execute(self *world.Settlement, all *[]world.Settlement, en
 
 	target := conquerTarget(self, *all, env.MaxActionRange())
 	if target == "" {
-		event.Description = fmt.Sprintf("%s found no conquerable targets", self.Name)
+		event.Description = fmt.Sprintf("%s sought conquest in vain", self.Name)
 		return event
 	}
 
@@ -295,7 +295,7 @@ func (AllyAction) Execute(self *world.Settlement, all *[]world.Settlement, env A
 
 	target := allyTarget(self, *all)
 	if target == "" {
-		event.Description = fmt.Sprintf("%s found no willing allies", self.Name)
+		event.Description = fmt.Sprintf("%s found no kindred court", self.Name)
 		return event
 	}
 

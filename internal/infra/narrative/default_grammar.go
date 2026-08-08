@@ -1,24 +1,45 @@
 package narrative
 
 // DefaultGrammar is the default CFG grammar string for the narrative engine.
-// Rules map to Event.Category values: Settlement, Conflict, Disaster, Politics, Discovery, Birth, Death,
-// plus agent categories: Expansion, Raid, Conquest, Diplomacy, Economy.
-// Available context variables: $year, $category, $description, $FigureName, $FigureRole, $SettlementName,
-// and for agent events: $ActionType, $TargetSettlement, $Outcome, $Amount.
+// Rules map to Event.Category values: Settlement, Conflict, Politics, Discovery,
+// Birth, Death, Marriage, RoleTransition, plus agent categories: Expansion,
+// Raid, Conquest, Diplomacy, Economy, AgentAction.
+//
+// Available context variables: $year, $category, $description, $FigureName,
+// $FigureRole, $SettlementName, and for agent events: $ActionType,
+// $TargetSettlement, $Outcome, $Amount.
+//
+// Invariants enforced by static validation in
+// default_grammar_test.go (TestDefaultGrammar_StaticInvariants):
+//
+//   - Every top-level rule has >= 1 alternative eligible under its
+//     guaranteed context. .figure rules are exempt; the chronicle caller
+//     falls back to the base rule on ErrNoEligibleAlternative.
+//   - RoleTransition has >= 1 role-free alternative so an empty
+//     FigureRole still resolves a sentence.
+//   - Every .figure alternative references $year so figure narration
+//     carries chronology.
+//   - $description appears only at clause boundaries (first symbol of an
+//     alternative, or preceded by a terminal ending in , . : —). It is
+//     never embedded as a mid-sentence noun phrase.
+//   - Agent-category rules (Expansion, Raid, Conquest, Diplomacy, Economy)
+//     do not reference $SettlementName: $Outcome is already a complete
+//     sentence that states the subject, so re-stating it produces the
+//     outcome-echo defect.
+//   - Dead rules with no producing timeline category (Disaster, Succession,
+//     ReputationChange) are absent. The chronicle caller falls back to
+//     event.Description on ErrRuleNotFound if a future producer emits
+//     them.
 const DefaultGrammar = `# Mythic Fantasy Default Grammar
 # Maps directly to Event.Category values
 
 # ── Settlement ──────────────────────────────────────────
-Settlement ::= "In the year " $year ", " <settlement_blessing> "."
-	| "The people of " $description " rejoiced as " <settlement_celebration> "."
-	| "A wave of " <settlement_prosperity> " washed over " $description " in " $year "."
-	| "Strange " <settlement_omen> " appeared in " $description ", stirring both hope and dread."
-	| $description " flourished as " <settlement_trade> " filled its coffers in " $year "."
-
-settlement_blessing ::= "the harvest yielded twice its expected bounty"
-	| "a newborn star blessed the fields with unnatural fertility"
-	| "ancient irrigation channels awakened by forgotten magic"
-	| "the soil itself grew rich and dark, yielding crops of wondrous size"
+# Guaranteed context: year, description, SettlementName, FigureName
+Settlement ::= "In " $year ", " $description "."
+	| $SettlementName " rejoiced in " $year " as " <settlement_celebration> "."
+	| "A wave of " <settlement_prosperity> " washed over " $SettlementName " in " $year "."
+	| "Strange " <settlement_omen> " appeared in " $SettlementName " during " $year ", stirring both hope and dread."
+	| $SettlementName " flourished in " $year " as " <settlement_trade> " filled its coffers."
 
 settlement_celebration ::= "a grand festival of masks and music drew crowds from every corner"
 	| "the High Harvest feast lasted seven nights without pause"
@@ -41,12 +62,12 @@ settlement_trade ::= "caravans from distant lands arrived bearing silks and spic
 	| "traders bartered in rare crystals found only in the sunken caverns below"
 
 # ── Conflict ────────────────────────────────────────────
+# Guaranteed context: year, description
 Conflict ::= "In " $year ", " <conflict_skirmish> ", and " <conflict_outcome> "."
-	| "The " <conflict_scale> " of " $description " erupted when " <conflict_catalyst> "."
-	| $description "."
-	| <conflict_scale> " claimed countless lives before " <conflict_outcome> "."
-	| "Banners of " <conflict_faction> " clashed at " $description " during the winter of " $year ". " <conflict_outcome> "."
-	| "A " <conflict_tactic> " turned the tide at " $description " in " $year ", leading to " <conflict_outcome> "."
+	| "In " $year ", " $description "."
+	| <conflict_scale> " claimed countless lives in " $year " before " <conflict_outcome> "."
+	| "Banners of " <conflict_faction> " clashed during the winter of " $year ". " <conflict_outcome> "."
+	| "A " <conflict_tactic> " turned the tide in " $year ", leading to " <conflict_outcome> "."
 
 conflict_skirmish ::= "steel met steel as rival hosts collided on the blood-soaked plains"
 	| "arrows darkened the sky above the siege towers"
@@ -64,11 +85,6 @@ conflict_scale ::= "Border War"
 	| "Siege of Sorrow"
 	| "War of the Broken Crown"
 
-conflict_catalyst ::= "a disputed bloodline claim ignited old hatreds"
-	| "raiders from the wastelands pushed deep into fertile territories"
-	| "a sacred relic was stolen from its temple sanctuary"
-	| "an ambassador was found murdered beneath a flag of truce"
-
 conflict_faction ::= "the Iron Covenant"
 	| "the Ashen Lords"
 	| "the Freehold Confederacy"
@@ -80,59 +96,14 @@ conflict_tactic ::= "daring night raid"
 	| "elemental barrage summoned from the screaming skies"
 	| "tunnel sappers who collapsed the fortress foundations"
 
-# ── Disaster ────────────────────────────────────────────
-Disaster ::= "A " <disaster_type> " of " <disaster_magnitude> " befell " $description " in " $year "."
-	| $description " was consumed by " <disaster_calamity> " during the " <disaster_season> " of " $year "."
-	| "When the " <disaster_type> " came to " $description " in " $year ", " <disaster_aftermath> "."
-	| "The " <disaster_season> " of " $year " brought " <disaster_calamity> " upon " $description ", leaving only " <disaster_remnant> "."
-	| "From the " <disaster_source> ", a " <disaster_type> " descended upon " $description " in " $year ". " <disaster_aftermath> "."
-
-disaster_type ::= "Plague"
-	| "Famine"
-	| "Great Fire"
-	| "Blight"
-	| "Tempest"
-	| "Earthquake"
-
-disaster_magnitude ::= "unprecedented severity"
-	| "ancient proportions"
-	| "merciless intensity"
-	| "apocalyptic scale"
-
-disaster_calamity ::= "a creeping rot that blackened crops and fouled the wells"
-	| "rains of ash that smothered the sun for forty days"
-	| "a shudder deep below that split the earth into chasms"
-	| "a wasting fever that spared neither noble nor beggar"
-	| "a tide of vermin that devoured every grain in every storehouse"
-
-disaster_season ::= "Year of the Weeping Moon"
-	| "Blighted Summer"
-	| "Long Winter"
-	| "Season of Ash"
-
-disaster_aftermath ::= "the survivors fled, carrying only what they could hold"
-	| "a generation of hunger shaped the treaties that followed"
-	| "the land itself was scarred, and nothing grew there for a decade"
-	| "the old rulers fell, blamed for failing to avert the catastrophe"
-	| "a strange serenity settled over the ruins, as if the land was at peace for the first time"
-
-disaster_remnant ::= "scorched earth and bitter memory"
-	| "a handful of orphans huddled in a single standing hall"
-	| "silence where markets once roared"
-	| "crypts overflowing with the unclaimed dead"
-
-disaster_source ::= "cracks in the mountain's heart"
-	| "poisoned heavens beyond the rim of the world"
-	| "depths no living light has touched"
-	| "forgotten catacombs sealed by the first kings"
-
 # ── Politics ────────────────────────────────────────────
-Politics ::= "In " $year ", " <political_intrigue> " within " $description "."
-	| "The court of " $description " was shaken when " <political_event> "."
-	| $description "."
+# Guaranteed context: year, description
+Politics ::= "In " $year ", " <political_intrigue> " unfolded within the court."
+	| "The court was shaken in " $year " when " <political_event> "."
+	| "In " $year ", " $description "."
 	| <political_scheme> "."
-	| "A " <political_ritual> " was held in " $year " as " $description " faced " <political_crisis> "."
-	| "Whispers of " <political_betrayal> " spread through " $description " in " $year ", and " <political_outcome> "."
+	| "A " <political_ritual> " was held in " $year " amid " <political_crisis> "."
+	| "Whispers of " <political_betrayal> " spread in " $year ", and " <political_outcome> "."
 
 political_intrigue ::= "a shadowy cabal of mask-wearing nobles plotted the throne's succession"
 	| "the old king named an unexpected heir, setting cousin against cousin"
@@ -144,7 +115,7 @@ political_event ::= "the heir apparent vanished on the eve of their coronation"
 	| "the royal astrologer proclaimed a celestial omen of doom"
 	| "a vault of sealed pacts was discovered beneath the throne room"
 
-political_scheme ::= "clever spy network unraveled a plot to poison the entire council"
+political_scheme ::= "a clever spy network unraveled a plot to poison the entire council"
 	| "a tribute of enchanted steel bought the loyalty of the border lords"
 	| "the treasury was emptied to fund a shadow war against the rebel provinces"
 	| "a false prophet was planted in the capital to sway the common folk"
@@ -170,21 +141,17 @@ political_outcome ::= "a fragile peace was brokered at dagger-point"
 	| "a new dynasty rose from the ashes of the old, crowned in blood and fire"
 
 # ── Discovery ──────────────────────────────────────────
+# Guaranteed context: year, description
 Discovery ::= "In " $year ", " <discovery_exploit> "."
-	| $description " changed the world when " <discovery_revelation> "."
-	| "Deep beneath " $description ", " <discovery_find> "."
+	| "In " $year ", " $description "."
+	| "Deep beneath the earth in " $year ", " <discovery_find> "."
 	| "Through " <discovery_method> ", scholars in " $year " uncovered " <discovery_marvel> "."
-	| "A lone " <discovery_explorer> " ventured from " $description " in " $year " and " <discovery_return> "."
+	| "A lone " <discovery_explorer> " ventured forth in " $year " and " <discovery_return> "."
 
-discovery_exploit ::= "a expedition to the " <discovery_place> " returned with maps of impossible lands"
+discovery_exploit ::= "an expedition to the " <discovery_place> " returned with maps of impossible lands"
 	| "a mage discovered a new school of magic woven from " <discovery_material>
 	| "a wandering smith unlocked the secret of forging " <discovery_artifact>
 	| "a cartographer traced the true shape of the continent, revealing " <discovery_place>
-
-discovery_revelation ::= "a lost spell was reclaimed from a pre-human ruin"
-	| "a seam of star-metal was found nestled in a volcanic caldera"
-	| "the journal of a forgotten explorer revealed a passage through the " <discovery_place>
-	| "an ancient guardian awoke and spoke a prophecy in a language older than speech"
 
 discovery_find ::= "a sealed vault held the preserved knowledge of a fallen civilization"
 	| "a network of luminescent caverns stretched for leagues, lit by crystalline flora"
@@ -228,78 +195,80 @@ discovery_return ::= "returned bearing a crown of living crystal"
 	| "came home changed, speaking in riddles and bearing gifts of unearthly beauty"
 
 # ── Birth ───────────────────────────────────────────────
+# Guaranteed context: year, description, SettlementName, FigureName
 Birth ::= "In " $year ", " $FigureName " was born in " $SettlementName "."
 	| "The people of " $SettlementName " welcomed " $FigureName " in " $year "."
 	| $FigureName " drew their first breath in " $SettlementName " during " $year "."
 
 # ── Death ───────────────────────────────────────────────
+# Guaranteed context: year, description, SettlementName, FigureName.
+# Alt 3 is role-free so an empty FigureRole still resolves.
 Death ::= "In " $year ", " $FigureName " the " $FigureRole " of " $SettlementName " passed into memory."
 	| "The " $FigureRole " " $FigureName " of " $SettlementName " was laid to rest in " $year "."
 	| $SettlementName " mourned " $FigureName " throughout " $year "."
 
-# ── Conflict (figure-driven) ───────────────────────────
-# Figure-driven alternatives use $FigureName, $FigureRole, $SettlementName.
-# Fallback to generic rules above when variables are absent.
-Conflict.figure ::= $FigureRole " " $FigureName " of " $SettlementName " led a raid on " $TargetSettlement "."
-	| $FigureName " the " $FigureRole " commanded the forces of " $SettlementName " against " $TargetSettlement "."
-	| "Under " $FigureName "'s command, " $SettlementName "'s army clashed with " $TargetSettlement "."
-
-# ── Politics (figure-driven) ───────────────────────────
-Politics.figure ::= $FigureRole " " $FigureName " of " $SettlementName " negotiated a treaty with " $TargetSettlement "."
-	| $FigureName " the " $FigureRole " brokered peace between " $SettlementName " and " $TargetSettlement "."
-	| "Through " $FigureName "'s diplomacy, " $SettlementName " secured an alliance."
-
-# ── Discovery (figure-driven) ──────────────────────────
-Discovery.figure ::= $FigureRole " " $FigureName " of " $SettlementName " discovered " $TargetSettlement "."
-	| $FigureName " the " $FigureRole " charted the unexplored reaches beyond " $SettlementName "."
-	| $FigureName " ventured forth from " $SettlementName " and returned with maps of new lands."
-
 # ── Marriage ──────────────────────────────────────────
+# Guaranteed context: year, description, SettlementName, FigureName
 Marriage ::= "In " $year ", " $FigureName " wed, uniting two families of " $SettlementName "."
 	| "The people of " $SettlementName " celebrated the marriage of " $FigureName " in " $year "."
 	| $FigureName " of " $SettlementName " was joined in marriage during " $year "."
 
 # ── RoleTransition ────────────────────────────────────
+# Guaranteed context: year, description, SettlementName, FigureName.
+# Alt 4 is role-free so an empty FigureRole still resolves.
 RoleTransition ::= "In " $year ", " $FigureName " was no longer content with their old role, and instead became known as " $FigureRole " of " $SettlementName "."
 	| $FigureName " of " $SettlementName " changed their destiny in " $year ", rising as " $FigureRole "."
 	| "The people of " $SettlementName " witnessed " $FigureName " take on a new path as " $FigureRole " in " $year "."
+	| $FigureName " of " $SettlementName " charted a new path in " $year "."
 
-# ── Succession ────────────────────────────────────────
-Succession ::= "In " $year ", " $FigureName " succeeded as the new " $FigureRole " of " $SettlementName "."
-	| $FigureName " inherited the mantle of leadership over " $SettlementName " in " $year "."
-	| $SettlementName " gained a new " $FigureRole " in " $year " when " $FigureName " rose to power."
+# ── Conflict (figure-driven) ───────────────────────────
+# Every alternative references $year (chronology) and a role-free fallback
+# (alt 3) so an empty FigureRole still resolves.
+Conflict.figure ::= $FigureRole " " $FigureName " of " $SettlementName " led a raid on " $TargetSettlement " in " $year "."
+	| $FigureName " the " $FigureRole " commanded the forces of " $SettlementName " against " $TargetSettlement " in " $year "."
+	| "Under " $FigureName "'s command, " $SettlementName "'s army clashed with " $TargetSettlement " in " $year "."
 
-# ── ReputationChange ──────────────────────────────────
-ReputationChange ::= "In " $year ", word spread of " $FigureName "'s deeds in " $SettlementName "."
-	| "The bards of " $year " sang of " $FigureName " the " $FigureRole " of " $SettlementName "."
-	| $FigureName "'s reputation grew across " $SettlementName " after the events of " $year "."
+# ── Politics (figure-driven) ───────────────────────────
+Politics.figure ::= $FigureRole " " $FigureName " of " $SettlementName " negotiated a treaty with " $TargetSettlement " in " $year "."
+	| $FigureName " the " $FigureRole " brokered peace between " $SettlementName " and " $TargetSettlement " in " $year "."
+	| "Through " $FigureName "'s diplomacy, " $SettlementName " secured an alliance in " $year "."
+
+# ── Discovery (figure-driven) ──────────────────────────
+Discovery.figure ::= $FigureRole " " $FigureName " of " $SettlementName " discovered " $TargetSettlement " in " $year "."
+	| $FigureName " the " $FigureRole " charted the unexplored reaches beyond " $SettlementName " in " $year "."
+	| $FigureName " ventured forth from " $SettlementName " in " $year " and returned with maps of new lands."
 
 # ── Agent Actions ───────────────────────────────────────
 # Expansion, Raid, Conquest, Diplomacy, and Economy events produced by the
 # settlement agent decision loop. Variables: $ActionType, $TargetSettlement,
 # $Outcome, $Amount, $SettlementName.
-
-Expansion ::= <AgentAction>
-	| "In " $year ", the people of " $SettlementName " raised new banners beyond their walls: " $Outcome "."
-	| $SettlementName " looked outward in " $year ", and " $Outcome "."
-
-Raid ::= <AgentAction>
-	| "War-bands from " $SettlementName " fell upon " $TargetSettlement " in " $year ": " $Outcome "."
-	| "In " $year ", " $Outcome ", and the feud between " $SettlementName " and " $TargetSettlement " deepened."
-
-Conquest ::= <AgentAction>
-	| "In " $year ", the banners of " $SettlementName " rose over " $TargetSettlement ": " $Outcome "."
-	| $Outcome " — so ended the independence of " $TargetSettlement " in " $year "."
-
-Diplomacy ::= <AgentAction>
-	| "In " $year ", envoys between " $SettlementName " and " $TargetSettlement " sealed their pact: " $Outcome "."
-	| $Outcome ", and the bards of " $year " sang of the accord."
-
-Economy ::= <AgentAction>
-	| "In " $year ", the coffers of " $SettlementName " told their own story: " $Outcome "."
-	| $SettlementName " tended its wealth in " $year " — " $Outcome "."
+#
+# Guaranteed context: year, description, SettlementName, ActionType,
+# Outcome, TargetSettlement (TargetSettlement may be empty for
+# Economy / Expansion).
+#
+# $Outcome is already a complete, subject-prefixed sentence (e.g.
+# "Deepcrest raided Northhold and seized 50 wealth"), so the framing
+# alternatives must not re-state the subject via $SettlementName — that
+# produces the outcome-echo defect. AgentAction carries the terse forms
+# (no subject echo); the category rules reference AgentAction and add at
+# most one non-subject framing alternative (which may use $TargetSettlement
+# or just $year) to add a year/target clause.
 
 AgentAction ::= "In " $year ", " $Outcome
 	| $Outcome " (" $year ")"
 	| "It is recorded that in " $year ", " $Outcome
+
+Expansion ::= <AgentAction>
+
+Raid ::= <AgentAction>
+	| "War fell upon " $TargetSettlement " in " $year "."
+
+Conquest ::= <AgentAction>
+	| $TargetSettlement " fell under new banners in " $year "."
+
+Diplomacy ::= <AgentAction>
+	| "Envoys plied their words between courts in " $year "."
+
+Economy ::= <AgentAction>
 `

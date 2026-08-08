@@ -96,9 +96,10 @@ func (e *Engine) NarrateWithRule(event simulation.Event, extraContext map[string
 	return text, nil
 }
 
-// alternativeVariables returns the names of all direct variables referenced
-// in an alternative.
-func alternativeVariables(alt Alternative) []string {
+// AlternativeVariables returns the names of all direct variables referenced
+// in an alternative. Variables nested inside referenced non-terminals are
+// not included — each rule filters those when it expands.
+func AlternativeVariables(alt Alternative) []string {
 	var names []string
 	for _, sym := range alt {
 		if v, ok := sym.(Variable); ok {
@@ -111,7 +112,7 @@ func alternativeVariables(alt Alternative) []string {
 // isAlternativeEligible reports whether every direct variable referenced by
 // the alternative is present and non-empty in the context.
 func isAlternativeEligible(alt Alternative, context map[string]string) bool {
-	for _, name := range alternativeVariables(alt) {
+	for _, name := range AlternativeVariables(alt) {
 		if v, ok := context[name]; !ok || v == "" {
 			return false
 		}
