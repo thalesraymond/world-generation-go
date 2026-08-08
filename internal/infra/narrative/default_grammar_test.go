@@ -61,12 +61,6 @@ func subset(sub, sup map[string]struct{}) bool {
 	return true
 }
 
-// isFigureRule reports whether a rule name is a figure-driven variant
-// (e.g. "Conflict.figure"). The base rules of these names are figure-free.
-func isFigureRule(name string) bool {
-	return strings.HasSuffix(name, ".figure")
-}
-
 // hasYearReference reports whether the alternative references $year anywhere
 // (direct variable only).
 func hasYearReference(alt narrative.Alternative) bool {
