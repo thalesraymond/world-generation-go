@@ -59,6 +59,7 @@ func TestNewEngineFromFile_LoadsMythicalGrammar(t *testing.T) {
 			extra: map[string]string{
 				"settlement": "Rivensprawl",
 				"faction":    "the Dominion of Sun",
+				"location":   "the Thornwood Vale",
 			},
 			contains: []string{"Rivensprawl", "the Dominion of Sun"},
 		},
@@ -100,6 +101,7 @@ func TestNewEngineFromFile_LoadsMythicalGrammar(t *testing.T) {
 				"explorer": "Elara Moonwhisper",
 				"thing":    "the Crown of Stars",
 				"place":    "the Sunken Vale",
+				"location": "the Mournful Reach",
 			},
 			contains: []string{"Elara Moonwhisper", "the Crown of Stars", "the Sunken Vale"},
 		},

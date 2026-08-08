@@ -99,7 +99,7 @@ func TestCheckBirths_UnderCap(t *testing.T) {
 		{ID: "a", Name: "A", BirthYear: 0, MaxAge: 70},
 	}
 	rng := newTestRNG(1)
-	child := CheckBirths(figures, 20000, 100, rng)
+	child := CheckBirths(figures, 20000, 100, "Haven", rng)
 	if child == nil {
 		t.Fatalf("expected a birth under cap")
 	}
@@ -111,7 +111,7 @@ func TestCheckBirths_AtCap(t *testing.T) {
 		figures[i] = HistoricalFigure{ID: "alive", Name: "A", BirthYear: 0, MaxAge: 70}
 	}
 	rng := newTestRNG(1)
-	child := CheckBirths(figures, 99999, 100, rng)
+	child := CheckBirths(figures, 99999, 100, "Haven", rng)
 	if child != nil {
 		t.Fatalf("expected no birth when at cap")
 	}
@@ -120,12 +120,51 @@ func TestCheckBirths_AtCap(t *testing.T) {
 func TestCheckBirths_NewFigureHasCorrectYear(t *testing.T) {
 	rng := newTestRNG(1)
 	currentYear := 100
-	child := CheckBirths(nil, 20000, currentYear, rng)
+	child := CheckBirths(nil, 20000, currentYear, "Haven", rng)
 	if child == nil {
 		t.Fatalf("expected a birth")
 	}
 	if child.BirthYear != currentYear {
 		t.Fatalf("expected birth year %d, got %d", currentYear, child.BirthYear)
+	}
+}
+
+func TestCheckBirths_PerSettlementOrdinalID(t *testing.T) {
+	figures := []HistoricalFigure{
+		{ID: "Haven-0", Name: "Founder", BirthYear: 0, MaxAge: 70},
+	}
+	rng := newTestRNG(1)
+	child := CheckBirths(figures, 20000, 100, "Haven", rng)
+	if child == nil {
+		t.Fatalf("expected a birth")
+	}
+	if child.ID != "Haven-1" {
+		t.Fatalf("expected ID %q, got %q", "Haven-1", child.ID)
+	}
+}
+
+func TestCheckBirths_IDUniquenessAcrossPipeline(t *testing.T) {
+	const settlement = "Ironhold"
+	const faction = "Ironbound"
+	const foundingYear = 100
+
+	rng := newTestRNG(42)
+	figs := GenerateFounders(rng, settlement, faction, foundingYear)
+	seen := make(map[string]bool)
+	for _, f := range figs {
+		seen[f.ID] = true
+	}
+
+	for year := foundingYear + 1; year <= foundingYear+100; year++ {
+		CheckDeaths(figs, year, rng)
+		child := CheckBirths(figs, 15000, year, settlement, rng)
+		if child != nil {
+			if seen[child.ID] {
+				t.Fatalf("duplicate figure ID %q", child.ID)
+			}
+			seen[child.ID] = true
+			figs = append(figs, *child)
+		}
 	}
 }
 
@@ -156,7 +195,7 @@ func TestFullPipelineDeterminism(t *testing.T) {
 		figs := GenerateFounders(rng, settlement, faction, foundingYear)
 		for year := foundingYear + 1; year <= foundingYear+50; year++ {
 			CheckDeaths(figs, year, rng)
-			child := CheckBirths(figs, 15000, year, rng)
+			child := CheckBirths(figs, 15000, year, settlement, rng)
 			if child != nil {
 				figs = append(figs, *child)
 			}
@@ -234,7 +273,7 @@ func TestEmptyFigures_Nil(t *testing.T) {
 
 	// CheckBirths is probabilistic — with nil figures and high population
 	// a birth is likely but not guaranteed. The key assertion is no panic.
-	CheckBirths(nil, 10000, 100, rng)
+	CheckBirths(nil, 10000, 100, "Haven", rng)
 
 	assignEvents := AssignRoles(nil, nil, 0, 0, rng)
 	if len(assignEvents) != 0 {
@@ -252,7 +291,7 @@ func TestEmptyFigures_EmptySlice(t *testing.T) {
 	}
 
 	// CheckBirths is probabilistic — the key assertion is no panic.
-	CheckBirths(empty, 10000, 100, rng)
+	CheckBirths(empty, 10000, 100, "Haven", rng)
 
 	assignEvents := AssignRoles(empty, nil, 0, 0, rng)
 	if len(assignEvents) != 0 {

@@ -96,7 +96,7 @@ func CheckDeaths(figures []HistoricalFigure, currentYear int, rng *randv2.Rand) 
 }
 
 // CheckBirths evaluates whether a new figure is born this year.
-func CheckBirths(figures []HistoricalFigure, population float64, currentYear int, rng *randv2.Rand) *HistoricalFigure {
+func CheckBirths(figures []HistoricalFigure, population float64, currentYear int, settlementName string, rng *randv2.Rand) *HistoricalFigure {
 	aliveCount := 0
 	for _, f := range figures {
 		if f.IsAlive() {
@@ -114,7 +114,7 @@ func CheckBirths(figures []HistoricalFigure, population float64, currentYear int
 	idx := len(figures)
 	maxAge := 70 + rng.IntN(21)
 	figure := &HistoricalFigure{
-		ID:            fmt.Sprintf("born-%d", idx),
+		ID:            fmt.Sprintf("%s-%d", settlementName, idx),
 		Name:          GenerateName(rng),
 		BirthYear:     currentYear,
 		MaxAge:        maxAge,
