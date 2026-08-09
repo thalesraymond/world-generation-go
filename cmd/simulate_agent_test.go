@@ -202,22 +202,16 @@ func TestSettlementTickExpandAppendsSettlement(t *testing.T) {
 	}
 }
 
-func TestExtractAmount(t *testing.T) {
-	cases := []struct {
-		description string
-		want        string
-	}{
-		{"Haven raided Blackgate and seized 50 wealth", "50"},
-		{"Haven raided Blackgate and seized 50 wealth.", "50"},
-		{"Haven prospers", ""},
-		{"no numbers here", ""},
-		{"year 42 saw 100 wealth change hands", "100"}, // 100 followed by wealth
+// isAgentCategory reports whether the event category is produced by the
+// settlement agent decision loop. The narration pipeline moved this predicate
+// into the Chronicle service; the Tick tests below keep a test-scoped copy to
+// assert agent-event emission independently of the CLI narration path.
+func isAgentCategory(category string) bool {
+	switch category {
+	case "Expansion", "Raid", "Conquest", "Diplomacy", "Economy":
+		return true
 	}
-	for _, tc := range cases {
-		if got := extractAmount(tc.description); got != tc.want {
-			t.Errorf("extractAmount(%q) = %q, want %q", tc.description, got, tc.want)
-		}
-	}
+	return false
 }
 
 func TestIsAgentCategory(t *testing.T) {

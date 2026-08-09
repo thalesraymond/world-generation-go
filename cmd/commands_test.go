@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -250,15 +251,100 @@ func compareExportDirs(t *testing.T, dir1, dir2 string) {
 func executeCommand(t *testing.T, args ...string) string {
 	t.Helper()
 
+	output, err := executeCommandErr(t, args...)
+	if err != nil {
+		t.Fatalf("Execute(%v) returned error: %v", args, err)
+	}
+	return output
+}
+
+func executeCommandErr(t *testing.T, args ...string) (string, error) {
+	t.Helper()
+
 	rootCmd := NewRootCommand()
 	output := &bytes.Buffer{}
 	rootCmd.SetOut(output)
 	rootCmd.SetErr(output)
 	rootCmd.SetArgs(args)
 
-	if err := rootCmd.Execute(); err != nil {
-		t.Fatalf("Execute(%v) returned error: %v", args, err)
+	err := rootCmd.Execute()
+	return output.String(), err
+}
+
+// rawEventLine matches a FormatEvent line emitted by the verbose preset, e.g.
+// "[3] (Economy) Deepcrest prospers." or "[3] (Raid) Deepcrest → Northhold: ...".
+var rawEventLine = regexp.MustCompile(`^\[\d+\] (\([^)]*\) )?.*$`)
+
+func TestSimulateCommandSingleChronicleStream(t *testing.T) {
+	viper.Reset()
+	tmpDir := t.TempDir()
+	viper.Set("output", tmpDir)
+	output := executeCommand(t, "simulate", "--output", tmpDir, "--years", "5", "--width", "64", "--height", "64")
+
+	chronicleIdx := strings.Index(output, "--- Chronicle ---")
+	if chronicleIdx < 0 {
+		t.Fatal("simulate output missing the Chronicle header")
 	}
 
-	return output.String()
+	// With the default preset the pass-1 collector no longer prints, so no raw
+	// FormatEvent lines may appear anywhere in the output.
+	for i, line := range strings.Split(output, "\n") {
+		if rawEventLine.MatchString(line) {
+			t.Errorf("line %d = %q, want no raw FormatEvent lines in single-stream output", i, line)
+		}
+	}
+
+	// The narrated stream must carry real chronicle content (settlements with
+	// events), proving the Chronicle service ran and produced prose.
+	if strings.Count(output[chronicleIdx:], "\n") < 3 {
+		t.Errorf("chronicle section too sparse: %q", output[chronicleIdx:])
+	}
+}
+
+func TestSimulateCommandVerboseEmitsRawLines(t *testing.T) {
+	viper.Reset()
+	tmpDir := t.TempDir()
+	viper.Set("output", tmpDir)
+	output := executeCommand(t, "simulate", "--output", tmpDir, "--years", "3", "--width", "64", "--height", "64", "--events", "verbose")
+
+	rawCount := 0
+	for _, line := range strings.Split(output, "\n") {
+		if rawEventLine.MatchString(line) {
+			rawCount++
+		}
+	}
+	if rawCount < 10 {
+		t.Fatalf("verbose output should interleave raw FormatEvent lines with narration, got %d raw lines", rawCount)
+	}
+}
+
+func TestSimulateCommandInvalidPresetSurfacesError(t *testing.T) {
+	viper.Reset()
+	tmpDir := t.TempDir()
+	viper.Set("output", tmpDir)
+	_, err := executeCommandErr(t, "simulate", "--output", tmpDir, "--years", "2", "--width", "16", "--height", "16", "--events", "bogus")
+	if err == nil {
+		t.Fatal("expected an actionable error for an invalid --events preset")
+	}
+	if !strings.Contains(err.Error(), "bogus") || !strings.Contains(err.Error(), "quiet, normal, or verbose") {
+		t.Errorf("error = %v, want it to name the invalid preset and list the accepted values", err)
+	}
+}
+
+func TestSimulateCommandStdoutDeterminism(t *testing.T) {
+	viper.Reset()
+	// Both runs share one output directory: the generated files are
+	// byte-identical, so the second run overwrites with identical content and
+	// the printed paths match.
+	dir := t.TempDir()
+	run := func() string {
+		viper.Set("output", dir)
+		return executeCommand(t, "simulate", "--output", dir, "--years", "10", "--width", "64", "--height", "64")
+	}
+
+	first := run()
+	second := run()
+	if first != second {
+		t.Fatalf("same seed produced different stdout:\n--- first ---\n%s\n--- second ---\n%s", first, second)
+	}
 }
