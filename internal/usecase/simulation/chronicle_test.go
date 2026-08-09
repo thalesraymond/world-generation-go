@@ -96,10 +96,36 @@ func TestChronicleStream_InvalidPreset(t *testing.T) {
 		t.Fatal("expected error for invalid preset")
 	}
 	if !strings.Contains(err.Error(), "nope") || !strings.Contains(err.Error(), "quiet, normal, or verbose") {
-		t.Errorf("error = %q, want actionable invalid-preset message", err)
+		t.Errorf("error = %v, want actionable invalid-preset message", err)
 	}
 	if buf.Len() != 0 {
 		t.Errorf("invalid preset wrote %q", buf.String())
+	}
+}
+
+func TestChronicleStream_NilArguments(t *testing.T) {
+	c := newTestChronicle(t, staticGrammar{src: infranarrative.DefaultGrammar}, testFigureResolver{}, 1)
+	var buf bytes.Buffer
+	events := []domsim.Event{
+		{Year: 1, Category: "Economy", SettlementName: "Deepcrest", Description: "Deepcrest prospers."},
+	}
+
+	//nolint:staticcheck // deliberately exercising the nil-context guard
+	if err := c.Stream(nil, events, "normal", &buf); err == nil {
+		t.Error("expected error for nil context")
+	} else if !strings.Contains(err.Error(), "context is nil") {
+		t.Errorf("nil context error = %v, want a context-is-nil message", err)
+	}
+
+	if err := c.Stream(context.Background(), events, "normal", nil); err == nil {
+		t.Error("expected error for nil output writer")
+	} else if !strings.Contains(err.Error(), "output writer is nil") {
+		t.Errorf("nil writer error = %v, want an output-writer-is-nil message", err)
+	}
+
+	//nolint:staticcheck // deliberately exercising the nil-context guard
+	if err := c.Stream(nil, events, "nope", nil); err == nil {
+		t.Error("expected error for nil context and writer with invalid preset")
 	}
 }
 
@@ -430,7 +456,7 @@ func TestChronicleStream_WriteErrors(t *testing.T) {
 			continue
 		}
 		if !strings.Contains(err.Error(), "write failed") {
-			t.Errorf("preset %s: error = %q, want the underlying write error", preset, err)
+			t.Errorf("preset %s: error = %v, want the underlying write error", preset, err)
 		}
 	}
 }
@@ -448,7 +474,7 @@ func TestChronicleStream_VerboseNarrativeWriteError(t *testing.T) {
 		t.Fatal("expected write error on the narrative line")
 	}
 	if !strings.Contains(err.Error(), "write failed") {
-		t.Errorf("error = %q, want the underlying write error", err)
+		t.Errorf("error = %v, want the underlying write error", err)
 	}
 }
 
@@ -466,7 +492,7 @@ func TestChronicleStream_AggregatedNarrativeWriteError(t *testing.T) {
 		t.Fatal("expected write error on the per-event narrative line")
 	}
 	if !strings.Contains(err.Error(), "write failed") {
-		t.Errorf("error = %q, want the underlying write error", err)
+		t.Errorf("error = %v, want the underlying write error", err)
 	}
 }
 

@@ -7,7 +7,8 @@ import (
 )
 
 // Compile-time check that DefaultGrammarProvider satisfies the usecase
-// GrammarProvider interface without importing it (structural typing).
+// GrammarProvider interface. The infra package does not import usecase — the
+// method set satisfies the interface via structural typing.
 var _ simulation.GrammarProvider = DefaultGrammarProvider{}
 
 func TestDefaultGrammarProvider_Grammar(t *testing.T) {

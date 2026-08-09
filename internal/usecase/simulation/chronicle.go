@@ -115,6 +115,13 @@ func NewChronicle(rng *randv2.Rand, grammar GrammarProvider, figures FigureResol
 // individually. Normal and quiet apply cross-settlement per-year aggregation
 // to Economy|Expansion and suppress their per-event narration.
 func (c *Chronicle) Stream(ctx context.Context, events []domsim.Event, preset string, out io.Writer) error {
+	if ctx == nil {
+		return fmt.Errorf("context is nil")
+	}
+	if out == nil {
+		return fmt.Errorf("output writer is nil")
+	}
+
 	p, err := ParsePreset(preset)
 	if err != nil {
 		return err
