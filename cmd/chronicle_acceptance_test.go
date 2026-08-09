@@ -63,25 +63,33 @@ func TestChronicleAcceptanceInvariants(t *testing.T) {
 
 func TestChronicleDeterminism(t *testing.T) {
 	viper.Reset()
-	dir := t.TempDir()
+	dir1 := t.TempDir()
+	dir2 := t.TempDir()
 
 	args := []string{"--years", "20", "--width", "64", "--height", "64", "--seed", "42", "--events", "normal"}
 
-	viper.Set("output", dir)
-	out1 := executeCommand(t, append([]string{"simulate", "--output", dir}, args...)...)
+	viper.Set("output", dir1)
+	out1 := executeCommand(t, append([]string{"simulate", "--output", dir1}, args...)...)
 
-	viper.Set("output", dir)
-	out2 := executeCommand(t, append([]string{"simulate", "--output", dir}, args...)...)
+	viper.Set("output", dir2)
+	out2 := executeCommand(t, append([]string{"simulate", "--output", dir2}, args...)...)
 
-	if out1 != out2 {
-		t.Fatalf("same seed produced different stdout:\n--- first ---\n%s\n--- second ---\n%s", out1, out2)
+	chronicleIdx1 := strings.Index(out1, "--- Chronicle ---")
+	chronicleIdx2 := strings.Index(out2, "--- Chronicle ---")
+	if chronicleIdx1 < 0 || chronicleIdx2 < 0 {
+		t.Fatal("simulate output missing the Chronicle header")
+	}
+	chronicle1 := out1[chronicleIdx1:]
+	chronicle2 := out2[chronicleIdx2:]
+	if chronicle1 != chronicle2 {
+		t.Fatalf("same seed produced different chronicle:\n--- first ---\n%s\n--- second ---\n%s", chronicle1, chronicle2)
 	}
 
-	state1, err := os.ReadFile(filepath.Join(dir, "world_state.json"))
+	state1, err := os.ReadFile(filepath.Join(dir1, "world_state.json"))
 	if err != nil {
 		t.Fatalf("read world_state.json (run1): %v", err)
 	}
-	state2, err := os.ReadFile(filepath.Join(dir, "world_state.json"))
+	state2, err := os.ReadFile(filepath.Join(dir2, "world_state.json"))
 	if err != nil {
 		t.Fatalf("read world_state.json (run2): %v", err)
 	}
@@ -89,11 +97,11 @@ func TestChronicleDeterminism(t *testing.T) {
 		t.Fatal("world_state.json differs across identical runs")
 	}
 
-	timeline1, err := os.ReadFile(filepath.Join(dir, "timeline.json"))
+	timeline1, err := os.ReadFile(filepath.Join(dir1, "timeline.json"))
 	if err != nil {
 		t.Fatalf("read timeline.json (run1): %v", err)
 	}
-	timeline2, err := os.ReadFile(filepath.Join(dir, "timeline.json"))
+	timeline2, err := os.ReadFile(filepath.Join(dir2, "timeline.json"))
 	if err != nil {
 		t.Fatalf("read timeline.json (run2): %v", err)
 	}
@@ -102,37 +110,7 @@ func TestChronicleDeterminism(t *testing.T) {
 	}
 }
 
-func TestChronicleNoOutcomeEcho(t *testing.T) {
-	viper.Reset()
-	tmpDir := t.TempDir()
-	viper.Set("output", tmpDir)
 
-	output := executeCommand(t, "simulate", "--output", tmpDir, "--years", "20", "--width", "64", "--height", "64", "--seed", "42", "--events", "normal")
-
-	chronicleIdx := strings.Index(output, "--- Chronicle ---")
-	if chronicleIdx < 0 {
-		t.Fatal("simulate output missing the Chronicle header")
-	}
-	chronicle := output[chronicleIdx:]
-
-	outcomeEchoPatterns := []string{
-		"raided .* and seized",
-		"raided .* but was driven off",
-		"secured an alliance",
-		"declares a festival",
-		"establishes new trade routes",
-	}
-
-	for _, pattern := range outcomeEchoPatterns {
-		re := regexp.MustCompile(pattern)
-		lines := strings.Split(chronicle, "\n")
-		for _, line := range lines {
-			if re.MatchString(line) {
-				continue
-			}
-		}
-	}
-}
 
 func TestGoldFixtureChronicle(t *testing.T) {
 	viper.Reset()
@@ -147,14 +125,13 @@ func TestGoldFixtureChronicle(t *testing.T) {
 	}
 	chronicle := output[chronicleIdx:]
 
-	goldDir := "testdata/gold"
-	if err := os.MkdirAll(goldDir, 0755); err != nil {
-		t.Fatalf("create gold fixture dir: %v", err)
+	goldPath := filepath.Join("testdata", "gold", "chronicle-normal-seed42.txt")
+	want, err := os.ReadFile(goldPath)
+	if err != nil {
+		t.Fatalf("read gold fixture: %v", err)
 	}
-
-	goldPath := filepath.Join(goldDir, "chronicle-normal-seed42.txt")
-	if err := os.WriteFile(goldPath, []byte(chronicle), 0644); err != nil {
-		t.Fatalf("write gold fixture: %v", err)
+	if string(want) != chronicle {
+		t.Errorf("chronicle output differs from gold fixture\n--- got ---\n%s--- want ---\n%s", chronicle, string(want))
 	}
 
 	timelinePath := filepath.Join(tmpDir, "timeline.json")
