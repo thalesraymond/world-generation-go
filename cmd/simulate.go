@@ -6,7 +6,6 @@ import (
 	randv2 "math/rand/v2"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/spf13/cobra"
@@ -14,7 +13,6 @@ import (
 	appconfig "github.com/thalesraymond/world-generation-go/config"
 	"github.com/thalesraymond/world-generation-go/internal/domain/agent"
 	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
-	domnarrative "github.com/thalesraymond/world-generation-go/internal/domain/narrative"
 	dompointcrawl "github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 	"github.com/thalesraymond/world-generation-go/internal/domain/settlement"
 	domsim "github.com/thalesraymond/world-generation-go/internal/domain/simulation"
@@ -273,8 +271,6 @@ func newSimulateCommand() *cobra.Command {
 				defer wg.Done()
 				for event := range eventChan {
 					events = append(events, event)
-					formatted := domsim.FormatEvent(event)
-					_, _ = fmt.Fprintln(cmd.OutOrStdout(), formatted)
 				}
 			}()
 			sim.Run(eventChan)
@@ -302,62 +298,17 @@ func newSimulateCommand() *cobra.Command {
 			}
 			cmd.Printf("Timeline saved to %s\n", timelinePath)
 
-			narrativeEngine, err := domnarrative.NewEngineFromString(infranarrative.DefaultGrammar)
-			if err != nil {
-				return fmt.Errorf("create narrative engine: %w", err)
-			}
 			narrativeRNG := engine.GetPRNG("narrative")
-
-			// Build figure lookup for narrative variable injection.
-			figureLookup := make(map[string]figures.HistoricalFigure)
-			for i := range worldState.Settlements {
-				for j := range worldState.Settlements[i].Figures {
-					f := &worldState.Settlements[i].Figures[j]
-					figureLookup[f.ID] = *f
-				}
+			resolver := ucsim.NewWorldFigureResolver(worldState)
+			chronicle, err := ucsim.NewChronicle(narrativeRNG, infranarrative.DefaultGrammarProvider{}, resolver)
+			if err != nil {
+				return fmt.Errorf("create chronicle: %w", err)
 			}
 
 			_, _ = fmt.Fprintln(cmd.OutOrStdout())
 			_, _ = fmt.Fprintln(cmd.OutOrStdout(), "--- Chronicle ---")
-			for _, event := range events {
-				var extra map[string]string
-				if event.FigureID != "" {
-					if fig, ok := figureLookup[event.FigureID]; ok {
-						extra = map[string]string{
-							"FigureName":     fig.Name,
-							"FigureRole":     fig.Role,
-							"SettlementName": event.SettlementName,
-						}
-					}
-				}
-				if isAgentCategory(event.Category) {
-					if extra == nil {
-						extra = make(map[string]string)
-					}
-					extra["SettlementName"] = event.SettlementName
-					extra["ActionType"] = event.Category
-					extra["TargetSettlement"] = event.TargetSettlement
-					extra["Outcome"] = event.Description
-					extra["Amount"] = extractAmount(event.Description)
-				}
-				var text string
-				var err error
-				if extra != nil && extra["FigureName"] != "" {
-					switch event.Category {
-					case "Conflict", "Politics", "Discovery":
-						text, err = narrativeEngine.NarrateWithRule(event, extra, narrativeRNG, event.Category+".figure")
-						if err != nil {
-							text = ""
-						}
-					}
-				}
-				if text == "" {
-					text, err = narrativeEngine.Narrate(event, extra, narrativeRNG)
-					if err != nil {
-						text = event.Description
-					}
-				}
-				_, _ = fmt.Fprintln(cmd.OutOrStdout(), text)
+			if err := chronicle.Stream(cmd.Context(), events, cfg.Events, cmd.OutOrStdout()); err != nil {
+				return fmt.Errorf("render chronicle: %w", err)
 			}
 
 			cmd.Println("\nSimulation completed successfully.")
@@ -380,38 +331,4 @@ func newSimulateCommand() *cobra.Command {
 	bindCommandFlag(cmd, "height")
 
 	return cmd
-}
-
-// isAgentCategory reports whether the event category is produced by the
-// settlement agent decision loop.
-func isAgentCategory(category string) bool {
-	switch category {
-	case "Expansion", "Raid", "Conquest", "Diplomacy", "Economy":
-		return true
-	}
-	return false
-}
-
-// extractAmount pulls the first integer-like token out of an event
-// description (e.g. "50" from "... seized 50 wealth"). It returns an empty
-// string when no amount is present.
-func extractAmount(description string) string {
-	fields := strings.Fields(description)
-	for i, field := range fields {
-		num := strings.Trim(field, ".,;:")
-		if num == "" {
-			continue
-		}
-		isNumber := true
-		for _, r := range num {
-			if r < '0' || r > '9' {
-				isNumber = false
-				break
-			}
-		}
-		if isNumber && i+1 < len(fields) && strings.Trim(fields[i+1], ".,;:") == "wealth" {
-			return num
-		}
-	}
-	return ""
 }
