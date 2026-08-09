@@ -1,0 +1,2327 @@
+--- Chronicle ---
+Jorah Pryor drew their first breath in Deephold during 1.
+In 1, 50 settlements tended their wealth: Ashbridge, Ashcrest, Ashcrest-2, Ashmarch, Ashmere, Ashmere-2, Blackmere, Brighthaven, Brighthaven-2, Brightvale, Coldbridge, Coldcross, Coldstone, Darkdale, Darkforge, Darkwatch, Deepgate, Deephold, Easthaven, Golddale, Goldfield, Goldgate, Greengate, Greenmarch, Greenvale, Highfall, Highgate, Highhold, Northforge, Northhold-3, Northvale, Redfall, Redforge, Redgate, Redhaven, Redstone, Southcrest, Southcross, Southcross-2, Southgate, Stillgate, Stonefield, Stonehaven, Thornmarch, Westbridge, Westdale, Westfield, Westhold, Westwood, Whiteford.
+The people of Deepcrest welcomed Quillon Yewbark in 1.
+It is recorded that in 1, Deepcrest raided Northhold and seized 50 wealth
+The people of Southcross welcomed Norwin Wildermere in 1.
+Istran Thorne drew their first breath in Ashfield during 1.
+A wave of mercantile fortune washed over Ashfield in 1.
+War fell upon Redfall in 1.
+In 1, Elara Yewbark was born in Stonemere.
+Through Yorick the Bold's diplomacy, Stonemere secured an alliance in 1.
+War fell upon Coldcross in 1.
+The people of Redfall welcomed Helia Holloway in 1.
+Through Haldor Duskweaver's diplomacy, Redfall secured an alliance in 1.
+Malak the Wise drew their first breath in Southcrest during 1.
+In 1, Eldrin Blackwood was born in Redgate.
+Malak Frostbane drew their first breath in Greenvale during 1.
+Weyland Blackwood drew their first breath in Coldcross during 1.
+In 1, Thorian Wildermere was born in Northhold.
+War fell upon Southcrest in 1.
+Brisa Vane drew their first breath in Westgate during 1.
+War fell upon Northhold in 1.
+Xander Brightlance drew their first breath in Westhold during 1.
+In 1, the crack of spellfire and shattering shields filled the valley, and both sides withdrew, the field littered with the fallen.
+The people of Ironwood welcomed Caius Ravenhill in 1.
+War fell upon Southgate in 1.
+The people of Ashmarch welcomed Zarek Glimmerstone in 1.
+In 1, Obarin Oakenshield was born in Goldkeep.
+Goldkeep raided Ashmere and seized 50 wealth (1)
+The people of Southfall welcomed Dorian Ironheart in 1.
+War fell upon Ashbridge in 1.
+In 1, Xander Wildermere was born in Highgate.
+Celeste Oakenshield drew their first breath in Stonebridge during 1.
+War fell upon Goldkeep in 1.
+The people of Highhold welcomed Baelor Frostbane in 1.
+In 1, Dorian Underhill was born in Southgate.
+The people of Stonefield welcomed Voren Oakenshield in 1.
+Zarek Coldspring drew their first breath in Greenmarch during 1.
+Voren Wildermere drew their first breath in Brightdale during 1.
+It is recorded that in 1, Brightdale raided Westhold and seized 50 wealth
+In 1, Uldric Lightbringer was born in Stonehaven.
+Kaelen Pryor drew their first breath in Ashmere during 1.
+In 1, Kaelen Quicksilver was born in Thornmarch.
+In 1, Gwyneth Kingsward was born in Goldgate.
+The people of Silvercrest welcomed Fenric Xalcrest in 1.
+Silvercrest flourished in 1 as the market square swelled with merchants hawking curios from beyond the known map filled its coffers.
+War fell upon Greenshire in 1.
+Aeliana Pryor drew their first breath in Stillcrest during 1.
+War fell upon Northhold in 1.
+In 1, Weyland Zephyrwind was born in Deepvale.
+War fell upon Coldkeep in 1.
+Brisa Ashford drew their first breath in Southhold during 1.
+War fell upon Greenvale in 1.
+The people of Ashmarch-2 welcomed Aelar Zephyrwind in 1.
+War fell upon Southhold in 1.
+The people of Greenshire welcomed Obarin Jadewalker in 1.
+Through Jorah the Wise's diplomacy, Greenshire secured an alliance in 1.
+In 1, Greenshire raided Silvercrest and seized 50 wealth
+Caius Thorne drew their first breath in Goldfield during 1.
+Jorah Brightlance drew their first breath in Blackdale during 1.
+Blackdale raided Goldkeep but was driven off (1)
+Irisa Vane drew their first breath in Ironwood-2 during 1.
+War fell upon Westgate in 1.
+Dorian Jadewalker drew their first breath in Blackmere during 1.
+In 1, Baelor the Wise was born in Brighthaven.
+The people of Ashbridge welcomed Yorick the Swift in 1.
+The people of Northhold-2 welcomed Dara Jadewalker in 1.
+Northhold-2 rejoiced in 1 as the High Harvest feast lasted seven nights without pause.
+In 1, Northhold-2 raided Southfall and seized 50 wealth
+The people of Eastwood welcomed Helia Jadewalker in 1.
+War fell upon Southcrest-2 in 1.
+In 1, Quillon the Wise was born in Silverfall.
+War fell upon Greenvale in 1.
+In 1, Rurik Mosswood was born in Darkwatch.
+The people of Goldhold welcomed Baelor Zephyrwind in 1.
+Through Zarek Ironheart's diplomacy, Goldhold secured an alliance in 1.
+Goldhold raided Ashmere-2 and seized 50 wealth (1)
+Gwyneth Ravenhill drew their first breath in Darkdale during 1.
+Darkdale rejoiced in 1 as the High Harvest feast lasted seven nights without pause.
+In 1, Malak the Swift was born in Silverford.
+War fell upon Stonefield in 1.
+The people of Northforge welcomed Thorian Xalcrest in 1.
+Istran Stormborn drew their first breath in Brighthaven-2 during 1.
+The people of Deepgate welcomed Weyland Ebonhart in 1.
+Deepgate flourished in 1 as caravans from distant lands arrived bearing silks and spices filled its coffers.
+Garrick Brightlance drew their first breath in Brightvale during 1.
+The people of Ashcrest welcomed Silas Pryor in 1.
+In 1, Perrin Jadewalker establishes new trade routes through Ashcrest.
+The people of Southhold-2 welcomed Garrick Quicksilver in 1.
+Southhold-2 raided Coldcross but was driven off (1)
+Fiora Oakenshield drew their first breath in Ashhaven during 1.
+War fell upon Westgate in 1.
+The people of Redfall-2 welcomed Helia Stormborn in 1.
+War fell upon Stillcrest in 1.
+In 1, Eldrin Brightlance was born in Easthaven.
+Haldor Frostbane drew their first breath in Darkcross during 1.
+It is recorded that in 1, Darkcross raided Westhold and seized 50 wealth
+The people of Southcrest-2 welcomed Aeliana Vane in 1.
+In 1, Southcrest-2 raided Eastwood and seized 50 wealth
+In 1, Gwyneth Mosswood was born in Stillgate.
+Caius Coldspring drew their first breath in Westbridge during 1.
+In 1, Caius Frostbane declares a festival in Westbridge.
+In 1, Fiora Lightbringer was born in Ashmere-2.
+The people of Southcross-2 welcomed Dara Ironheart in 1.
+The people of Highford welcomed Haldor Coldspring in 1.
+Highford raided Highgate but was driven off (1)
+The people of Coldkeep welcomed Aeliana Stormborn in 1.
+A wave of mercantile fortune washed over Coldkeep in 1.
+It is recorded that in 1, Coldkeep raided Deepgate and seized 50 wealth
+In 1, Aelar Nightfall was born in Greengate.
+In 1, Xander Underhill was born in Greenshire-2.
+It is recorded that in 1, Greenshire-2 raided Coldstone but was driven off
+The people of Coldbridge welcomed Istran Ironheart in 1.
+In 1, Aelar Ebonhart was born in Silverford-2.
+Silverford-2 raided Highfall and seized 50 wealth (1)
+Baelor Oakenshield drew their first breath in Westdale during 1.
+Strange dreams of winged serpents appeared in Westdale during 1, stirring both hope and dread.
+The people of Highfall welcomed Rurik Xalcrest in 1.
+Jorah Coldspring drew their first breath in Greenford during 1.
+Strange dreams of winged serpents appeared in Greenford during 1, stirring both hope and dread.
+Greenford raided Coldstone but was driven off (1)
+Celeste Vane drew their first breath in Northhold-3 during 1.
+The people of Darkforge welcomed Weyland Ironfoot in 1.
+In 1, Haldor Nightfall was born in Golddale.
+Golddale rejoiced in 1 as a tournament of champions honored the founding charter.
+In 1, Dorian Xalcrest was born in Northvale.
+In 1, Fenric Vane was born in Redforge.
+Jorah Stormborn drew their first breath in Coldstone during 1.
+In 1, Zarek Nightfall was born in Ashcrest-2.
+Through Norwin Frostbane's diplomacy, Ashcrest-2 secured an alliance in 1.
+The people of Redstone welcomed Garrick Kingsward in 1.
+In 1, Dara Quicksilver was born in Whiteford.
+The people of Redfall-3 welcomed Garrick Quicksilver in 1.
+It is recorded that in 1, Redfall-3 raided Highmount and seized 50 wealth
+Fiora Quicksilver drew their first breath in Redhaven during 1.
+Strange silver-tongued prophets appeared in Redhaven during 1, stirring both hope and dread.
+The people of Highmount welcomed Istran Blackwood in 1.
+Highmount raided Silverford-2 but was driven off (1)
+Kaelen Ironheart drew their first breath in Northford during 1.
+Crimson Campaign claimed countless lives in 1 before a rout that scattered the defeated across the wilderness.
+Northford raided Greenford but was driven off (1)
+The people of Westwood welcomed Yorick Glimmerstone in 1.
+Crimson Campaign claimed countless lives in 1 before both sides withdrew, the field littered with the fallen.
+In 1, Gwyneth the Wise was born in Westfield.
+Uldric Wildermere drew their first breath in Deephold during 2.
+In 2, Deephold raided Southcrest and seized 50 wealth
+Eldrin Mosswood drew their first breath in Deepcrest during 2.
+War fell upon Northhold in 2.
+The people of Southcross welcomed Elara Dawnwhisper in 2.
+In 2, 60 settlements tended their wealth: Ashbridge, Ashcrest, Ashcrest-2, Ashfield, Ashhaven, Ashmarch-2, Brightdale, Brighthaven, Brighthaven-2, Brightvale, Coldbridge, Coldkeep, Coldstone, Darkcross, Darkdale, Darkforge, Darkwatch, Deepgate, Deepvale, Eastwood, Golddale, Goldgate, Goldhold, Greenford, Greengate, Greenmarch, Greenshire-2, Greenvale, Highfall, Highford, Highgate, Highhold, Ironwood-2, Northford, Northhold-2, Northhold-3, Northvale, Redfall, Redforge, Redgate, Redhaven, Redstone, Silvercrest, Silverfall, Silverford-2, Southcrest, Southcrest-2, Southcross, Southcross-2, Southgate, Southhold-2, Stonefield, Stonemere, Westbridge, Westdale, Westfield, Westgate, Westhold, Westwood, Whiteford.
+Kaelen Frostbane drew their first breath in Ashfield during 2.
+Malak Coldspring drew their first breath in Stonemere during 2.
+Yorick the Bold of Stonemere changed their destiny in 2, rising as Leader.
+In 2, Rurik Coldspring was born in Redfall.
+In 2, Yorick the Swift was born in Southcrest.
+The people of Redgate welcomed Norwin Mosswood in 2.
+The people of Greenvale welcomed Thorian Jadewalker in 2.
+Loric Pryor drew their first breath in Coldcross during 2.
+Coldcross flourished in 2 as a guild of alchemists established a permanent quarter in the heart of town filled its coffers.
+War fell upon Stonemere in 2.
+Haldor Glimmerstone drew their first breath in Northhold during 2.
+War fell upon Southcrest in 2.
+In 2, Quillon the Bold was born in Westgate.
+In 2, Garrick Underhill was born in Westhold.
+In 2, Perrin Xalcrest was born in Ironwood.
+War fell upon Southgate in 2.
+The people of Ashmarch welcomed Fiora Dawnwhisper in 2.
+Ashmarch raided Stonehaven but was driven off (2)
+Rurik Ironfoot drew their first breath in Goldkeep during 2.
+Goldkeep raided Ashmere and seized 50 wealth (2)
+In 2, Irisa Ironfoot was born in Southfall.
+It is recorded that in 2, Southfall raided Ashbridge and seized 50 wealth
+The people of Highgate welcomed Loric Quicksilver in 2.
+Highgate flourished in 2 as caravans from distant lands arrived bearing silks and spices filled its coffers.
+The people of Stonebridge welcomed Kaelen Keen-Eye in 2.
+War fell upon Goldkeep in 2.
+The people of Highhold welcomed Perrin Holloway in 2.
+Highhold flourished in 2 as the market square swelled with merchants hawking curios from beyond the known map filled its coffers.
+In 2, Gwyneth Glimmerstone was born in Southgate.
+Through Uldric Ironheart's diplomacy, Southgate secured an alliance in 2.
+Aelar the Bold drew their first breath in Stonefield during 2.
+In 2, Malak Dawnwhisper was born in Greenmarch.
+The people of Brightdale welcomed Caius Jadewalker in 2.
+In 2, Kaelen Xalcrest was born in Stonehaven.
+War fell upon Ashmarch in 2.
+The people of Ashmere welcomed Caius Stormborn in 2.
+Ashmere raided Goldkeep but was driven off (2)
+Caius Ironheart drew their first breath in Thornmarch during 2.
+In 2, Quillon Yewbark rallies the militia of Thornmarch.
+In 2, Thornmarch raided Westwood but was driven off
+In 2, Malak Brightlance was born in Goldgate.
+Through Kaelen Keen-Eye's diplomacy, Goldgate secured an alliance in 2.
+The people of Silvercrest welcomed Perrin Blackwood in 2.
+A wave of arcane prosperity washed over Silvercrest in 2.
+The people of Stillcrest welcomed Eldrin Jadewalker in 2.
+A tunnel sappers who collapsed the fortress foundations turned the tide in 2, leading to an uneasy stalemate settled over the contested ground.
+In 2, Stillcrest raided Northhold and seized 50 wealth
+The people of Deepvale welcomed Rurik Oakenshield in 2.
+In 2, Celeste Coldspring was born in Southhold.
+Through Aelar Oakenshield's diplomacy, Southhold secured an alliance in 2.
+War fell upon Greenvale in 2.
+In 2, Eldrin Frostbane was born in Ashmarch-2.
+Kaelen Ravenhill drew their first breath in Greenshire during 2.
+Greenshire raided Silvercrest and seized 50 wealth (2)
+In 2, Rurik Mosswood was born in Goldfield.
+War fell upon Blackdale in 2.
+Norwin Fairwind drew their first breath in Blackdale during 2.
+War fell upon Goldkeep in 2.
+In 2, Dara Blackwood was born in Ironwood-2.
+In 2, Voren Vane establishes new trade routes through Ironwood-2.
+In 2, Fiora Stormborn was born in Blackmere.
+War fell upon Southcrest in 2.
+In 2, Dorian the Swift was born in Brighthaven.
+Silas Shadowstep drew their first breath in Ashbridge during 2.
+In 2, Brisa Mosswood establishes new trade routes through Ashbridge.
+Aelar Lightbringer drew their first breath in Northhold-2 during 2.
+Siege of Sorrow claimed countless lives in 2 before a rout that scattered the defeated across the wilderness.
+Baelor Holloway drew their first breath in Eastwood during 2.
+Eastwood rejoiced in 2 as the High Harvest feast lasted seven nights without pause.
+In 2, Quillon the Swift was born in Silverfall.
+Banners of the Iron Covenant clashed during the winter of 2. a rout that scattered the defeated across the wilderness.
+The people of Darkwatch welcomed Eldrin the Swift in 2.
+Yorick Ebonhart drew their first breath in Goldhold during 2.
+Border War claimed countless lives in 2 before an uneasy stalemate settled over the contested ground.
+In 2, Voren Oakenshield was born in Darkdale.
+In 2, Brisa the Wise was born in Silverford.
+A treacherous feigned retreat turned the tide in 2, leading to both sides withdrew, the field littered with the fallen.
+Silverford raided Stonefield and seized 50 wealth (2)
+Obarin Duskweaver drew their first breath in Northforge during 2.
+It is recorded that in 2, Northforge raided Goldfield and seized 50 wealth
+Kaelen Frostbane drew their first breath in Brighthaven-2 during 2.
+The people of Deepgate welcomed Yorick Ebonhart in 2.
+In 2, Jorah Ironheart was born in Brightvale.
+Crimson Campaign claimed countless lives in 2 before an uneasy stalemate settled over the contested ground.
+Loric Underhill drew their first breath in Ashcrest during 2.
+Through Perrin Jadewalker's diplomacy, Ashcrest secured an alliance in 2.
+In 2, Voren Xalcrest was born in Southhold-2.
+The people of Ashhaven welcomed Obarin Keen-Eye in 2.
+Kaelen Duskweaver drew their first breath in Redfall-2 during 2.
+War fell upon Stillcrest in 2.
+Perrin Xalcrest drew their first breath in Easthaven during 2.
+In 2, Easthaven raided Silvercrest but was driven off
+In 2, Voren Yewbark was born in Darkcross.
+Darkcross rejoiced in 2 as the Festival of Veils saw old grudges forgiven under moonlit dance.
+In 2, Celeste Ashford was born in Southcrest-2.
+Jorah Fairwind drew their first breath in Stillgate during 2.
+Helia Ebonhart of Stillgate was joined in marriage during 2.
+Stillgate raided Westbridge and seized 50 wealth (2)
+The people of Westbridge welcomed Haldor Pryor in 2.
+Xander Jadewalker drew their first breath in Ashmere-2 during 2.
+It is recorded that in 2, Ashmere-2 raided Westhold but was driven off
+Aeliana Ashford drew their first breath in Southcross-2 during 2.
+Rurik Brightlance drew their first breath in Highford during 2.
+Through Caius Frostbane's diplomacy, Highford secured an alliance in 2.
+In 2, Malak Pryor was born in Coldkeep.
+Zarek Xalcrest drew their first breath in Greengate during 2.
+Rurik Jadewalker drew their first breath in Greenshire-2 during 2.
+In 2, Aeliana Kingsward was born in Coldbridge.
+Zarek Ironfoot drew their first breath in Silverford-2 during 2.
+Helia Oakenshield drew their first breath in Westdale during 2.
+The people of Highfall welcomed Thorian Frostbane in 2.
+Thorian Vane drew their first breath in Greenford during 2.
+Baelor Duskweaver drew their first breath in Northhold-3 during 2.
+In 2, Obarin the Bold was born in Darkforge.
+The people of Darkforge celebrated the marriage of Aelar Oakenshield in 2.
+In 2, Rurik Xalcrest was born in Golddale.
+In 2, Loric Nightfall was born in Northvale.
+In 2, Norwin Underhill was born in Redforge.
+The people of Coldstone welcomed Elara Dawnwhisper in 2.
+In 2, Istran Duskweaver was born in Ashcrest-2.
+Gwyneth Nightfall drew their first breath in Redstone during 2.
+Haldor Pryor drew their first breath in Whiteford during 2.
+Through Quillon Quicksilver's diplomacy, Whiteford secured an alliance in 2.
+Irisa Zephyrwind drew their first breath in Redfall-3 during 2.
+Redfall-3 raided Highmount but was driven off (2)
+In 2, Uldric Ironheart was born in Redhaven.
+The people of Highmount welcomed Aelar Quicksilver in 2.
+War fell upon Silverford-2 in 2.
+In 2, Istran Quicksilver was born in Northford.
+Obarin Dawnwhisper drew their first breath in Westwood during 2.
+In 2, Dara Underhill was born in Westfield.
+In 3, Perrin Wildermere was born in Deephold.
+In 3, Deephold raided Southcrest and seized 50 wealth
+In 3, Helia Ravenhill was born in Deepcrest.
+In 3, 68 settlements tended their wealth: Ashbridge, Ashcrest, Ashfield, Ashhaven, Ashmarch, Ashmarch-2, Ashmere-2, Blackmere, Brightdale, Brighthaven, Brighthaven-2, Brightvale, Coldbridge, Coldcross, Coldkeep, Coldstone, Darkcross, Darkdale, Darkforge, Darkwatch, Deepcrest, Deepgate, Deepvale, Eastwood, Golddale, Goldfield, Goldgate, Goldkeep, Greenford, Greengate, Greenshire-2, Greenvale, Highfall, Highgate, Highmount, Ironwood, Northford, Northforge, Northhold, Northhold-2, Northhold-3, Northvale, Redfall, Redfall-2, Redforge, Redgate, Redhaven, Redstone, Silvercrest, Silverfall, Silverford, Silverford-2, Southcrest-2, Southcross, Southcross-2, Southgate, Southhold, Southhold-2, Stillcrest, Stillgate, Stonebridge, Stonefield, Thornmarch, Westbridge, Westdale, Westhold, Westwood, Whiteford.
+The people of Southcross welcomed Norwin Lightbringer in 3.
+Malak Brightlance drew their first breath in Ashfield during 3.
+Through Thorian the Wise's diplomacy, Ashfield secured an alliance in 3.
+Weyland Glimmerstone drew their first breath in Stonemere during 3.
+Through Garrick Oakenshield's diplomacy, Stonemere secured an alliance in 3.
+It is recorded that in 3, Stonemere raided Coldcross but was driven off
+In 3, Aeliana Duskweaver was born in Redfall.
+In 3, steel met steel as rival hosts collided on the blood-soaked plains, and a pyrrhic victory that left the victors as broken as the vanquished.
+The people of Southcrest welcomed Baelor Brightlance in 3.
+Through Celeste Jadewalker's diplomacy, Southcrest secured an alliance in 3.
+War fell upon Northhold in 3.
+The people of Redgate welcomed Gwyneth the Bold in 3.
+The people of Greenvale welcomed Irisa Thorne in 3.
+In 3, Irisa Ebonhart was born in Coldcross.
+Xander Xalcrest drew their first breath in Northhold during 3.
+Northhold flourished in 3 as the market square swelled with merchants hawking curios from beyond the known map filled its coffers.
+Jorah Fairwind drew their first breath in Westgate during 3.
+In 3, Westgate raided Northhold and seized 50 wealth
+Weyland Blackwood drew their first breath in Westhold during 3.
+The people of Ironwood welcomed Dara Stormborn in 3.
+Through Rurik Lightbringer's diplomacy, Ironwood secured an alliance in 3.
+Loric Shadowstep drew their first breath in Ashmarch during 3.
+Brisa Pryor drew their first breath in Goldkeep during 3.
+Strange prophecies carved in frost appeared in Goldkeep during 3, stirring both hope and dread.
+Yorick Quicksilver drew their first breath in Southfall during 3.
+War fell upon Ashbridge in 3.
+In 3, Aelar Coldspring was born in Highgate.
+In 3, Dara Yewbark was born in Stonebridge.
+In 3, Eldrin Kingsward was born in Highhold.
+It is recorded that in 3, Highhold raided Ashbridge and seized 50 wealth
+Kaelen Duskweaver drew their first breath in Southgate during 3.
+In 3, Irisa Ashford was born in Stonefield.
+Rurik the Wise drew their first breath in Greenmarch during 3.
+Greenmarch raided Golddale and seized 50 wealth (3)
+In 3, Rurik Coldspring was born in Brightdale.
+A treacherous feigned retreat turned the tide in 3, leading to a rout that scattered the defeated across the wilderness.
+The people of Stonehaven welcomed Rurik the Bold in 3.
+War fell upon Ashmarch in 3.
+The people of Ashmere welcomed Aelar Fairwind in 3.
+Ashmere raided Goldkeep and seized 50 wealth (3)
+The people of Thornmarch welcomed Rurik Lightbringer in 3.
+The people of Goldgate welcomed Dara the Bold in 3.
+Kaelen Keen-Eye of Goldgate charted a new path in 3.
+The people of Silvercrest welcomed Kaelen Glimmerstone in 3.
+In 3, Fiora Holloway was born in Stillcrest.
+In 3, Dara Ironheart was born in Deepvale.
+The people of Southhold welcomed Fiora Frostbane in 3.
+The people of Southhold celebrated the marriage of Aelar Oakenshield in 3.
+In 3, Thorian the Bold was born in Ashmarch-2.
+Banners of the Freehold Confederacy clashed during the winter of 3. both sides withdrew, the field littered with the fallen.
+In 3, Baelor Ravenhill was born in Greenshire.
+In 3, Greenshire raided Silvercrest and seized 50 wealth
+Aeliana Lightbringer drew their first breath in Goldfield during 3.
+Obarin Underhill drew their first breath in Blackdale during 3.
+Banners of the Freehold Confederacy clashed during the winter of 3. both sides withdrew, the field littered with the fallen.
+War fell upon Goldkeep in 3.
+In 3, Helia Underhill was born in Ironwood-2.
+In 3, Ironwood-2 raided Westgate and seized 50 wealth
+The people of Blackmere welcomed Caius Fairwind in 3.
+In 3, Baelor Zephyrwind was born in Brighthaven.
+The people of Ashbridge welcomed Quillon Blackwood in 3.
+The people of Northhold-2 welcomed Dorian Ashford in 3.
+Through Jorah Yewbark's diplomacy, Northhold-2 secured an alliance in 3.
+The people of Eastwood welcomed Rurik Ironheart in 3.
+Border War claimed countless lives in 3 before a rout that scattered the defeated across the wilderness.
+Weyland the Bold drew their first breath in Silverfall during 3.
+In 3, Yorick Mosswood was born in Darkwatch.
+In 3, Malak Thorne leads a skirmish near Darkwatch.
+The people of Goldhold welcomed Fiora Brightlance in 3.
+Through Zarek Ironheart's diplomacy, Goldhold secured an alliance in 3.
+Goldhold raided Ashmere-2 and seized 50 wealth (3)
+Dorian Thorne drew their first breath in Darkdale during 3.
+The people of Silverford welcomed Caius Yewbark in 3.
+Silas Dawnwhisper drew their first breath in Northforge during 3.
+Uldric Dawnwhisper drew their first breath in Brighthaven-2 during 3.
+The people of Deepgate welcomed Dara Fairwind in 3.
+In 3, Xander Kingsward was born in Brightvale.
+Helia Pryor of Brightvale was joined in marriage during 3.
+In 3, Perrin Holloway was born in Ashcrest.
+In 3, Eldrin Shadowstep was born in Southhold-2.
+A wave of mercantile fortune washed over Southhold-2 in 3.
+In 3, Norwin Holloway was born in Ashhaven.
+Ashhaven rejoiced in 3 as the High Harvest feast lasted seven nights without pause.
+In 3, Norwin Shadowstep was born in Redfall-2.
+The people of Easthaven welcomed Zarek Coldspring in 3.
+War fell upon Silvercrest in 3.
+The people of Darkcross welcomed Garrick Brightlance in 3.
+Elara Keen-Eye drew their first breath in Southcrest-2 during 3.
+Irisa Ironfoot drew their first breath in Stillgate during 3.
+The people of Westbridge welcomed Malak Duskweaver in 3.
+Quillon Ironfoot drew their first breath in Ashmere-2 during 3.
+In 3, Gwyneth Glimmerstone was born in Southcross-2.
+Through Fiora Stormborn's diplomacy, Southcross-2 secured an alliance in 3.
+In 3, Dorian Wildermere was born in Highford.
+Through Caius Frostbane's diplomacy, Highford secured an alliance in 3.
+War fell upon Highgate in 3.
+The people of Coldkeep welcomed Norwin Xalcrest in 3.
+The people of Greengate welcomed Irisa Lightbringer in 3.
+In 3, Irisa Underhill was born in Greenshire-2.
+Greenshire-2 rejoiced in 3 as a tournament of champions honored the founding charter.
+In 3, Perrin Duskweaver was born in Coldbridge.
+The people of Silverford-2 welcomed Dara Coldspring in 3.
+Quillon Yewbark of Silverford-2 was joined in marriage during 3.
+The people of Westdale welcomed Dorian Shadowstep in 3.
+Celeste the Bold drew their first breath in Highfall during 3.
+The people of Greenford welcomed Silas Glimmerstone in 3.
+Dara Xalcrest drew their first breath in Northhold-3 during 3.
+In 3, Yorick the Swift was born in Darkforge.
+Celeste Coldspring drew their first breath in Golddale during 3.
+Gwyneth Lightbringer drew their first breath in Northvale during 3.
+Obarin Lightbringer drew their first breath in Redforge during 3.
+Voren Coldspring of Redforge charted a new path in 3.
+The people of Coldstone welcomed Helia Stormborn in 3.
+In 3, Quillon Ravenhill was born in Ashcrest-2.
+War fell upon Westbridge in 3.
+In 3, Celeste Wildermere was born in Redstone.
+Caius Ironfoot drew their first breath in Whiteford during 3.
+Eldrin Yewbark drew their first breath in Redfall-3 during 3.
+War fell upon Highmount in 3.
+In 3, Weyland Shadowstep was born in Redhaven.
+Zarek the Swift drew their first breath in Highmount during 3.
+The people of Northford welcomed Kaelen Quicksilver in 3.
+The people of Westwood welcomed Elara Kingsward in 3.
+Istran Lightbringer of Westwood was joined in marriage during 3.
+Through Garrick Blackwood's diplomacy, Westwood secured an alliance in 3.
+Istran Zephyrwind drew their first breath in Westfield during 3.
+In 3, Celeste Glimmerstone wed, uniting two families of Westfield.
+A daring night raid turned the tide in 3, leading to the day belonged to the the Ashen Lords.
+Westfield raided Northhold-3 but was driven off (3)
+Perrin Mosswood drew their first breath in Deephold during 4.
+In 4, 59 settlements tended their wealth: Ashbridge, Ashcrest, Ashcrest-2, Ashmarch, Ashmarch-2, Ashmere, Ashmere-2, Blackdale, Brighthaven, Brighthaven-2, Brightvale, Coldbridge, Coldcross, Coldkeep, Coldstone, Darkforge, Darkwatch, Deepgate, Deephold, Deepvale, Golddale, Goldfield, Goldgate, Greengate, Greenmarch, Greenshire-2, Highford, Highgate, Highhold, Highmount, Ironwood, Ironwood-2, Northhold, Northhold-3, Northvale, Redforge, Redhaven, Redstone, Silvercrest, Silverfall, Silverford-2, Southcrest, Southcross, Southfall, Southhold, Southhold-2, Stillcrest, Stonebridge, Stonefield, Stonehaven, Stonemere, Thornmarch, Westbridge, Westdale, Westfield, Westgate, Westhold, Westwood, Whiteford.
+Thorian Dawnwhisper drew their first breath in Deepcrest during 4.
+War fell upon Northhold in 4.
+In 4, Aelar Vane was born in Southcross.
+The people of Ashfield welcomed Istran Kingsward in 4.
+Ashfield raided Redfall but was driven off (4)
+In 4, Yorick Oakenshield was born in Stonemere.
+Celeste Wildermere drew their first breath in Redfall during 4.
+War fell upon Ashfield in 4.
+In 4, Norwin the Bold was born in Southcrest.
+In 4, Aeliana Xalcrest was born in Redgate.
+Crimson Campaign claimed countless lives in 4 before a rout that scattered the defeated across the wilderness.
+War fell upon Redfall in 4.
+The people of Greenvale welcomed Garrick Oakenshield in 4.
+Through Elara Brightlance's diplomacy, Greenvale secured an alliance in 4.
+Greenvale raided Southhold and seized 50 wealth (4)
+Voren Thorne drew their first breath in Coldcross during 4.
+Crimson Campaign claimed countless lives in 4 before both sides withdrew, the field littered with the fallen.
+The people of Northhold welcomed Xander Keen-Eye in 4.
+Through Weyland Ironfoot's diplomacy, Northhold secured an alliance in 4.
+The people of Westgate welcomed Obarin Quicksilver in 4.
+In 4, Malak Keen-Eye was born in Westhold.
+In 4, Gwyneth Wildermere was born in Ironwood.
+The people of Ashmarch welcomed Brisa Shadowstep in 4.
+The people of Goldkeep welcomed Fenric Keen-Eye in 4.
+Goldkeep flourished in 4 as caravans from distant lands arrived bearing silks and spices filled its coffers.
+War fell upon Ashmere in 4.
+The people of Southfall welcomed Helia Shadowstep in 4.
+The people of Highgate welcomed Quillon Stormborn in 4.
+A wave of craftsman's plenty washed over Highgate in 4.
+The people of Stonebridge welcomed Voren Nightfall in 4.
+The people of Highhold welcomed Fenric the Wise in 4.
+In 4, Quillon the Wise was born in Southgate.
+It is recorded that in 4, Southgate raided Westhold and seized 50 wealth
+Voren Glimmerstone drew their first breath in Stonefield during 4.
+In 4, Aelar Ironfoot was born in Greenmarch.
+The people of Brightdale welcomed Caius the Bold in 4.
+Through Weyland Keen-Eye's diplomacy, Brightdale secured an alliance in 4.
+It is recorded that in 4, Brightdale raided Westhold but was driven off
+In 4, Jorah Ironfoot was born in Stonehaven.
+The people of Ashmere welcomed Malak Kingsward in 4.
+Thorian the Bold drew their first breath in Thornmarch during 4.
+The people of Thornmarch witnessed Quillon Yewbark take on a new path as Leader in 4.
+A wave of arcane prosperity washed over Thornmarch in 4.
+In 4, Eldrin Coldspring was born in Goldgate.
+Through Zarek Mosswood's diplomacy, Goldgate secured an alliance in 4.
+In 4, war-horns echoed through the mountain passes as armies converged, and a rout that scattered the defeated across the wilderness.
+Silas Wildermere drew their first breath in Silvercrest during 4.
+In 4, Voren Mosswood was born in Stillcrest.
+In 4, Weyland Brightlance was born in Deepvale.
+The people of Southhold welcomed Brisa Ravenhill in 4.
+In 4, Aelar Oakenshield expands the borders of Southhold.
+The people of Ashmarch-2 welcomed Uldric Yewbark in 4.
+Perrin Nightfall drew their first breath in Greenshire during 4.
+Perrin Nightfall of Greenshire was joined in marriage during 4.
+In 4, Greenshire raided Silvercrest and seized 50 wealth
+In 4, Elara Holloway was born in Goldfield.
+Dorian Zephyrwind drew their first breath in Blackdale during 4.
+Through Helia Ravenhill's diplomacy, Blackdale secured an alliance in 4.
+Jorah Yewbark drew their first breath in Ironwood-2 during 4.
+Malak Kingsward drew their first breath in Blackmere during 4.
+It is recorded that in 4, Blackmere raided Southcrest and seized 50 wealth
+The people of Brighthaven welcomed Fiora Underhill in 4.
+Istran Yewbark drew their first breath in Ashbridge during 4.
+The people of Ashbridge witnessed Brisa Mosswood take on a new path as Explorer in 4.
+In 4, Celeste Thorne was born in Northhold-2.
+Through Jorah Yewbark's diplomacy, Northhold-2 secured an alliance in 4.
+It is recorded that in 4, Northhold-2 raided Southfall and seized 50 wealth
+In 4, Elara Mosswood was born in Eastwood.
+Strange silver-tongued prophets appeared in Eastwood during 4, stirring both hope and dread.
+It is recorded that in 4, Eastwood raided Southcrest-2 and seized 50 wealth
+In 4, Kaelen Vane was born in Silverfall.
+The people of Darkwatch welcomed Garrick Yewbark in 4.
+Istran Zephyrwind drew their first breath in Goldhold during 4.
+Goldhold raided Ashmere-2 and seized 50 wealth (4)
+The people of Darkdale welcomed Dara the Swift in 4.
+Darkdale raided Highhold and seized 50 wealth (4)
+Weyland Brightlance drew their first breath in Silverford during 4.
+Banners of the Iron Covenant clashed during the winter of 4. a pyrrhic victory that left the victors as broken as the vanquished.
+Silverford raided Stonefield and seized 50 wealth (4)
+In 4, Xander Oakenshield was born in Northforge.
+War fell upon Goldfield in 4.
+The people of Brighthaven-2 welcomed Jorah Ironheart in 4.
+Brisa Nightfall drew their first breath in Deepgate during 4.
+The people of Brightvale welcomed Silas Underhill in 4.
+Caius Stormborn drew their first breath in Ashcrest during 4.
+In 4, Zarek Fairwind was born in Southhold-2.
+The people of Ashhaven welcomed Silas Holloway in 4.
+War fell upon Westgate in 4.
+The people of Redfall-2 welcomed Brisa Ashford in 4.
+Redfall-2 raided Stillcrest and seized 50 wealth (4)
+In 4, Elara Frostbane was born in Easthaven.
+War fell upon Silvercrest in 4.
+In 4, Fiora Zephyrwind was born in Darkcross.
+War fell upon Westhold in 4.
+In 4, Fenric Underhill was born in Southcrest-2.
+War fell upon Eastwood in 4.
+The people of Stillgate welcomed Brisa Holloway in 4.
+War fell upon Westbridge in 4.
+Gwyneth Yewbark drew their first breath in Westbridge during 4.
+The people of Ashmere-2 welcomed Fiora Blackwood in 4.
+The people of Southcross-2 welcomed Aeliana Ironfoot in 4.
+War fell upon Brighthaven in 4.
+Elara Nightfall drew their first breath in Highford during 4.
+Brisa Holloway drew their first breath in Coldkeep during 4.
+In 4, Caius the Swift was born in Greengate.
+A daring night raid turned the tide in 4, leading to a pyrrhic victory that left the victors as broken as the vanquished.
+Zarek Quicksilver drew their first breath in Greenshire-2 during 4.
+Haldor Lightbringer drew their first breath in Coldbridge during 4.
+In 4, Zarek Ravenhill was born in Silverford-2.
+The people of Westdale welcomed Obarin Coldspring in 4.
+The people of Highfall welcomed Silas Shadowstep in 4.
+Through Xander Ironfoot's diplomacy, Highfall secured an alliance in 4.
+Highfall raided Silverford-2 and seized 50 wealth (4)
+Perrin Dawnwhisper drew their first breath in Greenford during 4.
+Through Caius Stormborn's diplomacy, Greenford secured an alliance in 4.
+In 4, Greenford raided Coldstone but was driven off
+The people of Northhold-3 welcomed Zarek Shadowstep in 4.
+The people of Darkforge welcomed Perrin Thorne in 4.
+The people of Golddale welcomed Xander Shadowstep in 4.
+Xander Coldspring drew their first breath in Northvale during 4.
+Through Xander Jadewalker's diplomacy, Northvale secured an alliance in 4.
+In 4, Obarin Lightbringer was born in Redforge.
+Through Eldrin Nightfall's diplomacy, Redforge secured an alliance in 4.
+The people of Redforge witnessed Eldrin Nightfall take on a new path as Leader in 4.
+A wave of arcane prosperity washed over Redforge in 4.
+Silas Holloway drew their first breath in Coldstone during 4.
+Norwin Dawnwhisper drew their first breath in Ashcrest-2 during 4.
+Through Norwin Frostbane's diplomacy, Ashcrest-2 secured an alliance in 4.
+The people of Redstone welcomed Elara Mosswood in 4.
+Uldric Blackwood drew their first breath in Whiteford during 4.
+The people of Redfall-3 welcomed Eldrin Pryor in 4.
+War fell upon Highmount in 4.
+Garrick Glimmerstone drew their first breath in Redhaven during 4.
+In 4, Loric Shadowstep was born in Highmount.
+The people of Northford welcomed Jorah Shadowstep in 4.
+War fell upon Greenford in 4.
+Haldor Dawnwhisper drew their first breath in Westwood during 4.
+The people of Westfield welcomed Yorick Frostbane in 4.
+The people of Deephold welcomed Garrick Ashford in 5.
+War fell upon Southcrest in 5.
+The people of Deepcrest welcomed Celeste Oakenshield in 5.
+In 5, 59 settlements tended their wealth: Ashbridge, Ashcrest, Ashfield, Ashhaven, Brightdale, Brighthaven, Brighthaven-2, Brightvale, Coldbridge, Coldstone, Darkdale, Darkforge, Darkwatch, Deepcrest, Deepgate, Deepvale, Eastwood, Golddale, Goldgate, Goldhold, Greengate, Greenshire, Greenshire-2, Highfall, Highgate, Highmount, Ironwood, Ironwood-2, Northford, Northforge, Northhold, Northhold-2, Northhold-3, Northvale, Redfall, Redfall-2, Redfall-3, Redforge, Redgate, Redhaven, Redstone, Silvercrest, Silverfall, Silverford, Silverford-2, Southcrest-2, Southcross, Southgate, Southhold, Southhold-2, Stonebridge, Stonefield, Stonehaven, Stonemere, Westdale, Westfield, Westhold, Westwood, Whiteford.
+Obarin Brightlance drew their first breath in Southcross during 5.
+The people of Ashfield welcomed Loric Mosswood in 5.
+In 5, Istran Brightlance was born in Stonemere.
+Garrick Duskweaver drew their first breath in Redfall during 5.
+Banners of the Drowned Chorus clashed during the winter of 5. an uneasy stalemate settled over the contested ground.
+Gwyneth Fairwind drew their first breath in Southcrest during 5.
+War fell upon Northhold in 5.
+The people of Redgate welcomed Fenric Underhill in 5.
+The people of Greenvale welcomed Brisa Ashford in 5.
+Uldric the Swift of Greenvale was joined in marriage during 5.
+In 5, Greenvale raided Southhold and seized 50 wealth
+Silas Zephyrwind drew their first breath in Coldcross during 5.
+War fell upon Stonemere in 5.
+In 5, Perrin the Wise was born in Northhold.
+The people of Westgate welcomed Kaelen Ashford in 5.
+The people of Westgate celebrated the marriage of Elara Quicksilver in 5.
+Westgate raided Northhold but was driven off (5)
+The people of Westhold welcomed Fenric Glimmerstone in 5.
+Helia the Bold drew their first breath in Ironwood during 5.
+The people of Ashmarch welcomed Eldrin Nightfall in 5.
+In 5, Ashmarch raided Stonehaven and seized 50 wealth
+The people of Goldkeep welcomed Aeliana Nightfall in 5.
+Through Obarin Ashford's diplomacy, Goldkeep secured an alliance in 5.
+War fell upon Ashmere in 5.
+The people of Southfall welcomed Gwyneth Ashford in 5.
+Through Fiora Mosswood's diplomacy, Southfall secured an alliance in 5.
+It is recorded that in 5, Southfall raided Ashbridge and seized 50 wealth
+The people of Highgate welcomed Obarin Ashford in 5.
+Weyland Kingsward of Highgate changed their destiny in 5, rising as Explorer.
+In 5, Irisa Shadowstep was born in Stonebridge.
+Through Obarin Oakenshield's diplomacy, Stonebridge secured an alliance in 5.
+In 5, Loric Xalcrest was born in Highhold.
+War fell upon Ashbridge in 5.
+Zarek Blackwood drew their first breath in Southgate during 5.
+The people of Stonefield welcomed Dara Underhill in 5.
+In 5, Elara Glimmerstone was born in Greenmarch.
+Greenmarch conquered Golddale (5)
+The people of Brightdale welcomed Aeliana Thorne in 5.
+In 5, Eldrin Duskweaver was born in Stonehaven.
+Uldric the Wise drew their first breath in Ashmere during 5.
+Ashmere raided Goldkeep but was driven off (5)
+The people of Thornmarch welcomed Dara Coldspring in 5.
+Through Norwin Coldspring's diplomacy, Thornmarch secured an alliance in 5.
+Through Norwin Coldspring's diplomacy, Thornmarch secured an alliance in 5.
+In 5, Thornmarch conquered Westwood
+Istran Jadewalker drew their first breath in Goldgate during 5.
+In 5, Helia Oakenshield wed, uniting two families of Goldgate.
+In 5, Kaelen Keen-Eye was no longer content with their old role, and instead became known as Leader of Goldgate.
+Kaelen Keen-Eye ventured forth from Goldgate in 5 and returned with maps of new lands.
+Through Zarek Mosswood's diplomacy, Goldgate secured an alliance in 5.
+In 5, Caius Mosswood was born in Silvercrest.
+In 5, Aeliana Holloway was born in Stillcrest.
+Perrin Lightbringer of Stillcrest charted a new path in 5.
+Through Perrin Lightbringer's diplomacy, Stillcrest secured an alliance in 5.
+It is recorded that in 5, Stillcrest raided Northhold and seized 50 wealth
+Caius Oakenshield drew their first breath in Deepvale during 5.
+Rurik the Wise drew their first breath in Southhold during 5.
+The people of Ashmarch-2 welcomed Quillon Frostbane in 5.
+War fell upon Southhold in 5.
+The people of Greenshire welcomed Garrick Underhill in 5.
+Perrin Pryor drew their first breath in Goldfield during 5.
+Goldfield rejoiced in 5 as the High Harvest feast lasted seven nights without pause.
+It is recorded that in 5, Goldfield raided Blackdale and seized 50 wealth
+The people of Blackdale welcomed Zarek Coldspring in 5.
+In 5, Blackdale raided Goldkeep but was driven off
+Weyland Zephyrwind drew their first breath in Ironwood-2 during 5.
+The people of Ironwood-2 celebrated the marriage of Garrick Keen-Eye in 5.
+Norwin the Swift drew their first breath in Blackmere during 5.
+War fell upon Southcrest in 5.
+Zarek Frostbane drew their first breath in Brighthaven during 5.
+The people of Ashbridge welcomed Silas Thorne in 5.
+Through Fenric Stormborn's diplomacy, Ashbridge secured an alliance in 5.
+Brisa Mosswood ventured forth from Ashbridge in 5 and returned with maps of new lands.
+Banners of the Sun-Scaled Dynasty clashed during the winter of 5. the day belonged to the the Iron Covenant.
+In 5, Helia Lightbringer was born in Northhold-2.
+Irisa Nightfall drew their first breath in Eastwood during 5.
+Helia Mosswood drew their first breath in Silverfall during 5.
+In 5, Celeste Glimmerstone fortifies the defenses of Silverfall.
+Dorian Brightlance drew their first breath in Darkwatch during 5.
+Istran Wildermere drew their first breath in Goldhold during 5.
+Xander Wildermere drew their first breath in Darkdale during 5.
+The people of Silverford welcomed Eldrin Nightfall in 5.
+Banners of the Freehold Confederacy clashed during the winter of 5. a rout that scattered the defeated across the wilderness.
+The people of Northforge welcomed Xander Ashford in 5.
+The people of Brighthaven-2 welcomed Istran Keen-Eye in 5.
+Caius Brightlance drew their first breath in Deepgate during 5.
+Caius Frostbane drew their first breath in Brightvale during 5.
+Xander Stormborn drew their first breath in Ashcrest during 5.
+Dara Nightfall drew their first breath in Southhold-2 during 5.
+Yorick Xalcrest drew their first breath in Ashhaven during 5.
+The people of Redfall-2 welcomed Fiora Dawnwhisper in 5.
+The people of Easthaven welcomed Helia Nightfall in 5.
+Through Helia Frostbane's diplomacy, Easthaven secured an alliance in 5.
+War fell upon Silvercrest in 5.
+In 5, Irisa Ashford was born in Darkcross.
+War fell upon Westhold in 5.
+Xander Blackwood drew their first breath in Southcrest-2 during 5.
+Thorian Pryor drew their first breath in Stillgate during 5.
+Banners of the Freehold Confederacy clashed during the winter of 5. the day belonged to the the Sun-Scaled Dynasty.
+It is recorded that in 5, Stillgate raided Westbridge and seized 50 wealth
+Eldrin Brightlance drew their first breath in Westbridge during 5.
+War fell upon Stillgate in 5.
+The people of Ashmere-2 welcomed Helia Quicksilver in 5.
+War fell upon Westhold in 5.
+Thorian Glimmerstone drew their first breath in Southcross-2 during 5.
+War fell upon Brighthaven in 5.
+Thorian Thorne drew their first breath in Highford during 5.
+In 5, Highford raided Highgate and seized 50 wealth
+War fell upon Deepgate in 5.
+Obarin Mosswood drew their first breath in Greengate during 5.
+In 5, Quillon Thorne was born in Greenshire-2.
+Silas Fairwind drew their first breath in Coldbridge during 5.
+Celeste the Wise drew their first breath in Silverford-2 during 5.
+In 5, Eldrin Mosswood was born in Greenford.
+It is recorded that in 5, Greenford raided Coldstone but was driven off
+Celeste Xalcrest drew their first breath in Northhold-3 during 5.
+The people of Darkforge welcomed Thorian Jadewalker in 5.
+In 5, Brisa the Bold was born in Golddale.
+The people of Northvale welcomed Norwin Thorne in 5.
+The people of Redforge welcomed Istran Ironheart in 5.
+Through Gwyneth Ravenhill's diplomacy, Redforge secured an alliance in 5.
+Voren Coldspring of Redforge charted a new path in 5.
+Voren Coldspring ventured forth from Redforge in 5 and returned with maps of new lands.
+Strange silver-tongued prophets appeared in Redforge during 5, stirring both hope and dread.
+In 5, Silas Pryor was born in Coldstone.
+Coldstone rejoiced in 5 as the High Harvest feast lasted seven nights without pause.
+Fenric the Bold drew their first breath in Ashcrest-2 during 5.
+It is recorded that in 5, Ashcrest-2 raided Westbridge and seized 50 wealth
+Eldrin Stormborn drew their first breath in Redstone during 5.
+Through Kaelen Shadowstep's diplomacy, Redstone secured an alliance in 5.
+Haldor Duskweaver of Redfall-3 was joined in marriage during 5.
+The people of Redhaven welcomed Quillon the Bold in 5.
+A wave of mercantile fortune washed over Redhaven in 5.
+Gwyneth Oakenshield drew their first breath in Highmount during 5.
+The people of Northford welcomed Istran Mosswood in 5.
+Through Fiora Frostbane's diplomacy, Northford secured an alliance in 5.
+In 5, Garrick Oakenshield was born in Westwood.
+Helia Duskweaver drew their first breath in Westfield during 5.
+Kaelen Zephyrwind drew their first breath in Deephold during 6.
+In 6, 53 settlements tended their wealth: Ashcrest, Ashcrest-2, Ashhaven, Ashmarch, Ashmere, Ashmere-2, Blackmere, Brightdale, Brighthaven-2, Brightvale, Coldbridge, Coldstone, Darkcross, Darkforge, Darkwatch, Deepgate, Deephold, Golddale, Goldfield, Goldgate, Goldhold, Greenford, Greengate, Greenshire, Greenshire-2, Highgate, Highhold, Highmount, Ironwood, Northford, Northhold, Northhold-2, Northvale, Redfall, Redfall-3, Redforge, Redhaven, Redstone, Southcrest, Southcrest-2, Southcross, Southcross-2, Southfall, Southgate, Southhold-2, Stillcrest, Stonebridge, Thornmarch, Westbridge, Westdale, Westhold, Westwood, Whiteford.
+Celeste the Wise drew their first breath in Deepcrest during 6.
+War fell upon Northhold in 6.
+The people of Southcross welcomed Quillon Underhill in 6.
+Strange prophecies carved in frost appeared in Southcross during 6, stirring both hope and dread.
+The people of Ashfield welcomed Brisa the Swift in 6.
+War fell upon Redfall in 6.
+The people of Stonemere welcomed Eldrin the Bold in 6.
+Yorick the Bold of Stonemere charted a new path in 6.
+Yorick the Bold ventured forth from Stonemere in 6 and returned with maps of new lands.
+War fell upon Coldcross in 6.
+In 6, Voren Kingsward was born in Redfall.
+The people of Southcrest welcomed Celeste Thorne in 6.
+In 6, Silas Keen-Eye was born in Redgate.
+In 6, Baelor Vane expands the borders of Redgate.
+War fell upon Redfall in 6.
+Uldric Mosswood drew their first breath in Greenvale during 6.
+In 6, Greenvale raided Southhold and seized 50 wealth
+In 6, Aelar Keen-Eye was born in Coldcross.
+It is recorded that in 6, Coldcross raided Stonemere and seized 50 wealth
+Kaelen Ironheart drew their first breath in Northhold during 6.
+The people of Westgate welcomed Zarek Ironfoot in 6.
+Westgate raided Northhold and seized 50 wealth (6)
+The people of Westhold welcomed Dara Ironheart in 6.
+The people of Ironwood welcomed Silas Lightbringer in 6.
+Baelor Keen-Eye drew their first breath in Ashmarch during 6.
+In 6, Yorick Oakenshield was born in Goldkeep.
+War fell upon Ashmere in 6.
+In 6, Rurik Mosswood was born in Southfall.
+In 6, Brisa Jadewalker was born in Highgate.
+Through Celeste Lightbringer's diplomacy, Highgate secured an alliance in 6.
+The people of Stonebridge welcomed Garrick Ironfoot in 6.
+In 6, Quillon Quicksilver was born in Highhold.
+Eldrin Pryor drew their first breath in Southgate during 6.
+The people of Stonefield welcomed Dorian Xalcrest in 6.
+Envoys plied their words between courts in 6.
+The people of Greenmarch welcomed Helia Zephyrwind in 6.
+War fell upon Golddale in 6.
+The people of Brightdale welcomed Xander Quicksilver in 6.
+In 6, Weyland Keen-Eye wed, uniting two families of Brightdale.
+In 6, Istran the Swift was born in Stonehaven.
+War fell upon Ashmarch in 6.
+Brisa Frostbane drew their first breath in Ashmere during 6.
+Kaelen Vane drew their first breath in Thornmarch during 6.
+In 6, Obarin Kingsward was born in Goldgate.
+In 6, Zarek Mosswood expands the borders of Goldgate.
+The people of Silvercrest welcomed Eldrin Brightlance in 6.
+War fell upon Greenshire in 6.
+Baelor Frostbane drew their first breath in Stillcrest during 6.
+Through Malak Ebonhart's diplomacy, Stillcrest secured an alliance in 6.
+Stillcrest flourished in 6 as traders bartered in rare crystals found only in the sunken caverns below filled its coffers.
+In 6, Istran Wildermere was born in Deepvale.
+A daring night raid turned the tide in 6, leading to a rout that scattered the defeated across the wilderness.
+In 6, Deepvale raided Coldkeep but was driven off
+Aelar Quicksilver drew their first breath in Southhold during 6.
+In 6, Southhold raided Greenvale and seized 50 wealth
+In 6, Elara the Swift was born in Ashmarch-2.
+Through Zarek Quicksilver's diplomacy, Ashmarch-2 secured an alliance in 6.
+It is recorded that in 6, Ashmarch-2 raided Southhold and seized 50 wealth
+The people of Greenshire welcomed Elara Brightlance in 6.
+The people of Goldfield welcomed Eldrin Glimmerstone in 6.
+In 6, Thorian Glimmerstone declares a festival in Goldfield.
+Silas Ravenhill drew their first breath in Blackdale during 6.
+In 6, Helia Ravenhill wed, uniting two families of Blackdale.
+In 6, arrows darkened the sky above the siege towers, and an uneasy stalemate settled over the contested ground.
+It is recorded that in 6, Blackdale raided Goldkeep and seized 50 wealth
+The people of Ironwood-2 welcomed Norwin Ebonhart in 6.
+War fell upon Westgate in 6.
+In 6, Brisa Blackwood was born in Blackmere.
+In 6, Xander Thorne was born in Brighthaven.
+Brighthaven raided Redfall-2 and seized 50 wealth (6)
+The people of Ashbridge welcomed Jorah Zephyrwind in 6.
+Through Fenric Stormborn's diplomacy, Ashbridge secured an alliance in 6.
+War fell upon Southfall in 6.
+Loric the Bold drew their first breath in Northhold-2 during 6.
+The people of Eastwood welcomed Irisa Ashford in 6.
+In 6, Eastwood raided Southcrest-2 and seized 50 wealth
+Haldor Keen-Eye drew their first breath in Silverfall during 6.
+It is recorded that in 6, Silverfall raided Greenvale but was driven off
+The people of Darkwatch welcomed Quillon Jadewalker in 6.
+In 6, Kaelen Nightfall was born in Goldhold.
+In 6, Baelor Frostbane was born in Darkdale.
+War fell upon Highhold in 6.
+In 6, Malak Ironfoot was born in Silverford.
+In 6, Silverford raided Stonefield but was driven off
+In 6, Fenric Coldspring was born in Northforge.
+It is recorded that in 6, Northforge raided Goldfield and seized 50 wealth
+Dorian Blackwood drew their first breath in Brighthaven-2 during 6.
+Caius Yewbark drew their first breath in Deepgate during 6.
+The people of Brightvale welcomed Garrick Frostbane in 6.
+A treacherous feigned retreat turned the tide in 6, leading to a pyrrhic victory that left the victors as broken as the vanquished.
+In 6, Celeste Thorne was born in Ashcrest.
+In 6, Perrin Ebonhart was born in Southhold-2.
+Istran Glimmerstone drew their first breath in Ashhaven during 6.
+Through Obarin Ebonhart's diplomacy, Ashhaven secured an alliance in 6.
+The people of Redfall-2 welcomed Brisa Thorne in 6.
+In 6, Redfall-2 raided Stillcrest and seized 50 wealth
+In 6, Caius the Wise was born in Easthaven.
+It is recorded that in 6, Easthaven raided Silvercrest and seized 50 wealth
+The people of Darkcross welcomed Norwin Holloway in 6.
+The people of Southcrest-2 welcomed Dara Keen-Eye in 6.
+In 6, Rurik Blackwood was born in Stillgate.
+Through Malak Ashford's diplomacy, Stillgate secured an alliance in 6.
+In 6, 1 settlement expanded their borders: Stillgate.
+Thorian Pryor drew their first breath in Westbridge during 6.
+In 6, Caius Frostbane expands the borders of Westbridge.
+The people of Ashmere-2 welcomed Eldrin Glimmerstone in 6.
+Obarin Glimmerstone drew their first breath in Southcross-2 during 6.
+In 6, Perrin Stormborn was born in Highford.
+The people of Highford celebrated the marriage of Caius Dawnwhisper in 6.
+War fell upon Highgate in 6.
+In 6, Quillon the Wise was born in Coldkeep.
+In 6, Coldkeep raided Deepgate but was driven off
+In 6, Thorian Xalcrest was born in Greengate.
+The people of Greenshire-2 welcomed Fiora Stormborn in 6.
+A wave of arcane prosperity washed over Greenshire-2 in 6.
+In 6, Voren Xalcrest was born in Coldbridge.
+Brisa Vane drew their first breath in Silverford-2 during 6.
+It is recorded that in 6, Silverford-2 raided Highfall and seized 50 wealth
+Celeste Mosswood drew their first breath in Westdale during 6.
+Silas Nightfall drew their first breath in Highfall during 6.
+Border War claimed countless lives in 6 before a rout that scattered the defeated across the wilderness.
+War fell upon Silverford-2 in 6.
+The people of Greenford welcomed Loric Mosswood in 6.
+Dara Ironheart drew their first breath in Northhold-3 during 6.
+In 6, Northhold-3 raided Highmount and seized 50 wealth
+The people of Darkforge welcomed Gwyneth Wildermere in 6.
+Zarek Dawnwhisper drew their first breath in Golddale during 6.
+In 6, Aeliana Ravenhill was born in Northvale.
+The people of Coldstone welcomed Garrick Fairwind in 6.
+Silas Blackwood of Coldstone was joined in marriage during 6.
+Through Silas Blackwood's diplomacy, Coldstone secured an alliance in 6.
+The people of Ashcrest-2 welcomed Weyland Lightbringer in 6.
+Through Kaelen Shadowstep's diplomacy, Redstone secured an alliance in 6.
+Fiora Brightlance drew their first breath in Whiteford during 6.
+Yorick Glimmerstone drew their first breath in Redfall-3 during 6.
+Siege of Sorrow claimed countless lives in 6 before the day belonged to the the Ashen Lords.
+In 6, Malak Quicksilver was born in Redhaven.
+Banners of the Sun-Scaled Dynasty clashed during the winter of 6. a pyrrhic victory that left the victors as broken as the vanquished.
+Weyland Coldspring drew their first breath in Highmount during 6.
+In 6, Aelar Dawnwhisper was born in Westwood.
+Through Garrick Blackwood's diplomacy, Westwood secured an alliance in 6.
+The people of Westfield welcomed Garrick Shadowstep in 6.
+Westfield raided Northhold-3 but was driven off (6)
+Brisa Mosswood drew their first breath in Deephold during 7.
+In 7, 60 settlements tended their wealth: Ashcrest, Ashfield, Ashhaven, Ashmarch-2, Ashmere, Ashmere-2, Brightdale, Brighthaven, Brighthaven-2, Brightvale, Coldcross, Coldstone, Darkcross, Darkdale, Darkforge, Darkwatch, Deepcrest, Deepgate, Deephold, Deepvale, Eastwood, Golddale, Goldfield, Goldhold, Goldkeep, Greengate, Greenshire, Highgate, Highhold, Highmount, Ironwood, Ironwood-2, Northford, Northforge, Northhold, Northhold-2, Northhold-3, Northvale, Redfall, Redfall-2, Redfall-3, Redforge, Redgate, Redhaven, Redstone, Silvercrest, Silverfall, Silverford, Southcrest, Southcross, Southfall, Stillgate, Stonefield, Stonehaven, Thornmarch, Westbridge, Westdale, Westfield, Westhold, Westwood.
+In 7, Aeliana Jadewalker was born in Deepcrest.
+The people of Southcross welcomed Uldric the Bold in 7.
+In 7, Kaelen Nightfall was born in Ashfield.
+Elara Coldspring drew their first breath in Stonemere during 7.
+In 7, Yorick the Bold establishes new trade routes through Stonemere.
+War fell upon Coldcross in 7.
+In 7, Caius the Bold was born in Redfall.
+Through Haldor Duskweaver's diplomacy, Redfall secured an alliance in 7.
+Silas Ironfoot drew their first breath in Southcrest during 7.
+The people of Redgate welcomed Fiora Brightlance in 7.
+Xander Thorne drew their first breath in Greenvale during 7.
+War fell upon Southhold in 7.
+The people of Coldcross welcomed Obarin Frostbane in 7.
+Through Baelor Zephyrwind's diplomacy, Coldcross secured an alliance in 7.
+The people of Northhold welcomed Xander Ashford in 7.
+The people of Northhold celebrated the marriage of Weyland Ironfoot in 7.
+Through Weyland Ironfoot's diplomacy, Northhold secured an alliance in 7.
+Haldor Fairwind drew their first breath in Westgate during 7.
+It is recorded that in 7, Westgate raided Northhold and seized 50 wealth
+Loric Ravenhill drew their first breath in Westhold during 7.
+In 7, Dara Frostbane was born in Ironwood.
+In 7, Thorian Vane was born in Ashmarch.
+War fell upon Stonehaven in 7.
+Weyland Ravenhill drew their first breath in Southfall during 7.
+The people of Highgate welcomed Dara Brightlance in 7.
+Strange silver-tongued prophets appeared in Highgate during 7, stirring both hope and dread.
+In 7, Brisa Frostbane was born in Stonebridge.
+The people of Stonebridge witnessed Obarin Oakenshield take on a new path as Explorer in 7.
+Stonebridge raided Goldkeep but was driven off (7)
+Aeliana Yewbark drew their first breath in Highhold during 7.
+Through Elara Stormborn's diplomacy, Highhold secured an alliance in 7.
+The people of Southgate welcomed Silas Frostbane in 7.
+It is recorded that in 7, Southgate forms alliance with Deepcrest
+Istran Stormborn drew their first breath in Stonefield during 7.
+In 7, Helia Vane was born in Greenmarch.
+War fell upon Golddale in 7.
+Jorah Frostbane drew their first breath in Brightdale during 7.
+Uldric Ravenhill drew their first breath in Stonehaven during 7.
+Stonehaven flourished in 7 as caravans from distant lands arrived bearing silks and spices filled its coffers.
+Caius Shadowstep drew their first breath in Ashmere during 7.
+In 7, Dorian Stormborn wed, uniting two families of Ashmere.
+Ashmere rejoiced in 7 as the Festival of Veils saw old grudges forgiven under moonlit dance.
+The people of Thornmarch welcomed Malak Oakenshield in 7.
+In 7, Norwin Coldspring establishes new trade routes through Thornmarch.
+In 7, Weyland Brightlance was born in Goldgate.
+Goldgate flourished in 7 as traders bartered in rare crystals found only in the sunken caverns below filled its coffers.
+Envoys plied their words between courts in 7.
+The people of Silvercrest welcomed Jorah Kingsward in 7.
+War fell upon Northhold in 7.
+In 7, Garrick Brightlance was born in Deepvale.
+Fenric Lightbringer drew their first breath in Southhold during 7.
+War fell upon Greenvale in 7.
+Irisa Wildermere drew their first breath in Ashmarch-2 during 7.
+Loric Ebonhart of Ashmarch-2 was joined in marriage during 7.
+In 7, Zarek Yewbark was born in Greenshire.
+Through Jorah the Wise's diplomacy, Greenshire secured an alliance in 7.
+Eldrin the Bold drew their first breath in Goldfield during 7.
+Istran Ebonhart drew their first breath in Blackdale during 7.
+Through Helia Ravenhill's diplomacy, Blackdale secured an alliance in 7.
+War fell upon Goldkeep in 7.
+Irisa Jadewalker drew their first breath in Ironwood-2 during 7.
+In 7, Voren Vane rallies the militia of Ironwood-2.
+In 7, Fiora Underhill was born in Blackmere.
+Blackmere rejoiced in 7 as a tournament of champions honored the founding charter.
+In 7, 3 settlements expanded their borders: Blackmere, Easthaven, Highford.
+Thorian Stormborn drew their first breath in Brighthaven during 7.
+Obarin Yewbark drew their first breath in Ashbridge during 7.
+Envoys plied their words between courts in 7.
+The people of Northhold-2 welcomed Haldor Lightbringer in 7.
+In 7, Aeliana Shadowstep was born in Eastwood.
+In 7, Xander Oakenshield was born in Silverfall.
+War of the Broken Crown claimed countless lives in 7 before an uneasy stalemate settled over the contested ground.
+Dorian Pryor drew their first breath in Darkwatch during 7.
+Malak Ironfoot drew their first breath in Goldhold during 7.
+Norwin Brightlance drew their first breath in Darkdale during 7.
+Brisa Thorne drew their first breath in Silverford during 7.
+The people of Northforge welcomed Malak Nightfall in 7.
+A wave of uncommon abundance washed over Northforge in 7.
+The people of Brighthaven-2 welcomed Malak Duskweaver in 7.
+Malak Lightbringer drew their first breath in Deepgate during 7.
+Eldrin Ravenhill of Deepgate was joined in marriage during 7.
+Dorian Lightbringer drew their first breath in Brightvale during 7.
+In 7, Malak Keen-Eye was born in Ashcrest.
+Banners of the Drowned Chorus clashed during the winter of 7. the day belonged to the the Ashen Lords.
+The people of Southhold-2 welcomed Malak Frostbane in 7.
+War fell upon Coldcross in 7.
+In 7, Istran Oakenshield was born in Ashhaven.
+Through Obarin Ebonhart's diplomacy, Ashhaven secured an alliance in 7.
+In 7, Elara Mosswood was born in Redfall-2.
+The people of Easthaven welcomed Eldrin Duskweaver in 7.
+Aeliana Mosswood drew their first breath in Southcrest-2 during 7.
+War fell upon Eastwood in 7.
+The people of Stillgate welcomed Aelar Brightlance in 7.
+In 7, Dara Glimmerstone was born in Westbridge.
+In 7, Kaelen Glimmerstone was born in Ashmere-2.
+The people of Southcross-2 welcomed Aelar Wildermere in 7.
+Through Fiora Stormborn's diplomacy, Southcross-2 secured an alliance in 7.
+In 7, Southcross-2 raided Blackdale and seized 50 wealth
+In 7, Thorian Lightbringer was born in Highford.
+In 7, Istran Ebonhart was born in Coldkeep.
+Coldkeep raided Deepgate and seized 50 wealth (7)
+In 7, Dara Ebonhart was born in Greengate.
+In 7, Dorian the Wise was born in Greenshire-2.
+War fell upon Coldstone in 7.
+The people of Coldbridge welcomed Caius the Swift in 7.
+War fell upon Silverford in 7.
+In 7, Norwin Ironfoot was born in Silverford-2.
+Silverford-2 flourished in 7 as the market square swelled with merchants hawking curios from beyond the known map filled its coffers.
+Silverford-2 raided Highfall and seized 50 wealth (7)
+A wave of craftsman's plenty washed over Westdale in 7.
+The people of Highfall welcomed Voren the Bold in 7.
+In 7, Highfall raided Silverford-2 and seized 50 wealth
+Uldric Holloway drew their first breath in Greenford during 7.
+War fell upon Coldstone in 7.
+The people of Northhold-3 welcomed Istran Fairwind in 7.
+In 7, Xander Pryor was born in Darkforge.
+Eldrin Holloway drew their first breath in Golddale during 7.
+Malak Dawnwhisper drew their first breath in Coldstone during 7.
+In 7, war-horns echoed through the mountain passes as armies converged, and an uneasy stalemate settled over the contested ground.
+War fell upon Westbridge in 7.
+Quillon Kingsward drew their first breath in Redstone during 7.
+The people of Redstone celebrated the marriage of Norwin Keen-Eye in 7.
+Strange prophecies carved in frost appeared in Redstone during 7, stirring both hope and dread.
+The people of Whiteford welcomed Gwyneth Zephyrwind in 7.
+In 7, Uldric Blackwood wed, uniting two families of Whiteford.
+It is recorded that in 7, Whiteford forms alliance with Deephold
+The people of Highmount welcomed Malak Stormborn in 7.
+Kaelen Brightlance drew their first breath in Westwood during 7.
+Through Garrick Blackwood's diplomacy, Westwood secured an alliance in 7.
+Quillon the Bold drew their first breath in Westfield during 7.
+In 8, Gwyneth the Wise was born in Deephold.
+In 8, 53 settlements tended their wealth: Ashbridge, Ashcrest, Ashcrest-2, Ashfield, Ashhaven, Ashmarch, Ashmarch-2, Ashmere, Blackdale, Blackmere, Brightdale, Brighthaven-2, Brightvale, Coldstone, Darkcross, Darkdale, Darkforge, Deephold, Deepvale, Easthaven, Golddale, Goldfield, Goldgate, Goldhold, Goldkeep, Greenshire-2, Greenvale, Highford, Highgate, Highhold, Ironwood, Northford, Northforge, Northhold, Northhold-2, Northhold-3, Redfall-3, Redforge, Redgate, Redstone, Silverfall, Silverford-2, Southcrest, Southcrest-2, Southcross, Stillgate, Stonehaven, Stonemere, Westdale, Westfield, Westgate, Westwood, Whiteford.
+The people of Deepcrest welcomed Istran Duskweaver in 8.
+War fell upon Northhold in 8.
+The people of Southcross welcomed Perrin Blackwood in 8.
+The people of Ashfield welcomed Loric Ebonhart in 8.
+Caius the Bold drew their first breath in Stonemere during 8.
+In 8, Uldric the Wise was born in Redfall.
+Strange dreams of winged serpents appeared in Redfall during 8, stirring both hope and dread.
+Envoys plied their words between courts in 8.
+In 8, Norwin Underhill was born in Southcrest.
+In 8, Perrin the Wise was born in Redgate.
+The people of Greenvale welcomed Loric Dawnwhisper in 8.
+Helia Ebonhart drew their first breath in Coldcross during 8.
+Through Baelor Zephyrwind's diplomacy, Coldcross secured an alliance in 8.
+Coldcross raided Stonemere but was driven off (8)
+Celeste Yewbark drew their first breath in Northhold during 8.
+In 8, Weyland Ironfoot leads a skirmish near Northhold.
+Dorian Dawnwhisper drew their first breath in Westgate during 8.
+The people of Westhold welcomed Baelor Stormborn in 8.
+Envoys plied their words between courts in 8.
+Malak Wildermere drew their first breath in Ironwood during 8.
+Uldric the Wise drew their first breath in Ashmarch during 8.
+Voren Zephyrwind drew their first breath in Goldkeep during 8.
+It is recorded that in 8, Southfall raided Ashbridge and seized 50 wealth
+The people of Highgate welcomed Garrick Lightbringer in 8.
+The people of Stonebridge welcomed Quillon Ravenhill in 8.
+Through Aelar Kingsward's diplomacy, Stonebridge secured an alliance in 8.
+It is recorded that in 8, Stonebridge raided Goldkeep and seized 50 wealth
+Dara the Bold drew their first breath in Highhold during 8.
+The people of Southgate welcomed Baelor Shadowstep in 8.
+Envoys plied their words between courts in 8.
+Voren Coldspring drew their first breath in Stonefield during 8.
+It is recorded that in 8, Stonefield raided Southcrest but was driven off
+In 8, Helia Brightlance was born in Greenmarch.
+Crimson Campaign claimed countless lives in 8 before the day belonged to the the Ashen Lords.
+In 8, 2 settlements expanded their borders: Greenmarch, Silverford.
+Through Weyland Keen-Eye's diplomacy, Brightdale secured an alliance in 8.
+Perrin Ravenhill drew their first breath in Stonehaven during 8.
+Helia the Swift drew their first breath in Ashmere during 8.
+In 8, Istran Ironfoot was born in Thornmarch.
+Quillon Yewbark the Leader charted the unexplored reaches beyond Thornmarch in 8.
+A elemental barrage summoned from the screaming skies turned the tide in 8, leading to a pyrrhic victory that left the victors as broken as the vanquished.
+War fell upon Westwood in 8.
+In 8, Quillon Mosswood was born in Silvercrest.
+War fell upon Greenshire in 8.
+The people of Stillcrest welcomed Rurik Oakenshield in 8.
+The people of Stillcrest witnessed Malak Ebonhart take on a new path as Leader in 8.
+In 8, Stillcrest raided Northhold and seized 50 wealth
+In 8, Xander Dawnwhisper was born in Deepvale.
+In 8, Quillon Coldspring was born in Southhold.
+War fell upon Greenvale in 8.
+Dorian Wildermere drew their first breath in Ashmarch-2 during 8.
+Fenric Holloway drew their first breath in Greenshire during 8.
+Greenshire raided Silvercrest and seized 50 wealth (8)
+Aelar Keen-Eye drew their first breath in Goldfield during 8.
+In 8, Irisa the Bold was born in Blackdale.
+A wave of uncommon abundance washed over Blackdale in 8.
+War fell upon Westgate in 8.
+In 8, Zarek Xalcrest was born in Blackmere.
+In 8, Fiora Lightbringer was born in Brighthaven.
+Through Celeste Duskweaver's diplomacy, Brighthaven secured an alliance in 8.
+Envoys plied their words between courts in 8.
+In 8, Loric the Swift was born in Ashbridge.
+In 8, Elara Thorne was born in Northhold-2.
+In 8, Kaelen Yewbark wed, uniting two families of Northhold-2.
+In 8, Jorah Yewbark fortifies the defenses of Northhold-2.
+The people of Eastwood welcomed Fenric Nightfall in 8.
+War fell upon Southcrest-2 in 8.
+In 8, Norwin Yewbark was born in Darkwatch.
+Through Malak Thorne's diplomacy, Darkwatch secured an alliance in 8.
+Envoys plied their words between courts in 8.
+In 8, Fiora Underhill was born in Goldhold.
+The people of Darkdale welcomed Xander Fairwind in 8.
+Elara Ironfoot drew their first breath in Silverford during 8.
+A daring night raid turned the tide in 8, leading to the day belonged to the the Drowned Chorus.
+In 8, Malak Zephyrwind was born in Northforge.
+The people of Brighthaven-2 welcomed Dara Jadewalker in 8.
+The people of Brighthaven-2 celebrated the marriage of Aelar Kingsward in 8.
+A treacherous feigned retreat turned the tide in 8, leading to both sides withdrew, the field littered with the fallen.
+Quillon Stormborn drew their first breath in Deepgate during 8.
+War fell upon Redgate in 8.
+In 8, Uldric Quicksilver was born in Brightvale.
+In 8, Helia Pryor fortifies the defenses of Brightvale.
+Voren Brightlance drew their first breath in Ashcrest during 8.
+Yorick Ironfoot of Ashcrest was joined in marriage during 8.
+The people of Southhold-2 welcomed Dara Zephyrwind in 8.
+Southhold-2 raided Coldcross and seized 50 wealth (8)
+Obarin Jadewalker drew their first breath in Ashhaven during 8.
+Through Obarin Ebonhart's diplomacy, Ashhaven secured an alliance in 8.
+The people of Redfall-2 welcomed Fenric Ironfoot in 8.
+In 8, Redfall-2 raided Stillcrest and seized 50 wealth
+The people of Easthaven welcomed Istran Keen-Eye in 8.
+In 8, Helia Frostbane declares a festival in Easthaven.
+The people of Darkcross welcomed Caius Quicksilver in 8.
+In 8, Weyland Fairwind wed, uniting two families of Darkcross.
+Gwyneth Wildermere drew their first breath in Southcrest-2 during 8.
+The people of Stillgate welcomed Thorian Pryor in 8.
+Through Caius Frostbane's diplomacy, Westbridge secured an alliance in 8.
+War fell upon Stillgate in 8.
+The people of Ashmere-2 welcomed Helia Ravenhill in 8.
+A treacherous feigned retreat turned the tide in 8, leading to a pyrrhic victory that left the victors as broken as the vanquished.
+Envoys plied their words between courts in 8.
+The people of Southcross-2 welcomed Gwyneth Ironfoot in 8.
+Through Fiora Stormborn's diplomacy, Southcross-2 secured an alliance in 8.
+War fell upon Brighthaven in 8.
+In 8, Rurik Shadowstep was born in Coldkeep.
+In 8, Coldkeep raided Deepgate and seized 50 wealth
+In 8, Perrin Wildermere was born in Greengate.
+It is recorded that in 8, Greengate forms alliance with Deephold
+The people of Greenshire-2 welcomed Malak Fairwind in 8.
+In 8, Loric Quicksilver was born in Coldbridge.
+It is recorded that in 8, Coldbridge forms alliance with Deepcrest
+The people of Silverford-2 welcomed Thorian Shadowstep in 8.
+Through Eldrin Ironfoot's diplomacy, Silverford-2 secured an alliance in 8.
+Malak Xalcrest drew their first breath in Westdale during 8.
+In 8, Highfall raided Silverford-2 and seized 50 wealth
+It is recorded that in 8, Greenford raided Coldstone and seized 50 wealth
+The people of Northhold-3 welcomed Quillon Lightbringer in 8.
+In 8, Dorian the Swift was born in Northvale.
+Envoys plied their words between courts in 8.
+In 8, Jorah Ebonhart was born in Redforge.
+The people of Coldstone welcomed Yorick Lightbringer in 8.
+Istran the Wise of Coldstone was joined in marriage during 8.
+In 8, Fenric the Wise was born in Redstone.
+Envoys plied their words between courts in 8.
+Highmount flourished in 8 as traders bartered in rare crystals found only in the sunken caverns below filled its coffers.
+It is recorded that in 8, Highmount forms alliance with Deepcrest
+The people of Northford celebrated the marriage of Brisa Holloway in 8.
+Kaelen Underhill drew their first breath in Westwood during 8.
+Through Garrick Blackwood's diplomacy, Westwood secured an alliance in 8.
+Westfield rejoiced in 8 as the Festival of Veils saw old grudges forgiven under moonlit dance.
+Fenric Blackwood drew their first breath in Deephold during 9.
+In 9, 55 settlements tended their wealth: Ashbridge, Ashcrest, Ashcrest-2, Ashfield, Ashmarch, Ashmarch-2, Ashmere, Ashmere-2, Blackdale, Blackmere, Brightdale, Brighthaven, Brighthaven-2, Brightvale, Coldcross, Coldkeep, Darkcross, Darkdale, Darkforge, Deepcrest, Deephold, Deepvale, Easthaven, Eastwood, Golddale, Goldhold, Greenshire, Greenshire-2, Highfall, Highford, Highgate, Ironwood, Ironwood-2, Northforge, Northhold, Northhold-2, Northhold-3, Northvale, Redfall, Redfall-2, Redforge, Silvercrest, Silverfall, Southcrest, Southcross-2, Southfall, Southgate, Southhold-2, Stillgate, Stonebridge, Thornmarch, Westgate, Westhold, Westwood, Whiteford.
+The people of Deepcrest welcomed Celeste Jadewalker in 9.
+The people of Southcross welcomed Baelor Holloway in 9.
+Envoys plied their words between courts in 9.
+The people of Ashfield welcomed Malak Dawnwhisper in 9.
+In 9, Aelar Lightbringer was born in Stonemere.
+Through Yorick the Bold's diplomacy, Stonemere secured an alliance in 9.
+It is recorded that in 9, Stonemere raided Coldcross and seized 50 wealth
+The people of Redfall welcomed Haldor Frostbane in 9.
+Istran Jadewalker drew their first breath in Southcrest during 9.
+Through Celeste Jadewalker's diplomacy, Southcrest secured an alliance in 9.
+Redgate rejoiced in 9 as the Festival of Veils saw old grudges forgiven under moonlit dance.
+It is recorded that in 9, Redgate forms alliance with Deephold
+War fell upon Southhold in 9.
+In 9, Yorick Jadewalker was born in Coldcross.
+The people of Northhold welcomed Elara Dawnwhisper in 9.
+The people of Westhold welcomed Fiora Dawnwhisper in 9.
+The people of Ironwood welcomed Elara Ebonhart in 9.
+The people of Ashmarch celebrated the marriage of Elara Ironheart in 9.
+Ashmarch flourished in 9 as a guild of alchemists established a permanent quarter in the heart of town filled its coffers.
+War fell upon Ashmere in 9.
+In 9, Malak Vane was born in Highgate.
+Border War claimed countless lives in 9 before a pyrrhic victory that left the victors as broken as the vanquished.
+The people of Stonebridge welcomed Eldrin Holloway in 9.
+In 9, Obarin Oakenshield wed, uniting two families of Stonebridge.
+The people of Highhold welcomed Kaelen Holloway in 9.
+In 9, Highhold raided Ashbridge and seized 50 wealth
+The people of Southgate welcomed Aeliana Blackwood in 9.
+In 9, Loric Blackwood was born in Stonefield.
+Stonefield raided Southcrest and seized 50 wealth (9)
+Banners of the Sun-Scaled Dynasty clashed during the winter of 9. a pyrrhic victory that left the victors as broken as the vanquished.
+In 9, 2 settlements expanded their borders: Greenmarch, Silverford.
+Obarin Kingsward drew their first breath in Brightdale during 9.
+In 9, Haldor Keen-Eye was born in Stonehaven.
+In 9, Stonehaven raided Ashmarch but was driven off
+Through Perrin Fairwind's diplomacy, Ashmere secured an alliance in 9.
+The people of Thornmarch welcomed Silas the Wise in 9.
+In 9, Norwin Coldspring rallies the militia of Thornmarch.
+Helia the Bold drew their first breath in Goldgate during 9.
+Banners of the Iron Covenant clashed during the winter of 9. a rout that scattered the defeated across the wilderness.
+Through Zarek Mosswood's diplomacy, Goldgate secured an alliance in 9.
+Goldgate forms alliance with Westgate (9)
+The people of Silvercrest welcomed Aeliana Glimmerstone in 9.
+Through Elara Nightfall's diplomacy, Stillcrest secured an alliance in 9.
+Through Elara Nightfall's diplomacy, Stillcrest secured an alliance in 9.
+In 9, Stillcrest raided Northhold and seized 50 wealth
+In 9, Irisa Duskweaver was born in Deepvale.
+Through Aelar Oakenshield's diplomacy, Southhold secured an alliance in 9.
+War fell upon Greenvale in 9.
+Through Jorah the Wise's diplomacy, Greenshire secured an alliance in 9.
+Istran Vane drew their first breath in Goldfield during 9.
+A wave of uncommon abundance washed over Goldfield in 9.
+War fell upon Blackdale in 9.
+Banners of the Freehold Confederacy clashed during the winter of 9. both sides withdrew, the field littered with the fallen.
+Celeste Ironheart drew their first breath in Blackmere during 9.
+Yorick Oakenshield drew their first breath in Brighthaven during 9.
+Dorian Keen-Eye of Brighthaven was joined in marriage during 9.
+Through Celeste Duskweaver's diplomacy, Brighthaven secured an alliance in 9.
+In 9, Fiora Oakenshield was born in Ashbridge.
+In 9, Haldor Zephyrwind was born in Northhold-2.
+Through Celeste Glimmerstone's diplomacy, Silverfall secured an alliance in 9.
+Darkwatch forms alliance with Redgate (9)
+The people of Goldhold welcomed Baelor Xalcrest in 9.
+Strange wandering stone circles appeared in Goldhold during 9, stirring both hope and dread.
+In 9, Aelar Ironheart was born in Darkdale.
+The people of Northforge welcomed Eldrin Fairwind in 9.
+Through Silas Shadowstep's diplomacy, Brighthaven-2 secured an alliance in 9.
+In 9, Voren Holloway was born in Deepgate.
+In 9, Deepgate raided Redgate and seized 50 wealth
+In 9, Gwyneth Ironheart was born in Ashcrest.
+In 9, steel met steel as rival hosts collided on the blood-soaked plains, and a pyrrhic victory that left the victors as broken as the vanquished.
+Strange silver-tongued prophets appeared in Southhold-2 during 9, stirring both hope and dread.
+In 9, Ashhaven raided Westgate and seized 50 wealth
+In 9, Helia the Swift was born in Redfall-2.
+The people of Easthaven welcomed Elara Oakenshield in 9.
+Banners of the Freehold Confederacy clashed during the winter of 9. the day belonged to the the Drowned Chorus.
+Caius Keen-Eye drew their first breath in Darkcross during 9.
+Xander Vane drew their first breath in Southcrest-2 during 9.
+War fell upon Eastwood in 9.
+Through Malak Ashford's diplomacy, Stillgate secured an alliance in 9.
+Istran Lightbringer drew their first breath in Westbridge during 9.
+Fenric Zephyrwind of Westbridge was joined in marriage during 9.
+Envoys plied their words between courts in 9.
+The people of Ashmere-2 welcomed Obarin Ebonhart in 9.
+The people of Southcross-2 celebrated the marriage of Xander Fairwind in 9.
+Southcross-2 rejoiced in 9 as the High Harvest feast lasted seven nights without pause.
+Brisa Jadewalker drew their first breath in Highford during 9.
+Caius Duskweaver drew their first breath in Coldkeep during 9.
+In 9, Silas Ravenhill rallies the militia of Coldkeep.
+Envoys plied their words between courts in 9.
+The people of Coldbridge welcomed Voren Mosswood in 9.
+War fell upon Silverford in 9.
+A elemental barrage summoned from the screaming skies turned the tide in 9, leading to both sides withdrew, the field littered with the fallen.
+Silverford-2 raided Highfall and seized 50 wealth (9)
+Elara Zephyrwind drew their first breath in Westdale during 9.
+In 9, Obarin Frostbane was no longer content with their old role, and instead became known as Explorer of Westdale.
+Envoys plied their words between courts in 9.
+Dorian Underhill drew their first breath in Highfall during 9.
+Rurik Oakenshield drew their first breath in Greenford during 9.
+Through Caius Stormborn's diplomacy, Greenford secured an alliance in 9.
+In 9, Greenford raided Coldstone and seized 50 wealth
+Quillon Oakenshield drew their first breath in Northhold-3 during 9.
+Through Voren Dawnwhisper's diplomacy, Northhold-3 secured an alliance in 9.
+Baelor Kingsward drew their first breath in Darkforge during 9.
+The people of Golddale welcomed Aelar Ravenhill in 9.
+Malak Nightfall of Northvale was joined in marriage during 9.
+In 9, Malak the Swift was born in Redforge.
+Malak Ebonhart drew their first breath in Coldstone during 9.
+Strange dreams of winged serpents appeared in Coldstone during 9, stirring both hope and dread.
+It is recorded that in 9, Coldstone forms alliance with Stonemere
+Envoys plied their words between courts in 9.
+War fell upon Highmount in 9.
+Redhaven forms alliance with Ashfield (9)
+Malak Quicksilver drew their first breath in Highmount during 9.
+In 9, Voren Holloway wed, uniting two families of Highmount.
+War fell upon Northhold-3 in 9.
+Banners of the Sun-Scaled Dynasty clashed during the winter of 9. an uneasy stalemate settled over the contested ground.
+Northford raided Greenford and seized 50 wealth (9)
+Zarek Frostbane drew their first breath in Westfield during 9.
+Westfield raided Northhold-3 and seized 50 wealth (9)
+The people of Deephold welcomed Yorick Thorne in 10.
+Deephold flourished in 10 as traders bartered in rare crystals found only in the sunken caverns below filled its coffers.
+In 10, 45 settlements tended their wealth: Ashcrest-2, Ashhaven, Ashmarch-2, Blackdale, Brightdale, Brighthaven-2, Darkdale, Darkforge, Deephold, Easthaven, Golddale, Goldfield, Goldgate, Goldhold, Greenford, Greengate, Greenmarch, Greenshire, Greenshire-2, Highfall, Highford, Highgate, Northhold-2, Redfall-2, Redfall-3, Redforge, Redgate, Silvercrest, Silverfall, Silverford-2, Southcrest-2, Southcross, Southcross-2, Southgate, Southhold, Stillcrest, Stillgate, Stonebridge, Stonefield, Thornmarch, Westdale, Westfield, Westgate, Westwood, Whiteford.
+In 10, Quillon Glimmerstone was born in Deepcrest.
+In 10, Deepcrest raided Northhold and seized 50 wealth
+The people of Ashfield welcomed Aeliana Shadowstep in 10.
+Strange silver-tongued prophets appeared in Ashfield during 10, stirring both hope and dread.
+War fell upon Redfall in 10.
+In 10, Dorian Ravenhill was born in Stonemere.
+Strange prophecies carved in frost appeared in Stonemere during 10, stirring both hope and dread.
+It is recorded that in 10, Stonemere raided Coldcross but was driven off
+The people of Redfall welcomed Dara Nightfall in 10.
+Strange prophecies carved in frost appeared in Redfall during 10, stirring both hope and dread.
+It is recorded that in 10, Redfall forms alliance with Westgate
+Through Celeste Jadewalker's diplomacy, Southcrest secured an alliance in 10.
+War fell upon Northhold in 10.
+In 10, Obarin Lightbringer was born in Greenvale.
+War fell upon Southhold in 10.
+Uldric Stormborn drew their first breath in Coldcross during 10.
+In 10, Baelor Zephyrwind wed, uniting two families of Coldcross.
+In 10, Baelor Zephyrwind declares a festival in Coldcross.
+It is recorded that in 10, Coldcross raided Stonemere and seized 50 wealth
+Uldric Lightbringer drew their first breath in Northhold during 10.
+In 10, Northhold raided Southcrest and seized 50 wealth
+Caius Duskweaver drew their first breath in Westgate during 10.
+In 10, Norwin the Wise was born in Westhold.
+War fell upon Brightdale in 10.
+Xander Holloway drew their first breath in Ironwood during 10.
+Through Rurik Lightbringer's diplomacy, Ironwood secured an alliance in 10.
+Envoys plied their words between courts in 10.
+In 10, Garrick Coldspring expands the borders of Ashmarch.
+Ashmarch forms alliance with Deepcrest (10)
+The people of Goldkeep welcomed Rurik Ashford in 10.
+In 10, Obarin Ashford fortifies the defenses of Goldkeep.
+War fell upon Ashmere in 10.
+In 10, Kaelen Fairwind was born in Southfall.
+A wave of mercantile fortune washed over Southfall in 10.
+War fell upon Ashbridge in 10.
+Through Aelar Kingsward's diplomacy, Stonebridge secured an alliance in 10.
+War fell upon Ashbridge in 10.
+In 10, Obarin Xalcrest was born in Southgate.
+In 10, Xander Ebonhart was born in Greenmarch.
+In 10, Norwin Brightlance was born in Stonehaven.
+Yorick Kingsward of Stonehaven was joined in marriage during 10.
+In 10, Stonehaven raided Ashmarch and seized 50 wealth
+In 10, Ashmere raided Goldkeep and seized 50 wealth
+Fenric the Bold drew their first breath in Goldgate during 10.
+In 10, Rurik Coldspring was born in Stillcrest.
+Through Elara Nightfall's diplomacy, Stillcrest secured an alliance in 10.
+The people of Deepvale welcomed Yorick Thorne in 10.
+Deepvale raided Coldkeep and seized 50 wealth (10)
+The people of Greenshire witnessed Jorah the Wise take on a new path as Explorer in 10.
+In 10, Dorian Keen-Eye was born in Ironwood-2.
+It is recorded that in 10, Ironwood-2 raided Westgate and seized 50 wealth
+Through Jorah Vane's diplomacy, Blackmere secured an alliance in 10.
+In 10, Blackmere raided Southcrest but was driven off
+Celeste Jadewalker drew their first breath in Brighthaven during 10.
+Strange wandering stone circles appeared in Brighthaven during 10, stirring both hope and dread.
+Envoys plied their words between courts in 10.
+Through Fenric Stormborn's diplomacy, Ashbridge secured an alliance in 10.
+War fell upon Southfall in 10.
+Dorian Blackwood of Eastwood was joined in marriage during 10.
+It is recorded that in 10, Eastwood raided Southcrest-2 and seized 50 wealth
+Obarin Quicksilver drew their first breath in Silverfall during 10.
+Kaelen Vane of Silverfall was joined in marriage during 10.
+In 10, Darkwatch forms alliance with Southfall
+The people of Darkdale welcomed Zarek the Wise in 10.
+Darkdale flourished in 10 as a guild of alchemists established a permanent quarter in the heart of town filled its coffers.
+The people of Silverford welcomed Eldrin Ashford in 10.
+Silverford raided Stonefield but was driven off (10)
+In 10, Istran Wildermere was born in Northforge.
+War fell upon Goldfield in 10.
+Perrin Fairwind drew their first breath in Brighthaven-2 during 10.
+Through Silas Shadowstep's diplomacy, Brighthaven-2 secured an alliance in 10.
+Envoys plied their words between courts in 10.
+Envoys plied their words between courts in 10.
+Envoys plied their words between courts in 10.
+Zarek Keen-Eye drew their first breath in Southhold-2 during 10.
+Southhold-2 raided Coldcross and seized 50 wealth (10)
+The people of Redfall-2 welcomed Brisa Zephyrwind in 10.
+Through Silas Holloway's diplomacy, Redfall-2 secured an alliance in 10.
+The people of Easthaven welcomed Jorah Jadewalker in 10.
+Banners of the Iron Covenant clashed during the winter of 10. the day belonged to the the Freehold Confederacy.
+In 10, Darkcross raided Westhold but was driven off
+Celeste Stormborn of Southcrest-2 was joined in marriage during 10.
+Kaelen Oakenshield drew their first breath in Stillgate during 10.
+In 10, Quillon Ebonhart was born in Westbridge.
+In 10, Westbridge forms alliance with Westgate
+Envoys plied their words between courts in 10.
+In 10, Fenric Fairwind was born in Southcross-2.
+In 10, Caius Frostbane was no longer content with their old role, and instead became known as Leader of Highford.
+The people of Coldkeep welcomed Uldric Thorne in 10.
+The people of Coldkeep celebrated the marriage of Haldor Lightbringer in 10.
+Coldkeep raided Deepgate and seized 50 wealth (10)
+Crimson Campaign claimed countless lives in 10 before both sides withdrew, the field littered with the fallen.
+Through Uldric the Wise's diplomacy, Greenshire-2 secured an alliance in 10.
+Fiora the Bold of Coldbridge was joined in marriage during 10.
+Coldbridge rejoiced in 10 as the High Harvest feast lasted seven nights without pause.
+In 10, Coldbridge forms alliance with Ashfield
+In 10, Dorian Dawnwhisper was born in Silverford-2.
+In 10, steel met steel as rival hosts collided on the blood-soaked plains, and an uneasy stalemate settled over the contested ground.
+Through Fenric Ironheart's diplomacy, Westdale secured an alliance in 10.
+In 10, Fenric Ironheart establishes new trade routes through Westdale.
+Strange dreams of winged serpents appeared in Highfall during 10, stirring both hope and dread.
+The people of Greenford welcomed Thorian Wildermere in 10.
+Through Caius Stormborn's diplomacy, Greenford secured an alliance in 10.
+In 10, Uldric Jadewalker was born in Northhold-3.
+In 10, arrows darkened the sky above the siege towers, and a pyrrhic victory that left the victors as broken as the vanquished.
+Northhold-3 forms alliance with Deephold (10)
+The people of Darkforge welcomed Jorah Yewbark in 10.
+The people of Northvale welcomed Obarin Pryor in 10.
+In 10, Northvale forms alliance with Ashfield
+In 10, Thorian Nightfall was born in Redforge.
+Strange dreams of winged serpents appeared in Redforge during 10, stirring both hope and dread.
+Fenric Ironfoot drew their first breath in Coldstone during 10.
+Envoys plied their words between courts in 10.
+The people of Ashcrest-2 welcomed Zarek Oakenshield in 10.
+The people of Redstone welcomed Brisa Stormborn in 10.
+Strange prophecies carved in frost appeared in Redstone during 10, stirring both hope and dread.
+In 10, Redstone forms alliance with Southfall
+Baelor Brightlance drew their first breath in Redfall-3 during 10.
+Through Quillon Dawnwhisper's diplomacy, Redhaven secured an alliance in 10.
+It is recorded that in 10, Redhaven forms alliance with Greenvale
+In 10, Dara Shadowstep was born in Highmount.
+Envoys plied their words between courts in 10.
+Brisa the Swift drew their first breath in Northford during 10.
+War fell upon Greenford in 10.
+The people of Westfield welcomed Aeliana Coldspring in 10.
+Through Celeste Glimmerstone's diplomacy, Westfield secured an alliance in 10.
+In 11, Deephold forms alliance with Southfall
+In 11, Yorick Fairwind wed, uniting two families of Deepcrest.
+Through Yorick Fairwind's diplomacy, Deepcrest secured an alliance in 11.
+In 11, 55 settlements tended their wealth: Ashbridge, Ashcrest, Ashcrest-2, Ashfield, Ashmarch, Ashmere, Blackdale, Blackmere, Brightdale, Brighthaven, Brighthaven-2, Brightvale, Coldbridge, Coldcross, Coldkeep, Darkwatch, Deepcrest, Deepgate, Easthaven, Golddale, Goldfield, Goldhold, Goldkeep, Greenmarch, Greenshire, Greenshire-2, Greenvale, Highford, Highgate, Highhold, Highmount, Ironwood, Northforge, Northhold-3, Northvale, Redfall, Redfall-2, Redforge, Redstone, Silverfall, Silverford, Silverford-2, Southcross, Southcross-2, Southfall, Southhold, Southhold-2, Stillcrest, Stonehaven, Westdale, Westfield, Westgate, Westhold, Westwood, Whiteford.
+Irisa Holloway drew their first breath in Ashfield during 11.
+Through Garrick Oakenshield's diplomacy, Stonemere secured an alliance in 11.
+War fell upon Coldcross in 11.
+In 11, Haldor Duskweaver fortifies the defenses of Redfall.
+In 11, Fenric Glimmerstone was born in Southcrest.
+Southcrest rejoiced in 11 as a tournament of champions honored the founding charter.
+It is recorded that in 11, Southcrest raided Northhold and seized 50 wealth
+Redgate raided Redfall and seized 50 wealth (11)
+In 11, Perrin Ironheart was born in Greenvale.
+Norwin Glimmerstone drew their first breath in Coldcross during 11.
+Through Baelor Zephyrwind's diplomacy, Coldcross secured an alliance in 11.
+In 11, Haldor Holloway was born in Northhold.
+Northhold raided Southcrest and seized 50 wealth (11)
+The people of Westgate welcomed Baelor Wildermere in 11.
+In 11, Caius Blackwood was born in Westhold.
+In 11, Kaelen Ebonhart was born in Ironwood.
+War fell upon Goldkeep in 11.
+War fell upon Westhold in 11.
+War fell upon Southcrest in 11.
+Norwin Mosswood of Greenmarch was joined in marriage during 11.
+In 11, Kaelen Vane was born in Stonehaven.
+The people of Ashmere welcomed Istran the Bold in 11.
+Elara Zephyrwind drew their first breath in Thornmarch during 11.
+Quillon Yewbark of Thornmarch charted a new path in 11.
+Quillon Yewbark the Leader charted the unexplored reaches beyond Thornmarch in 11.
+Envoys plied their words between courts in 11.
+In 11, Elara Quicksilver was born in Goldgate.
+Envoys plied their words between courts in 11.
+In 11, Helia Holloway was born in Silvercrest.
+Silvercrest forms alliance with Stonemere (11)
+Malak Ebonhart ventured forth from Stillcrest in 11 and returned with maps of new lands.
+In 11, Zarek Dawnwhisper leads a skirmish near Deepvale.
+In 11, Deepvale raided Coldkeep and seized 50 wealth
+Baelor Kingsward drew their first breath in Ashmarch-2 during 11.
+In 11, Uldric Yewbark wed, uniting two families of Ashmarch-2.
+Ashmarch-2 raided Southhold but was driven off (11)
+Greenshire mourned Perrin Stormborn throughout 11.
+In 11, Zarek Ironheart was born in Greenshire.
+Through Yorick Pryor's diplomacy, Greenshire secured an alliance in 11.
+Jorah the Wise ventured forth from Greenshire in 11 and returned with maps of new lands.
+Goldfield rejoiced in 11 as a grand festival of masks and music drew crowds from every corner.
+War fell upon Westgate in 11.
+Brisa Ashford drew their first breath in Blackmere during 11.
+In 11, Caius Wildermere was born in Brighthaven.
+In 11, the crack of spellfire and shattering shields filled the valley, and a pyrrhic victory that left the victors as broken as the vanquished.
+Brisa Mosswood the Explorer charted the unexplored reaches beyond Ashbridge in 11.
+In 11, Jorah Yewbark was no longer content with their old role, and instead became known as Leader of Northhold-2.
+In 11, Northhold-2 raided Southfall and seized 50 wealth
+The people of Eastwood welcomed Aeliana Jadewalker in 11.
+Eastwood raided Southcrest-2 and seized 50 wealth (11)
+Silverfall flourished in 11 as traders bartered in rare crystals found only in the sunken caverns below filled its coffers.
+Obarin Jadewalker drew their first breath in Goldhold during 11.
+Dara Ebonhart drew their first breath in Darkdale during 11.
+In 11, Darkdale forms alliance with Stonemere
+Silverford rejoiced in 11 as a tournament of champions honored the founding charter.
+The people of Northforge welcomed Eldrin Jadewalker in 11.
+A wave of mercantile fortune washed over Northforge in 11.
+The people of Deepgate welcomed Uldric Ironfoot in 11.
+In 11, Quillon Pryor was born in Brightvale.
+Strange prophecies carved in frost appeared in Ashhaven during 11, stirring both hope and dread.
+War fell upon Westgate in 11.
+Norwin Zephyrwind drew their first breath in Easthaven during 11.
+Aelar the Wise drew their first breath in Darkcross during 11.
+Through Elara Jadewalker's diplomacy, Darkcross secured an alliance in 11.
+War fell upon Westhold in 11.
+In 11, Southcrest-2 forms alliance with Deephold
+Obarin Ravenhill drew their first breath in Stillgate during 11.
+Through Malak Ashford's diplomacy, Stillgate secured an alliance in 11.
+War fell upon Westbridge in 11.
+The people of Westbridge welcomed Weyland Ravenhill in 11.
+War fell upon Stillgate in 11.
+In 11, Ashmere-2 raided Westhold and seized 50 wealth
+In 11, Xander Fairwind was born in Highford.
+Through Garrick Ravenhill's diplomacy, Highford secured an alliance in 11.
+The people of Greengate welcomed Gwyneth Ravenhill in 11.
+Envoys plied their words between courts in 11.
+A daring night raid turned the tide in 11, leading to an uneasy stalemate settled over the contested ground.
+Banners of the Iron Covenant clashed during the winter of 11. an uneasy stalemate settled over the contested ground.
+In 11, Obarin Blackwood was born in Highfall.
+Envoys plied their words between courts in 11.
+War fell upon Coldstone in 11.
+Envoys plied their words between courts in 11.
+Through Norwin Blackwood's diplomacy, Golddale secured an alliance in 11.
+In 11, Xander Oakenshield was born in Northvale.
+In 11, Norwin Ironheart was born in Redforge.
+Gwyneth Ravenhill of Redforge was joined in marriage during 11.
+Strange silver-tongued prophets appeared in Redforge during 11, stirring both hope and dread.
+It is recorded that in 11, Coldstone raided Greenshire-2 and seized 50 wealth
+The people of Ashcrest-2 celebrated the marriage of Silas Holloway in 11.
+The people of Whiteford welcomed Gwyneth Jadewalker in 11.
+The people of Redfall-3 welcomed Brisa Duskweaver in 11.
+It is recorded that in 11, Redfall-3 raided Highmount and seized 50 wealth
+Envoys plied their words between courts in 11.
+The people of Northford welcomed Kaelen Underhill in 11.
+Northford rejoiced in 11 as a grand festival of masks and music drew crowds from every corner.
+It is recorded that in 11, Northford forms alliance with Deepcrest
+Banners of the Sun-Scaled Dynasty clashed during the winter of 11. a rout that scattered the defeated across the wilderness.
+The people of Deephold celebrated the marriage of Perrin Thorne in 12.
+In 12, 55 settlements tended their wealth: Ashbridge, Ashcrest, Ashcrest-2, Ashfield, Ashmarch, Ashmarch-2, Ashmere, Blackmere, Brighthaven, Brighthaven-2, Coldbridge, Coldcross, Coldkeep, Darkcross, Deepcrest, Deephold, Deepvale, Easthaven, Eastwood, Golddale, Goldfield, Goldgate, Goldhold, Goldkeep, Greengate, Greenmarch, Greenshire, Greenshire-2, Greenvale, Highgate, Highmount, Ironwood-2, Northford, Northhold-3, Northvale, Redfall-2, Redfall-3, Redforge, Redhaven, Silvercrest, Silverford, Southcrest-2, Southfall, Southgate, Southhold-2, Stillcrest, Stillgate, Stonebridge, Stonefield, Stonehaven, Thornmarch, Westdale, Westfield, Westhold, Westwood.
+In 12, Helia the Bold was born in Southcross.
+Southcross forms alliance with Westgate (12)
+The people of Ashfield welcomed Istran Ironfoot in 12.
+In 12, Weyland Ashford was born in Stonemere.
+Stonemere raided Coldcross and seized 50 wealth (12)
+In 12, Garrick Mosswood was born in Redfall.
+War fell upon Ashfield in 12.
+War fell upon Northhold in 12.
+War fell upon Redfall in 12.
+Strange prophecies carved in frost appeared in Greenvale during 12, stirring both hope and dread.
+Through Baelor Zephyrwind's diplomacy, Coldcross secured an alliance in 12.
+In 12, Weyland Ironfoot fortifies the defenses of Northhold.
+Envoys plied their words between courts in 12.
+Voren Glimmerstone of Westgate changed their destiny in 12, rising as Explorer.
+In 12, Voren Glimmerstone leads a skirmish near Westgate.
+War fell upon Northhold in 12.
+Ironwood forms alliance with Westgate (12)
+Istran Ravenhill drew their first breath in Highgate during 12.
+The people of Highgate celebrated the marriage of Celeste Lightbringer in 12.
+The people of Stonebridge welcomed Zarek Kingsward in 12.
+In 12, Rurik Coldspring was born in Highhold.
+A treacherous feigned retreat turned the tide in 12, leading to the day belonged to the the Iron Covenant.
+Envoys plied their words between courts in 12.
+The people of Southgate welcomed Baelor Xalcrest in 12.
+In 12, Obarin Duskweaver wed, uniting two families of Stonefield.
+The people of Brightdale celebrated the marriage of Celeste Coldspring in 12.
+Brightdale flourished in 12 as a guild of alchemists established a permanent quarter in the heart of town filled its coffers.
+Brightdale raided Westhold and seized 50 wealth (12)
+In 12, Yorick Ashford was born in Stonehaven.
+In 12, war-horns echoed through the mountain passes as armies converged, and a rout that scattered the defeated across the wilderness.
+A wave of mercantile fortune washed over Stillcrest in 12.
+The people of Southhold welcomed Garrick Frostbane in 12.
+It is recorded that in 12, Southhold raided Greenvale and seized 50 wealth
+Dorian Coldspring drew their first breath in Ashmarch-2 during 12.
+Banners of the Iron Covenant clashed during the winter of 12. a rout that scattered the defeated across the wilderness.
+The people of Goldfield celebrated the marriage of Thorian Glimmerstone in 12.
+Quillon Nightfall drew their first breath in Blackdale during 12.
+In 12, Helia Ravenhill fortifies the defenses of Blackdale.
+War fell upon Goldkeep in 12.
+Through Celeste Duskweaver's diplomacy, Brighthaven secured an alliance in 12.
+In 12, Dorian Nightfall was born in Ashbridge.
+In 12, Brisa Mosswood was no longer content with their old role, and instead became known as Explorer of Ashbridge.
+Brisa Mosswood the Explorer charted the unexplored reaches beyond Ashbridge in 12.
+Brisa Keen-Eye drew their first breath in Northhold-2 during 12.
+Through Kaelen Shadowstep's diplomacy, Northhold-2 secured an alliance in 12.
+In 12, Jorah Yewbark was no longer content with their old role, and instead became known as Leader of Northhold-2.
+Jorah Yewbark the Leader charted the unexplored reaches beyond Northhold-2 in 12.
+It is recorded that in 12, Northhold-2 forms alliance with Stonemere
+In 12, Yorick Quicksilver wed, uniting two families of Silverfall.
+Envoys plied their words between courts in 12.
+The people of Darkwatch welcomed Quillon Glimmerstone in 12.
+In 12, Loric Ebonhart wed, uniting two families of Darkwatch.
+It is recorded that in 12, Darkwatch forms alliance with Highhold
+Banners of the Freehold Confederacy clashed during the winter of 12. a pyrrhic victory that left the victors as broken as the vanquished.
+War fell upon Highhold in 12.
+A treacherous feigned retreat turned the tide in 12, leading to both sides withdrew, the field littered with the fallen.
+Northforge forms alliance with Stonemere (12)
+War fell upon Redgate in 12.
+The people of Brightvale welcomed Gwyneth Glimmerstone in 12.
+In 12, the crack of spellfire and shattering shields filled the valley, and a pyrrhic victory that left the victors as broken as the vanquished.
+War fell upon Southhold-2 in 12.
+Envoys plied their words between courts in 12.
+Redfall-2 mourned Brisa Kingsward throughout 12.
+In 12, Caius Underhill was born in Redfall-2.
+The people of Southcrest-2 welcomed Elara Holloway in 12.
+Voren Mosswood of Southcrest-2 charted a new path in 12.
+Stillgate mourned Gwyneth Jadewalker throughout 12.
+The people of Stillgate welcomed Voren Jadewalker in 12.
+The people of Westbridge welcomed Thorian Ravenhill in 12.
+In 12, Westbridge forms alliance with Goldkeep
+Ashmere-2 raided Westhold and seized 50 wealth (12)
+In 12, Dorian Oakenshield was born in Southcross-2.
+A wave of uncommon abundance washed over Southcross-2 in 12.
+Southcross-2 raided Blackdale but was driven off (12)
+Through Garrick Ravenhill's diplomacy, Highford secured an alliance in 12.
+It is recorded that in 12, Highford raided Highgate and seized 50 wealth
+Through Silas Ravenhill's diplomacy, Coldkeep secured an alliance in 12.
+In 12, Brisa Stormborn was born in Silverford-2.
+In 12, Eldrin Ironfoot rallies the militia of Silverford-2.
+Envoys plied their words between courts in 12.
+Through Xander Ironfoot's diplomacy, Highfall secured an alliance in 12.
+In 12, Highfall forms alliance with Greenvale
+War fell upon Coldstone in 12.
+The people of Darkforge welcomed Kaelen Kingsward in 12.
+Darkforge forms alliance with Southfall (12)
+The people of Golddale witnessed Norwin Blackwood take on a new path as Explorer in 12.
+Northvale flourished in 12 as caravans from distant lands arrived bearing silks and spices filled its coffers.
+The people of Redforge celebrated the marriage of Perrin Ironheart in 12.
+Banners of the Sun-Scaled Dynasty clashed during the winter of 12. a rout that scattered the defeated across the wilderness.
+War fell upon Greenshire-2 in 12.
+Istran Thorne drew their first breath in Ashcrest-2 during 12.
+Through Norwin Frostbane's diplomacy, Ashcrest-2 secured an alliance in 12.
+The people of Redstone celebrated the marriage of Brisa the Bold in 12.
+Envoys plied their words between courts in 12.
+Through Quillon Quicksilver's diplomacy, Whiteford secured an alliance in 12.
+In 12, Whiteford forms alliance with Southfall
+The people of Redhaven welcomed Perrin Wildermere in 12.
+Strange silver-tongued prophets appeared in Redhaven during 12, stirring both hope and dread.
+In 12, Baelor Ironfoot expands the borders of Highmount.
+Border War claimed countless lives in 12 before both sides withdrew, the field littered with the fallen.
+Deephold flourished in 13 as the market square swelled with merchants hawking curios from beyond the known map filled its coffers.
+Deephold forms alliance with Highhold (13)
+In 13, Silas Fairwind was born in Deepcrest.
+In 13, 52 settlements tended their wealth: Ashbridge, Ashmere-2, Blackdale, Blackmere, Brightdale, Brightvale, Coldbridge, Coldcross, Coldstone, Darkcross, Darkdale, Darkforge, Darkwatch, Deepcrest, Deepvale, Easthaven, Golddale, Goldfield, Goldgate, Goldhold, Greengate, Greenshire, Greenvale, Highford, Highgate, Highhold, Highmount, Ironwood, Northhold, Northhold-3, Northvale, Redfall-3, Redhaven, Redstone, Silverfall, Silverford, Southcrest-2, Southcross-2, Southfall, Southhold-2, Stillcrest, Stillgate, Stonebridge, Stonefield, Stonehaven, Stonemere, Thornmarch, Westbridge, Westdale, Westfield, Westwood, Whiteford.
+In 13, Fiora Shadowstep was born in Southcross.
+Southcross rejoiced in 13 as a tournament of champions honored the founding charter.
+In 13, Southcross forms alliance with Goldkeep
+In 13, Ashfield raided Redfall and seized 50 wealth
+A wave of arcane prosperity washed over Stonemere in 13.
+Envoys plied their words between courts in 13.
+War fell upon Northhold in 13.
+Banners of the Ashen Lords clashed during the winter of 13. a pyrrhic victory that left the victors as broken as the vanquished.
+Redgate forms alliance with Southfall (13)
+In 13, war-horns echoed through the mountain passes as armies converged, and a rout that scattered the defeated across the wilderness.
+Through Elara Quicksilver's diplomacy, Westgate secured an alliance in 13.
+Envoys plied their words between courts in 13.
+Through Helia Blackwood's diplomacy, Westhold secured an alliance in 13.
+War fell upon Brightdale in 13.
+In 13, Brisa Jadewalker was born in Ashmarch.
+It is recorded that in 13, Ashmarch raided Stonehaven and seized 50 wealth
+In 13, Fenric Keen-Eye wed, uniting two families of Goldkeep.
+Envoys plied their words between courts in 13.
+Southfall flourished in 13 as traders bartered in rare crystals found only in the sunken caverns below filled its coffers.
+Crimson Campaign claimed countless lives in 13 before a rout that scattered the defeated across the wilderness.
+Envoys plied their words between courts in 13.
+The people of Stonefield welcomed Dorian Frostbane in 13.
+In 13, Obarin Frostbane declares a festival in Stonefield.
+It is recorded that in 13, Greenmarch raided Golddale and seized 50 wealth
+The people of Brightdale welcomed Kaelen Brightlance in 13.
+Strange wandering stone circles appeared in Stonehaven during 13, stirring both hope and dread.
+Banners of the Sun-Scaled Dynasty clashed during the winter of 13. a rout that scattered the defeated across the wilderness.
+It is recorded that in 13, Ashmere raided Goldkeep and seized 50 wealth
+The people of Thornmarch welcomed Quillon Duskweaver in 13.
+Thornmarch flourished in 13 as traders bartered in rare crystals found only in the sunken caverns below filled its coffers.
+War of the Broken Crown claimed countless lives in 13 before a pyrrhic victory that left the victors as broken as the vanquished.
+It is recorded that in 13, Silvercrest raided Greenshire and seized 50 wealth
+War fell upon Greenvale in 13.
+In 13, the crack of spellfire and shattering shields filled the valley, and an uneasy stalemate settled over the contested ground.
+It is recorded that in 13, Ashmarch-2 raided Southhold but was driven off
+The people of Greenshire witnessed Yorick Pryor take on a new path as Leader in 13.
+In 13, Dara Duskweaver was born in Goldfield.
+In 13, Garrick Duskweaver was born in Ironwood-2.
+In 13, Ironwood-2 raided Westgate but was driven off
+Through Celeste Duskweaver's diplomacy, Brighthaven secured an alliance in 13.
+In 13, Brighthaven raided Redfall-2 but was driven off
+In 13, Uldric Zephyrwind was born in Northhold-2.
+Siege of Sorrow claimed countless lives in 13 before an uneasy stalemate settled over the contested ground.
+Northhold-2 rejoiced in 13 as the High Harvest feast lasted seven nights without pause.
+In 13, Northhold-2 forms alliance with Westgate
+In 13, Haldor Stormborn was born in Eastwood.
+It is recorded that in 13, Eastwood raided Southcrest-2 and seized 50 wealth
+Strange dreams of winged serpents appeared in Darkwatch during 13, stirring both hope and dread.
+The people of Darkdale celebrated the marriage of Silas Keen-Eye in 13.
+Rurik Mosswood of Darkdale changed their destiny in 13, rising as Explorer.
+The people of Northforge welcomed Zarek Jadewalker in 13.
+In 13, Northforge raided Goldfield and seized 50 wealth
+In 13, Rurik Thorne was born in Brighthaven-2.
+In 13, Brighthaven-2 forms alliance with Greenmarch
+Envoys plied their words between courts in 13.
+In 13, Gwyneth Nightfall was born in Brightvale.
+In 13, Malak Stormborn was born in Ashcrest.
+In 13, Ashcrest forms alliance with Greenmarch
+In 13, Silas Holloway wed, uniting two families of Ashhaven.
+In 13, Obarin Ebonhart fortifies the defenses of Ashhaven.
+Envoys plied their words between courts in 13.
+In 13, Norwin Quicksilver was born in Redfall-2.
+Redfall-2 raided Stillcrest and seized 50 wealth (13)
+In 13, Kaelen Dawnwhisper was born in Easthaven.
+Through Irisa the Wise's diplomacy, Southcrest-2 secured an alliance in 13.
+A tunnel sappers who collapsed the fortress foundations turned the tide in 13, leading to a rout that scattered the defeated across the wilderness.
+The people of Coldkeep welcomed Fiora Xalcrest in 13.
+War fell upon Deepgate in 13.
+In 13, Loric Underhill was born in Greenshire-2.
+War fell upon Coldstone in 13.
+Crimson Campaign claimed countless lives in 13 before an uneasy stalemate settled over the contested ground.
+War fell upon Highfall in 13.
+Westdale flourished in 13 as the market square swelled with merchants hawking curios from beyond the known map filled its coffers.
+Crimson Campaign claimed countless lives in 13 before both sides withdrew, the field littered with the fallen.
+Envoys plied their words between courts in 13.
+In 13, Caius Dawnwhisper was born in Greenford.
+In 13, Greenford raided Coldstone but was driven off
+Through Istran Frostbane's diplomacy, Darkforge secured an alliance in 13.
+The people of Golddale welcomed Dara Dawnwhisper in 13.
+Through Garrick Vane's diplomacy, Golddale secured an alliance in 13.
+Eldrin Nightfall ventured forth from Redforge in 13 and returned with maps of new lands.
+Envoys plied their words between courts in 13.
+Through Norwin Frostbane's diplomacy, Ashcrest-2 secured an alliance in 13.
+It is recorded that in 13, Ashcrest-2 forms alliance with Deepcrest
+The people of Redstone welcomed Celeste Ravenhill in 13.
+In 13, Aelar Underhill was born in Whiteford.
+In 13, Quillon Quicksilver wed, uniting two families of Whiteford.
+The people of Redhaven celebrated the marriage of Jorah Nightfall in 13.
+Highmount rejoiced in 13 as the Festival of Veils saw old grudges forgiven under moonlit dance.
+War fell upon Greenshire-2 in 13.
+In 14, Deephold forms alliance with Greenmarch
+War fell upon Northhold in 14.
+Weyland Brightlance of Southcross was joined in marriage during 14.
+In 14, 42 settlements tended their wealth: Ashbridge, Ashcrest, Ashfield, Ashhaven, Ashmere-2, Blackmere, Brighthaven, Coldbridge, Coldkeep, Coldstone, Darkcross, Darkdale, Deepvale, Golddale, Greenford, Greenmarch, Greenvale, Highmount, Ironwood-2, Northforge, Northhold-2, Northvale, Redfall, Redfall-2, Redfall-3, Redforge, Redgate, Redhaven, Redstone, Silverfall, Southcross, Southfall, Stillcrest, Stonefield, Stonehaven, Thornmarch, Westdale, Westfield, Westgate, Westhold, Westwood, Whiteford.
+The people of Stonemere celebrated the marriage of Malak Stormborn in 14.
+In 14, Garrick Oakenshield was no longer content with their old role, and instead became known as Leader of Stonemere.
+In 14, Stonemere raided Coldcross and seized 50 wealth
+The people of Redfall welcomed Dara the Bold in 14.
+In 14, Southcrest raided Northhold and seized 50 wealth
+The people of Redgate celebrated the marriage of Norwin Pryor in 14.
+Envoys plied their words between courts in 14.
+Envoys plied their words between courts in 14.
+The people of Westgate welcomed Zarek Zephyrwind in 14.
+Voren Glimmerstone the Explorer charted the unexplored reaches beyond Westgate in 14.
+War fell upon Southgate in 14.
+In 14, Obarin Nightfall was born in Ashmarch.
+Ashmarch raided Stonehaven and seized 50 wealth (14)
+Envoys plied their words between courts in 14.
+Weyland Kingsward the Explorer charted the unexplored reaches beyond Highgate in 14.
+War fell upon Highford in 14.
+In 14, Stonebridge raided Goldkeep but was driven off
+Xander Vane drew their first breath in Highhold during 14.
+Through Elara Stormborn's diplomacy, Highhold secured an alliance in 14.
+War fell upon Ashbridge in 14.
+In 14, Southgate raided Westhold and seized 50 wealth
+Through Caius Holloway's diplomacy, Greenmarch secured an alliance in 14.
+War fell upon Westhold in 14.
+In 14, Loric Frostbane was born in Ashmere.
+Envoys plied their words between courts in 14.
+Border War claimed countless lives in 14 before a rout that scattered the defeated across the wilderness.
+A wave of arcane prosperity washed over Thornmarch in 14.
+Through Kaelen Keen-Eye's diplomacy, Goldgate secured an alliance in 14.
+It is recorded that in 14, Goldgate forms alliance with Silverford
+Silvercrest mourned Xander Underhill throughout 14.
+Haldor Glimmerstone drew their first breath in Silvercrest during 14.
+Through Celeste Stormborn's diplomacy, Silvercrest secured an alliance in 14.
+The people of Silvercrest celebrated the marriage of Celeste Stormborn in 14.
+Envoys plied their words between courts in 14.
+Aeliana Ironheart drew their first breath in Stillcrest during 14.
+The people of Stillcrest celebrated the marriage of Malak Ebonhart in 14.
+Malak Ebonhart of Stillcrest charted a new path in 14.
+Perrin Lightbringer the Explorer charted the unexplored reaches beyond Stillcrest in 14.
+Malak Ebonhart the Leader charted the unexplored reaches beyond Stillcrest in 14.
+Celeste the Swift of Deepvale was joined in marriage during 14.
+Southhold raided Greenvale and seized 50 wealth (14)
+War fell upon Southhold in 14.
+Through Haldor Ironfoot's diplomacy, Greenshire secured an alliance in 14.
+War fell upon Silvercrest in 14.
+Goldfield forms alliance with Greenmarch (14)
+Blackdale raided Goldkeep and seized 50 wealth (14)
+Strange silver-tongued prophets appeared in Ironwood-2 during 14, stirring both hope and dread.
+Norwin Keen-Eye drew their first breath in Blackmere during 14.
+Through Celeste Duskweaver's diplomacy, Brighthaven secured an alliance in 14.
+Brisa Mosswood of Ashbridge changed their destiny in 14, rising as Explorer.
+In 14, Brisa Mosswood rallies the militia of Ashbridge.
+In 14, Obarin Holloway was born in Eastwood.
+War fell upon Southcrest-2 in 14.
+Envoys plied their words between courts in 14.
+In 14, Quillon Blackwood was born in Goldhold.
+War fell upon Ashmere-2 in 14.
+Through Silas Keen-Eye's diplomacy, Darkdale secured an alliance in 14.
+Rurik Mosswood ventured forth from Darkdale in 14 and returned with maps of new lands.
+Silverford raided Stonefield and seized 50 wealth (14)
+Norwin Quicksilver drew their first breath in Brighthaven-2 during 14.
+Envoys plied their words between courts in 14.
+In 14, Dara Ashford was born in Deepgate.
+Envoys plied their words between courts in 14.
+In 14, the crack of spellfire and shattering shields filled the valley, and both sides withdrew, the field littered with the fallen.
+War fell upon Southhold-2 in 14.
+Through Quillon Fairwind's diplomacy, Southhold-2 secured an alliance in 14.
+War fell upon Coldcross in 14.
+In 14, Eldrin Shadowstep was born in Ashhaven.
+Through Obarin Ebonhart's diplomacy, Ashhaven secured an alliance in 14.
+In 14, Brisa Pryor wed, uniting two families of Easthaven.
+Through Helia Frostbane's diplomacy, Easthaven secured an alliance in 14.
+Easthaven raided Silvercrest and seized 50 wealth (14)
+Through Elara Jadewalker's diplomacy, Darkcross secured an alliance in 14.
+In 14, Istran Coldspring was born in Southcrest-2.
+Envoys plied their words between courts in 14.
+Strange prophecies carved in frost appeared in Stillgate during 14, stirring both hope and dread.
+Envoys plied their words between courts in 14.
+It is recorded that in 14, Westbridge forms alliance with Silverford
+Envoys plied their words between courts in 14.
+Highford raided Highgate and seized 50 wealth (14)
+The people of Coldkeep celebrated the marriage of Jorah the Swift in 14.
+Baelor Ironheart drew their first breath in Greengate during 14.
+Greengate forms alliance with Greenmarch (14)
+In 14, Uldric the Wise wed, uniting two families of Greenshire-2.
+Through Uldric the Wise's diplomacy, Greenshire-2 secured an alliance in 14.
+Greenshire-2 forms alliance with Greenmarch (14)
+It is recorded that in 14, Silverford-2 raided Highfall and seized 50 wealth
+In 14, Baelor the Swift was born in Westdale.
+Banners of the Freehold Confederacy clashed during the winter of 14. the day belonged to the the Drowned Chorus.
+The people of Highfall welcomed Silas Dawnwhisper in 14.
+Highfall raided Silverford-2 and seized 50 wealth (14)
+The people of Northhold-3 welcomed Eldrin Quicksilver in 14.
+War fell upon Highmount in 14.
+It is recorded that in 14, Darkforge forms alliance with Greenmarch
+Northvale mourned Brisa Lightbringer throughout 14.
+In 14, Brisa Holloway wed, uniting two families of Northvale.
+The people of Ashcrest-2 welcomed Haldor Nightfall in 14.
+Through Norwin Frostbane's diplomacy, Ashcrest-2 secured an alliance in 14.
+Ashcrest-2 raided Westbridge and seized 50 wealth (14)
+In 14, Kaelen Glimmerstone was born in Redstone.
+Garrick Stormborn drew their first breath in Redfall-3 during 14.
+Garrick Glimmerstone of Redhaven was joined in marriage during 14.
+In 14, Quillon Dawnwhisper rallies the militia of Redhaven.
+Strange wandering stone circles appeared in Northford during 14, stirring both hope and dread.
+War fell upon Greenshire-2 in 14.
+Through Perrin Thorne's diplomacy, Deephold secured an alliance in 15.
+In 15, 49 settlements tended their wealth: Ashbridge, Ashcrest, Ashfield, Ashhaven, Ashmarch, Ashmere, Brightdale, Brighthaven-2, Brightvale, Coldstone, Darkforge, Darkwatch, Deepcrest, Deephold, Easthaven, Eastwood, Golddale, Goldfield, Goldgate, Greenford, Greengate, Greenmarch, Greenshire, Greenshire-2, Highgate, Highhold, Highmount, Northford, Northhold-2, Redfall, Redfall-3, Redforge, Redhaven, Redstone, Silverfall, Silverford, Silverford-2, Southfall, Southhold, Stillcrest, Stillgate, Stonebridge, Stonehaven, Westbridge, Westfield, Westgate, Westhold, Westwood, Whiteford.
+Weyland Brightlance of Southcross charted a new path in 15.
+Envoys plied their words between courts in 15.
+Fiora Ironheart of Ashfield was joined in marriage during 15.
+Strange silver-tongued prophets appeared in Stonemere during 15, stirring both hope and dread.
+Garrick Oakenshield the Leader charted the unexplored reaches beyond Stonemere in 15.
+War fell upon Coldcross in 15.
+In 15, Southcrest raided Northhold and seized 50 wealth
+In 15, Fiora Keen-Eye was born in Redgate.
+Envoys plied their words between courts in 15.
+Envoys plied their words between courts in 15.
+Border War claimed countless lives in 15 before both sides withdrew, the field littered with the fallen.
+It is recorded that in 15, Coldcross raided Stonemere but was driven off
+Strange silver-tongued prophets appeared in Northhold during 15, stirring both hope and dread.
+In 15, Northhold raided Southcrest but was driven off
+Voren Glimmerstone the Explorer charted the unexplored reaches beyond Westgate in 15.
+In 15, Irisa Holloway was born in Ironwood.
+It is recorded that in 15, Ironwood raided Southgate and seized 50 wealth
+A wave of arcane prosperity washed over Ashmarch in 15.
+Envoys plied their words between courts in 15.
+The people of Southfall celebrated the marriage of Fiora Mosswood in 15.
+The people of Stonebridge welcomed Perrin Lightbringer in 15.
+Through Elara Stormborn's diplomacy, Highhold secured an alliance in 15.
+War fell upon Westhold in 15.
+Stonefield raided Southcrest and seized 50 wealth (15)
+Through Loric Jadewalker's diplomacy, Stonehaven secured an alliance in 15.
+Fenric Xalcrest of Ashmere was joined in marriage during 15.
+Through Perrin Fairwind's diplomacy, Ashmere secured an alliance in 15.
+Through Quillon Yewbark's diplomacy, Thornmarch secured an alliance in 15.
+It is recorded that in 15, Thornmarch forms alliance with Southhold
+The Leader Kaelen Keen-Eye of Goldgate was laid to rest in 15.
+Through Celeste Stormborn's diplomacy, Silvercrest secured an alliance in 15.
+War fell upon Greenshire in 15.
+Stillcrest flourished in 15 as traders bartered in rare crystals found only in the sunken caverns below filled its coffers.
+The people of Deepvale welcomed Garrick Duskweaver in 15.
+It is recorded that in 15, Deepvale raided Coldkeep and seized 50 wealth
+Siege of Sorrow claimed countless lives in 15 before both sides withdrew, the field littered with the fallen.
+It is recorded that in 15, Ashmarch-2 forms alliance with Deepcrest
+In 15, Norwin Ironfoot was born in Greenshire.
+Yorick Pryor ventured forth from Greenshire in 15 and returned with maps of new lands.
+In 15, steel met steel as rival hosts collided on the blood-soaked plains, and an uneasy stalemate settled over the contested ground.
+In 15, Blackdale forms alliance with Deepcrest
+It is recorded that in 15, Ironwood-2 raided Westgate and seized 50 wealth
+It is recorded that in 15, Blackmere raided Southcrest but was driven off
+Banners of the Iron Covenant clashed during the winter of 15. the day belonged to the the Ashen Lords.
+Envoys plied their words between courts in 15.
+The people of Ashbridge celebrated the marriage of Perrin Wildermere in 15.
+Kaelen Shadowstep of Northhold-2 changed their destiny in 15, rising as Explorer.
+Jorah Ebonhart of Eastwood was joined in marriage during 15.
+In 15, Jorah Ebonhart fortifies the defenses of Eastwood.
+Goldhold raided Ashmere-2 but was driven off (15)
+Envoys plied their words between courts in 15.
+It is recorded that in 15, Northforge forms alliance with Silverford
+Envoys plied their words between courts in 15.
+The people of Brightvale welcomed Dara Dawnwhisper in 15.
+Through Helia Pryor's diplomacy, Brightvale secured an alliance in 15.
+Southhold-2 raided Coldcross and seized 50 wealth (15)
+In 15, Zarek Fairwind was born in Ashhaven.
+Haldor Frostbane drew their first breath in Redfall-2 during 15.
+Envoys plied their words between courts in 15.
+Through Helia Frostbane's diplomacy, Easthaven secured an alliance in 15.
+Strange prophecies carved in frost appeared in Darkcross during 15, stirring both hope and dread.
+War fell upon Westhold in 15.
+Voren Mosswood of Southcrest-2 changed their destiny in 15, rising as Leader.
+Voren Mosswood ventured forth from Southcrest-2 in 15 and returned with maps of new lands.
+It is recorded that in 15, Southcrest-2 raided Eastwood but was driven off
+In 15, Eldrin Underhill was born in Stillgate.
+The people of Stillgate celebrated the marriage of Caius Kingsward in 15.
+Norwin Wildermere of Westbridge was joined in marriage during 15.
+Through Caius Frostbane's diplomacy, Westbridge secured an alliance in 15.
+In 15, Caius Jadewalker was born in Ashmere-2.
+Envoys plied their words between courts in 15.
+Envoys plied their words between courts in 15.
+In 15, steel met steel as rival hosts collided on the blood-soaked plains, and the day belonged to the the Ashen Lords.
+Envoys plied their words between courts in 15.
+War fell upon Deepgate in 15.
+In 15, Coldbridge forms alliance with Blackdale
+It is recorded that in 15, Westdale forms alliance with Goldkeep
+Highfall raided Silverford-2 but was driven off (15)
+In 15, Rurik Quicksilver was born in Greenford.
+A tunnel sappers who collapsed the fortress foundations turned the tide in 15, leading to a rout that scattered the defeated across the wilderness.
+Envoys plied their words between courts in 15.
+Through Istran Frostbane's diplomacy, Darkforge secured an alliance in 15.
+Through Xander Jadewalker's diplomacy, Northvale secured an alliance in 15.
+Envoys plied their words between courts in 15.
+A wave of arcane prosperity washed over Redforge in 15.
+Banners of the Freehold Confederacy clashed during the winter of 15. a pyrrhic victory that left the victors as broken as the vanquished.
+Envoys plied their words between courts in 15.
+The people of Whiteford welcomed Aeliana Fairwind in 15.
+Uldric Ashford of Highmount was joined in marriage during 15.
+Through Fiora Frostbane's diplomacy, Northford secured an alliance in 15.
+Elara Ironfoot drew their first breath in Westwood during 15.
+A elemental barrage summoned from the screaming skies turned the tide in 15, leading to an uneasy stalemate settled over the contested ground.
+Malak Xalcrest drew their first breath in Westfield during 15.
+Envoys plied their words between courts in 16.
+In 16, 42 settlements tended their wealth: Ashbridge, Ashcrest-2, Ashmarch, Ashmere, Blackmere, Brighthaven, Brightvale, Coldcross, Darkcross, Darkforge, Darkwatch, Deepcrest, Deepgate, Eastwood, Golddale, Goldfield, Goldgate, Goldkeep, Greenford, Greengate, Greenmarch, Highford, Highmount, Ironwood, Northforge, Northhold-3, Northvale, Redfall-3, Redhaven, Redstone, Silverford, Southcross, Southhold-2, Stillcrest, Stillgate, Stonefield, Stonehaven, Westdale, Westfield, Westhold, Westwood, Whiteford.
+Through Irisa Frostbane's diplomacy, Southcross secured an alliance in 16.
+In 16, Irisa Frostbane rallies the militia of Southcross.
+Envoys plied their words between courts in 16.
+In 16, Garrick Oakenshield was no longer content with their old role, and instead became known as Leader of Stonemere.
+Garrick Oakenshield the Leader charted the unexplored reaches beyond Stonemere in 16.
+It is recorded that in 16, Stonemere raided Coldcross but was driven off
+Through Haldor Duskweaver's diplomacy, Redfall secured an alliance in 16.
+It is recorded that in 16, Redfall raided Ashfield and seized 50 wealth
+In 16, Southcrest forms alliance with Stonemere
+The people of Redgate welcomed Eldrin Zephyrwind in 16.
+In 16, Baelor Vane declares a festival in Redgate.
+It is recorded that in 16, Redgate raided Redfall and seized 50 wealth
+Through Elara Brightlance's diplomacy, Greenvale secured an alliance in 16.
+In 16, Greenvale raided Southhold and seized 50 wealth
+The people of Northhold welcomed Weyland Ironfoot in 16.
+War fell upon Southcrest in 16.
+Envoys plied their words between courts in 16.
+In 16, Caius Xalcrest was born in Goldkeep.
+Southfall raided Ashbridge and seized 50 wealth (16)
+Weyland Kingsward the Explorer charted the unexplored reaches beyond Highgate in 16.
+Envoys plied their words between courts in 16.
+Through Aelar Kingsward's diplomacy, Stonebridge secured an alliance in 16.
+War fell upon Goldkeep in 16.
+Highhold rejoiced in 16 as a grand festival of masks and music drew crowds from every corner.
+It is recorded that in 16, Highhold raided Ashbridge but was driven off
+Xander Vane drew their first breath in Southgate during 16.
+In 16, Uldric Ironheart leads a skirmish near Southgate.
+Southgate raided Westhold and seized 50 wealth (16)
+Greenmarch flourished in 16 as a guild of alchemists established a permanent quarter in the heart of town filled its coffers.
+Brightdale rejoiced in 16 as the High Harvest feast lasted seven nights without pause.
+In 16, Brightdale raided Westhold and seized 50 wealth
+Stonehaven flourished in 16 as the market square swelled with merchants hawking curios from beyond the known map filled its coffers.
+In 16, Norwin Coldspring the Leader of Thornmarch passed into memory.
+It is recorded that in 16, Thornmarch forms alliance with Easthaven
+In 16, Gwyneth Nightfall was born in Goldgate.
+In 16, arrows darkened the sky above the siege towers, and a pyrrhic victory that left the victors as broken as the vanquished.
+The people of Silvercrest welcomed Quillon Stormborn in 16.
+Silvercrest forms alliance with Silverford (16)
+Perrin Lightbringer the Explorer charted the unexplored reaches beyond Stillcrest in 16.
+War fell upon Coldkeep in 16.
+The people of Southhold welcomed Jorah Lightbringer in 16.
+Southhold forms alliance with Easthaven (16)
+Ashmarch-2 forms alliance with Blackdale (16)
+In 16, Greenshire raided Silvercrest and seized 50 wealth
+Dorian Zephyrwind of Blackdale was joined in marriage during 16.
+It is recorded that in 16, Blackdale forms alliance with Ironwood-2
+War fell upon Westgate in 16.
+A tunnel sappers who collapsed the fortress foundations turned the tide in 16, leading to a pyrrhic victory that left the victors as broken as the vanquished.
+In 16, Kaelen Dawnwhisper was born in Brighthaven.
+In 16, Irisa the Wise was born in Ashbridge.
+In 16, Kaelen Shadowstep wed, uniting two families of Northhold-2.
+Envoys plied their words between courts in 16.
+In 16, Silas Oakenshield was born in Silverfall.
+In 16, Silverfall forms alliance with Southhold
+In 16, Rurik Pryor wed, uniting two families of Darkwatch.
+Through Zarek Ironheart's diplomacy, Goldhold secured an alliance in 16.
+It is recorded that in 16, Goldhold forms alliance with Southhold
+Rurik Mosswood ventured forth from Darkdale in 16 and returned with maps of new lands.
+It is recorded that in 16, Darkdale forms alliance with Silverford
+In 16, Istran Oakenshield wed, uniting two families of Northforge.
+In 16, Brighthaven-2 forms alliance with Easthaven
+Through Eldrin Ravenhill's diplomacy, Deepgate secured an alliance in 16.
+Brightvale flourished in 16 as a guild of alchemists established a permanent quarter in the heart of town filled its coffers.
+Envoys plied their words between courts in 16.
+In 16, Malak Vane was born in Southhold-2.
+War of the Broken Crown claimed countless lives in 16 before both sides withdrew, the field littered with the fallen.
+In 16, Norwin Blackwood wed, uniting two families of Ashhaven.
+War fell upon Westgate in 16.
+Silas Holloway of Redfall-2 charted a new path in 16.
+Redfall-2 raided Stillcrest and seized 50 wealth (16)
+Easthaven raided Silvercrest but was driven off (16)
+A daring night raid turned the tide in 16, leading to the day belonged to the the Drowned Chorus.
+It is recorded that in 16, Southcrest-2 forms alliance with Southhold
+Strange silver-tongued prophets appeared in Westbridge during 16, stirring both hope and dread.
+War fell upon Stillgate in 16.
+In 16, Uldric Quicksilver was born in Ashmere-2.
+Envoys plied their words between courts in 16.
+War fell upon Blackdale in 16.
+It is recorded that in 16, Coldkeep raided Deepgate but was driven off
+The people of Greenshire-2 welcomed Fenric Wildermere in 16.
+War fell upon Coldstone in 16.
+It is recorded that in 16, Coldbridge forms alliance with Ironwood-2
+War fell upon Highfall in 16.
+In 16, Baelor Shadowstep was born in Westdale.
+Silas Ebonhart of Highfall was joined in marriage during 16.
+Through Xander Ironfoot's diplomacy, Highfall secured an alliance in 16.
+Envoys plied their words between courts in 16.
+Strange wandering stone circles appeared in Northhold-3 during 16, stirring both hope and dread.
+The people of Golddale welcomed Garrick Kingsward in 16.
+The people of Northvale welcomed Aelar Ravenhill in 16.
+In 16, Xander Jadewalker leads a skirmish near Northvale.
+In 16, Irisa Kingsward was born in Redforge.
+Redforge rejoiced in 16 as a tournament of champions honored the founding charter.
+Envoys plied their words between courts in 16.
+In 16, Coldstone raided Greenshire-2 and seized 50 wealth
+The people of Ashcrest-2 welcomed Helia Nightfall in 16.
+Through Norwin Frostbane's diplomacy, Ashcrest-2 secured an alliance in 16.
+Through Quillon Quicksilver's diplomacy, Whiteford secured an alliance in 16.
+Perrin Xalcrest drew their first breath in Redfall-3 during 16.
+In 16, Baelor Ravenhill wed, uniting two families of Redfall-3.
+Through Quillon Blackwood's diplomacy, Redfall-3 secured an alliance in 16.
+In 16, Fiora Frostbane wed, uniting two families of Northford.
+War fell upon Greenshire-2 in 16.
+The people of Westwood welcomed Istran Stormborn in 16.
+Westfield mourned Gwyneth Pryor throughout 16.
+In 16, Jorah Mosswood wed, uniting two families of Westfield.
+Deephold raided Southcrest and seized 50 wealth (17)
+In 17, 39 settlements tended their wealth: Ashcrest, Ashcrest-2, Ashmere-2, Blackdale, Brightdale, Darkcross, Darkdale, Darkforge, Darkwatch, Deepcrest, Deepvale, Easthaven, Eastwood, Goldgate, Greengate, Greenshire, Greenvale, Highhold, Highmount, Northford, Northforge, Northvale, Redfall, Redfall-3, Redforge, Redhaven, Redstone, Silverfall, Silverford-2, Southcrest, Southcrest-2, Southcross-2, Southhold-2, Stonefield, Stonemere, Thornmarch, Westdale, Westfield, Whiteford.
+Envoys plied their words between courts in 17.
+Crimson Campaign claimed countless lives in 17 before both sides withdrew, the field littered with the fallen.
+Ashfield raided Redfall and seized 50 wealth (17)
+The people of Southcrest welcomed Thorian Jadewalker in 17.
+In 17, Loric Yewbark wed, uniting two families of Southcrest.
+In 17, Baelor Vane was no longer content with their old role, and instead became known as Explorer of Redgate.
+It is recorded that in 17, Redgate forms alliance with Southhold
+The people of Greenvale celebrated the marriage of Elara Brightlance in 17.
+War fell upon Stonemere in 17.
+War fell upon Southcrest in 17.
+War fell upon Northhold in 17.
+The people of Westhold celebrated the marriage of Helia Blackwood in 17.
+It is recorded that in 17, Westhold forms alliance with Southhold
+Envoys plied their words between courts in 17.
+Envoys plied their words between courts in 17.
+Crimson Campaign claimed countless lives in 17 before a rout that scattered the defeated across the wilderness.
+War fell upon Ashmere in 17.
+It is recorded that in 17, Southfall raided Ashbridge but was driven off
+Highgate rejoiced in 17 as a tournament of champions honored the founding charter.
+Highgate raided Highford and seized 50 wealth (17)
+A wave of mercantile fortune washed over Stonebridge in 17.
+War fell upon Goldkeep in 17.
+In 17, Southgate raided Westhold and seized 50 wealth
+In 17, Voren Oakenshield was born in Stonefield.
+In 17, Irisa Oakenshield was born in Greenmarch.
+Envoys plied their words between courts in 17.
+Brightdale flourished in 17 as the market square swelled with merchants hawking curios from beyond the known map filled its coffers.
+In 17, Stonehaven raided Ashmarch and seized 50 wealth
+Ashmere raided Goldkeep and seized 50 wealth (17)
+The people of Thornmarch welcomed Haldor Lightbringer in 17.
+Through Quillon Yewbark's diplomacy, Thornmarch secured an alliance in 17.
+The people of Goldgate celebrated the marriage of Zarek Mosswood in 17.
+Through Zarek Mosswood's diplomacy, Goldgate secured an alliance in 17.
+In 17, Silvercrest forms alliance with Southcross-2
+The people of Stillcrest welcomed Uldric Blackwood in 17.
+A treacherous feigned retreat turned the tide in 17, leading to a rout that scattered the defeated across the wilderness.
+A elemental barrage summoned from the screaming skies turned the tide in 17, leading to a rout that scattered the defeated across the wilderness.
+It is recorded that in 17, Stillcrest raided Northhold and seized 50 wealth
+Siege of Sorrow claimed countless lives in 17 before a pyrrhic victory that left the victors as broken as the vanquished.
+Southhold mourned Aelar Oakenshield throughout 17.
+Through Elara the Wise's diplomacy, Southhold secured an alliance in 17.
+War fell upon Greenvale in 17.
+It is recorded that in 17, Ashmarch-2 forms alliance with Ironwood-2
+Yorick Pryor ventured forth from Greenshire in 17 and returned with maps of new lands.
+It is recorded that in 17, Goldfield raided Blackdale and seized 50 wealth
+Aeliana Stormborn drew their first breath in Blackdale during 17.
+In 17, Voren Vane wed, uniting two families of Ironwood-2.
+Strange silver-tongued prophets appeared in Ironwood-2 during 17, stirring both hope and dread.
+War fell upon Westgate in 17.
+Envoys plied their words between courts in 17.
+Brighthaven raided Redfall-2 but was driven off (17)
+Brisa Mosswood ventured forth from Ashbridge in 17 and returned with maps of new lands.
+Envoys plied their words between courts in 17.
+In 17, Northhold-2 forms alliance with Southcross-2
+Uldric Ironheart drew their first breath in Darkwatch during 17.
+The people of Goldhold celebrated the marriage of Zarek Ironheart in 17.
+Envoys plied their words between courts in 17.
+Through Brisa Ashford's diplomacy, Silverford secured an alliance in 17.
+Envoys plied their words between courts in 17.
+It is recorded that in 17, Brighthaven-2 forms alliance with Highford
+In 17, Deepgate raided Redgate but was driven off
+Envoys plied their words between courts in 17.
+War fell upon Westgate in 17.
+Through Eldrin Ashford's diplomacy, Redfall-2 secured an alliance in 17.
+Silas Holloway the Explorer charted the unexplored reaches beyond Redfall-2 in 17.
+War of the Broken Crown claimed countless lives in 17 before a rout that scattered the defeated across the wilderness.
+In 17, Redfall-2 forms alliance with Ironwood-2
+Haldor Mosswood drew their first breath in Darkcross during 17.
+Through Voren Mosswood's diplomacy, Southcrest-2 secured an alliance in 17.
+Envoys plied their words between courts in 17.
+In 17, Westbridge raided Stillgate and seized 50 wealth
+In 17, Brisa Ashford was born in Southcross-2.
+Highford flourished in 17 as a guild of alchemists established a permanent quarter in the heart of town filled its coffers.
+Highford raided Highgate and seized 50 wealth (17)
+In 17, Coldkeep raided Deepgate and seized 50 wealth
+The people of Greenshire-2 welcomed Elara Glimmerstone in 17.
+Greenshire-2 forms alliance with Southhold (17)
+Envoys plied their words between courts in 17.
+Obarin Frostbane ventured forth from Westdale in 17 and returned with maps of new lands.
+Highfall raided Silverford-2 and seized 50 wealth (17)
+In 17, Greenford raided Coldstone and seized 50 wealth
+Rurik Xalcrest drew their first breath in Northhold-3 during 17.
+Envoys plied their words between courts in 17.
+In 17, Aeliana Ebonhart was born in Darkforge.
+In 17, Celeste Nightfall was born in Golddale.
+Golddale forms alliance with Greenshire (17)
+Eldrin Ravenhill drew their first breath in Northvale during 17.
+Through Voren Coldspring's diplomacy, Redforge secured an alliance in 17.
+War fell upon Greenshire-2 in 17.
+In 17, Norwin Dawnwhisper wed, uniting two families of Ashcrest-2.
+In 17, Norwin Frostbane establishes new trade routes through Ashcrest-2.
+Westwood forms alliance with Brighthaven (17)
+Westfield flourished in 17 as the market square swelled with merchants hawking curios from beyond the known map filled its coffers.
+In 18, 42 settlements tended their wealth: Ashbridge, Ashcrest, Ashhaven, Ashmere-2, Blackdale, Brighthaven-2, Brightvale, Coldcross, Darkcross, Deepcrest, Deepgate, Deephold, Easthaven, Golddale, Goldgate, Goldkeep, Greengate, Greenshire-2, Greenvale, Highhold, Ironwood, Northhold-2, Northvale, Redfall, Redfall-2, Redforge, Redhaven, Silvercrest, Silverfall, Silverford, Silverford-2, Southcrest, Southcross, Southcross-2, Southhold, Southhold-2, Stillcrest, Stonebridge, Stonefield, Stonehaven, Westdale, Westwood.
+It is recorded that in 18, Ashfield forms alliance with Ironwood-2
+War fell upon Coldcross in 18.
+Redfall rejoiced in 18 as a grand festival of masks and music drew crowds from every corner.
+Through Perrin Nightfall's diplomacy, Redgate secured an alliance in 18.
+Envoys plied their words between courts in 18.
+Border War claimed countless lives in 18 before a pyrrhic victory that left the victors as broken as the vanquished.
+Northhold flourished in 18 as a guild of alchemists established a permanent quarter in the heart of town filled its coffers.
+Envoys plied their words between courts in 18.
+Through Elara Quicksilver's diplomacy, Westgate secured an alliance in 18.
+Westgate raided Northhold and seized 50 wealth (18)
+Westhold raided Brightdale and seized 50 wealth (18)
+Rurik Lightbringer of Ironwood changed their destiny in 18, rising as Explorer.
+Ashmarch mourned Elara Ironheart throughout 18.
+The people of Ashmarch celebrated the marriage of Aeliana Coldspring in 18.
+Envoys plied their words between courts in 18.
+It is recorded that in 18, Southfall raided Ashbridge and seized 50 wealth
+The people of Highgate celebrated the marriage of Weyland Kingsward in 18.
+In 18, Highgate raided Highford and seized 50 wealth
+Obarin Oakenshield the Explorer charted the unexplored reaches beyond Stonebridge in 18.
+The people of Southgate celebrated the marriage of Elara Shadowstep in 18.
+It is recorded that in 18, Southgate forms alliance with Ironwood-2
+In 18, Norwin Ironheart was born in Stonefield.
+It is recorded that in 18, Greenmarch raided Golddale and seized 50 wealth
+Envoys plied their words between courts in 18.
+Ashmere raided Goldkeep and seized 50 wealth (18)
+It is recorded that in 18, Thornmarch raided Westwood and seized 50 wealth
+Through Zarek Mosswood's diplomacy, Goldgate secured an alliance in 18.
+In 18, Rurik Frostbane was born in Silvercrest.
+The people of Stillcrest celebrated the marriage of Voren Mosswood in 18.
+Envoys plied their words between courts in 18.
+Border War claimed countless lives in 18 before a rout that scattered the defeated across the wilderness.
+In 18, Ashmarch-2 forms alliance with Eastwood
+In 18, Loric Jadewalker was born in Greenshire.
+The people of Greenshire celebrated the marriage of Yorick Pryor in 18.
+The people of Greenshire witnessed Yorick Pryor take on a new path as Leader in 18.
+Yorick Pryor ventured forth from Greenshire in 18 and returned with maps of new lands.
+Greenshire forms alliance with Highford (18)
+Envoys plied their words between courts in 18.
+It is recorded that in 18, Ironwood-2 raided Westgate and seized 50 wealth
+Blackmere rejoiced in 18 as a grand festival of masks and music drew crowds from every corner.
+In 18, Blackmere raided Southcrest but was driven off
+It is recorded that in 18, Brighthaven forms alliance with Highford
+War fell upon Southcrest-2 in 18.
+Strange dreams of winged serpents appeared in Silverfall during 18, stirring both hope and dread.
+Envoys plied their words between courts in 18.
+Envoys plied their words between courts in 18.
+Banners of the Ashen Lords clashed during the winter of 18. both sides withdrew, the field littered with the fallen.
+Darkdale raided Highhold and seized 50 wealth (18)
+In 18, Yorick Zephyrwind wed, uniting two families of Silverford.
+War fell upon Goldfield in 18.
+Through Helia Pryor's diplomacy, Brightvale secured an alliance in 18.
+Perrin Holloway of Ashcrest was joined in marriage during 18.
+Banners of the Iron Covenant clashed during the winter of 18. the day belonged to the the Iron Covenant.
+In 18, steel met steel as rival hosts collided on the blood-soaked plains, and a pyrrhic victory that left the victors as broken as the vanquished.
+In 18, Dorian Xalcrest was born in Darkcross.
+A wave of craftsman's plenty washed over Darkcross in 18.
+Irisa the Wise of Southcrest-2 charted a new path in 18.
+Envoys plied their words between courts in 18.
+War fell upon Westbridge in 18.
+War fell upon Stillgate in 18.
+Irisa Coldspring of Ashmere-2 was joined in marriage during 18.
+Through Fiora Stormborn's diplomacy, Southcross-2 secured an alliance in 18.
+The people of Highford welcomed Uldric Coldspring in 18.
+Caius Frostbane the Leader charted the unexplored reaches beyond Highford in 18.
+Envoys plied their words between courts in 18.
+It is recorded that in 18, Coldkeep forms alliance with Greenford
+In 18, Garrick the Swift was born in Greengate.
+The people of Greengate celebrated the marriage of Elara Zephyrwind in 18.
+In 18, Coldbridge forms alliance with Redfall-2
+Strange prophecies carved in frost appeared in Silverford-2 during 18, stirring both hope and dread.
+Through Fenric Ironheart's diplomacy, Westdale secured an alliance in 18.
+Envoys plied their words between courts in 18.
+Envoys plied their words between courts in 18.
+Northhold-3 raided Highmount and seized 50 wealth (18)
+Envoys plied their words between courts in 18.
+The Leader Voren Coldspring of Redforge was laid to rest in 18.
+Eldrin Nightfall of Redforge charted a new path in 18.
+Eldrin Nightfall the Leader charted the unexplored reaches beyond Redforge in 18.
+Border War claimed countless lives in 18 before a pyrrhic victory that left the victors as broken as the vanquished.
+War fell upon Greenshire-2 in 18.
+It is recorded that in 18, Ashcrest-2 forms alliance with Ironwood-2
+Envoys plied their words between courts in 18.
+Through Quillon Quicksilver's diplomacy, Whiteford secured an alliance in 18.
+In 18, Whiteford forms alliance with Highford
+War fell upon Highmount in 18.
+Xander Ravenhill drew their first breath in Redhaven during 18.
+War fell upon Northhold-3 in 18.
+In 18, Northford forms alliance with Ironwood-2
+Westfield raided Northhold-3 and seized 50 wealth (18)
+In 19, 39 settlements tended their wealth: Ashcrest, Ashhaven, Blackmere, Brightdale, Brighthaven-2, Brightvale, Coldstone, Darkforge, Deepcrest, Deephold, Deepvale, Easthaven, Eastwood, Golddale, Goldgate, Goldkeep, Greenford, Greenmarch, Greenshire-2, Highfall, Highmount, Northforge, Northhold-2, Northvale, Redfall, Redfall-2, Redforge, Redhaven, Redstone, Southcrest-2, Southcross, Stillgate, Thornmarch, Westbridge, Westdale, Westfield, Westgate, Westhold, Westwood.
+Envoys plied their words between courts in 19.
+War fell upon Coldcross in 19.
+In 19, Haldor Duskweaver expands the borders of Redfall.
+The people of Southcrest welcomed Irisa Thorne in 19.
+A wave of arcane prosperity washed over Southcrest in 19.
+War fell upon Northhold in 19.
+Perrin Nightfall of Redgate was joined in marriage during 19.
+Envoys plied their words between courts in 19.
+Greenvale mourned Uldric the Swift throughout 19.
+Through Elara Brightlance's diplomacy, Greenvale secured an alliance in 19.
+In 19, Greenvale forms alliance with Ironwood-2
+Envoys plied their words between courts in 19.
+Northhold mourned Gwyneth Fairwind throughout 19.
+War fell upon Southcrest in 19.
+Voren Glimmerstone the Explorer charted the unexplored reaches beyond Westgate in 19.
+Through Kaelen Pryor's diplomacy, Ironwood secured an alliance in 19.
+It is recorded that in 19, Ironwood raided Southgate but was driven off
+In 19, Garrick Coldspring leads a skirmish near Ashmarch.
+In 19, Ashmarch forms alliance with Eastwood
+The people of Southfall welcomed Jorah the Bold in 19.
+In 19, Fiora Mosswood establishes new trade routes through Southfall.
+Envoys plied their words between courts in 19.
+Through Celeste Lightbringer's diplomacy, Highgate secured an alliance in 19.
+It is recorded that in 19, Highgate raided Highford and seized 50 wealth
+It is recorded that in 19, Stonebridge forms alliance with Ironwood-2
+Highhold raided Ashbridge and seized 50 wealth (19)
+War fell upon Westhold in 19.
+In 19, Stonefield forms alliance with Ironwood-2
+In 19, Kaelen Ironheart was born in Brightdale.
+Siege of Sorrow claimed countless lives in 19 before a pyrrhic victory that left the victors as broken as the vanquished.
+Stonehaven raided Ashmarch but was driven off (19)
+Through Perrin Fairwind's diplomacy, Ashmere secured an alliance in 19.
+War fell upon Goldkeep in 19.
+In 19, Uldric Ebonhart was born in Thornmarch.
+Siege of Sorrow claimed countless lives in 19 before a pyrrhic victory that left the victors as broken as the vanquished.
+It is recorded that in 19, Silvercrest raided Greenshire and seized 50 wealth
+Stillcrest mourned Celeste Jadewalker throughout 19.
+In 19, Irisa Coldspring was born in Stillcrest.
+Envoys plied their words between courts in 19.
+It is recorded that in 19, Southhold raided Greenvale and seized 50 wealth
+Ashmarch-2 forms alliance with Redfall-2 (19)
+In 19, Yorick Pryor declares a festival in Greenshire.
+It is recorded that in 19, Greenshire raided Silvercrest and seized 50 wealth
+It is recorded that in 19, Goldfield forms alliance with Coldkeep
+War fell upon Goldkeep in 19.
+Through Voren Vane's diplomacy, Ironwood-2 secured an alliance in 19.
+In 19, 1 settlement expanded their borders: Ironwood-2.
+In 19, war-horns echoed through the mountain passes as armies converged, and the day belonged to the the Sun-Scaled Dynasty.
+In 19, Celeste Duskweaver the Leader of Brighthaven passed into memory.
+Through Kaelen Dawnwhisper's diplomacy, Brighthaven secured an alliance in 19.
+In 19, Brighthaven raided Redfall-2 and seized 50 wealth
+War fell upon Southfall in 19.
+In 19, Silverfall raided Greenvale and seized 50 wealth
+It is recorded that in 19, Darkwatch forms alliance with Coldkeep
+War fell upon Ashmere-2 in 19.
+Rurik Mosswood the Explorer charted the unexplored reaches beyond Darkdale in 19.
+It is recorded that in 19, Darkdale raided Highhold and seized 50 wealth
+Baelor Frostbane drew their first breath in Silverford during 19.
+It is recorded that in 19, Silverford raided Stonefield and seized 50 wealth
+In 19, war-horns echoed through the mountain passes as armies converged, and the day belonged to the the Drowned Chorus.
+War fell upon Redgate in 19.
+Through Helia Pryor's diplomacy, Brightvale secured an alliance in 19.
+Envoys plied their words between courts in 19.
+Banners of the Ashen Lords clashed during the winter of 19. the day belonged to the the Sun-Scaled Dynasty.
+Darkcross mourned Weyland Fairwind throughout 19.
+In 19, Darkcross forms alliance with Stonemere
+Southcrest-2 mourned Celeste Stormborn throughout 19.
+Banners of the Drowned Chorus clashed during the winter of 19. an uneasy stalemate settled over the contested ground.
+A wave of mercantile fortune washed over Westbridge in 19.
+It is recorded that in 19, Ashmere-2 raided Westhold and seized 50 wealth
+War fell upon Blackdale in 19.
+Caius Frostbane of Highford charted a new path in 19.
+Caius Frostbane the Leader charted the unexplored reaches beyond Highford in 19.
+War fell upon Highgate in 19.
+It is recorded that in 19, Coldkeep raided Deepgate but was driven off
+Envoys plied their words between courts in 19.
+The people of Greenshire-2 welcomed Rurik Underhill in 19.
+Envoys plied their words between courts in 19.
+Silverford-2 forms alliance with Highford (19)
+The people of Westdale celebrated the marriage of Fenric the Bold in 19.
+Fenric Ironheart of Westdale charted a new path in 19.
+Envoys plied their words between courts in 19.
+Aeliana Dawnwhisper drew their first breath in Coldstone during 19.
+War fell upon Westbridge in 19.
+It is recorded that in 19, Whiteford forms alliance with Coldkeep
+Redfall-3 mourned Haldor Duskweaver throughout 19.
+The people of Redfall-3 welcomed Elara Underhill in 19.
+Envoys plied their words between courts in 19.
+Highmount mourned Baelor Ironfoot throughout 19.
+Through Uldric Ashford's diplomacy, Highmount secured an alliance in 19.
+The people of Northford welcomed Elara Ebonhart in 19.
+War fell upon Greenshire-2 in 19.
+In 19, Garrick Blackwood fortifies the defenses of Westwood.
+Through Celeste Glimmerstone's diplomacy, Westfield secured an alliance in 19.
+The people of Deephold celebrated the marriage of Aeliana Underhill in 20.
+In 20, 57 settlements tended their wealth: Ashbridge, Ashcrest, Ashcrest-2, Ashhaven, Ashmarch, Ashmarch-2, Ashmere, Blackdale, Brighthaven, Brighthaven-2, Brightvale, Coldbridge, Coldcross, Darkcross, Darkdale, Darkwatch, Deepgate, Deephold, Deepvale, Goldfield, Goldgate, Goldhold, Goldkeep, Greenshire-2, Greenvale, Highfall, Highford, Highgate, Ironwood, Ironwood-2, Northhold, Northhold-2, Northhold-3, Northvale, Redfall, Redfall-3, Redforge, Redhaven, Redstone, Silvercrest, Silverford, Silverford-2, Southcrest, Southcrest-2, Southcross, Southgate, Southhold, Southhold-2, Stillcrest, Stillgate, Stonebridge, Stonefield, Thornmarch, Westbridge, Westdale, Westgate, Whiteford.
+Deepcrest raided Northhold and seized 50 wealth (20)
+The people of Southcross celebrated the marriage of Irisa Frostbane in 20.
+Southcross flourished in 20 as a guild of alchemists established a permanent quarter in the heart of town filled its coffers.
+In 20, Ashfield raided Redfall and seized 50 wealth
+Stonemere raided Coldcross and seized 50 wealth (20)
+In 20, Haldor Duskweaver leads a skirmish near Redfall.
+It is recorded that in 20, Redgate raided Redfall and seized 50 wealth
+The people of Greenvale welcomed Brisa Brightlance in 20.
+Coldcross flourished in 20 as a guild of alchemists established a permanent quarter in the heart of town filled its coffers.
+In 20, Weyland Ironfoot establishes new trade routes through Northhold.
+The people of Westgate welcomed Rurik Wildermere in 20.
+A daring night raid turned the tide in 20, leading to a rout that scattered the defeated across the wilderness.
+Dorian Thorne drew their first breath in Westhold during 20.
+Envoys plied their words between courts in 20.
+In 20, Kaelen Pryor expands the borders of Ironwood.
+In 20, Perrin Shadowstep was born in Goldkeep.
+The people of Goldkeep celebrated the marriage of Elara Ebonhart in 20.
+Siege of Sorrow claimed countless lives in 20 before an uneasy stalemate settled over the contested ground.
+Southfall raided Ashbridge and seized 50 wealth (20)
+Stonebridge mourned Aelar Kingsward throughout 20.
+Through Garrick Ebonhart's diplomacy, Stonebridge secured an alliance in 20.
+In 20, Highhold raided Ashbridge and seized 50 wealth
+Strange wandering stone circles appeared in Stonefield during 20, stirring both hope and dread.
+In 20, Malak Glimmerstone wed, uniting two families of Greenmarch.
+In 20, Greenmarch forms alliance with Highford
+War of the Broken Crown claimed countless lives in 20 before a pyrrhic victory that left the victors as broken as the vanquished.
+War fell upon Westhold in 20.
+In 20, Loric Jadewalker leads a skirmish near Stonehaven.
+In 20, Stonehaven forms alliance with Highford
+In 20, Thorian Quicksilver was born in Ashmere.
+In 20, steel met steel as rival hosts collided on the blood-soaked plains, and a rout that scattered the defeated across the wilderness.
+Goldgate rejoiced in 20 as a tournament of champions honored the founding charter.
+The people of Deepvale celebrated the marriage of Zarek Dawnwhisper in 20.
+Strange dreams of winged serpents appeared in Deepvale during 20, stirring both hope and dread.
+War fell upon Silvercrest in 20.
+Thorian Ravenhill of Goldfield was joined in marriage during 20.
+Border War claimed countless lives in 20 before an uneasy stalemate settled over the contested ground.
+Haldor Xalcrest drew their first breath in Blackmere during 20.
+It is recorded that in 20, Blackmere raided Southcrest and seized 50 wealth
+Brisa Mosswood the Explorer charted the unexplored reaches beyond Ashbridge in 20.
+It is recorded that in 20, Eastwood raided Southcrest-2 and seized 50 wealth
+In 20, Silverfall forms alliance with Highford
+Banners of the Ashen Lords clashed during the winter of 20. a pyrrhic victory that left the victors as broken as the vanquished.
+Norwin Coldspring of Darkdale was joined in marriage during 20.
+Silverford flourished in 20 as the market square swelled with merchants hawking curios from beyond the known map filled its coffers.
+War fell upon Goldfield in 20.
+Banners of the Drowned Chorus clashed during the winter of 20. the day belonged to the the Ashen Lords.
+The people of Southhold-2 celebrated the marriage of Eldrin Stormborn in 20.
+A wave of mercantile fortune washed over Southhold-2 in 20.
+Through Obarin Ebonhart's diplomacy, Ashhaven secured an alliance in 20.
+Silas Holloway ventured forth from Redfall-2 in 20 and returned with maps of new lands.
+War fell upon Stillcrest in 20.
+Envoys plied their words between courts in 20.
+The people of Southcrest-2 welcomed Eldrin Nightfall in 20.
+It is recorded that in 20, Ashmere-2 raided Westhold and seized 50 wealth
+War fell upon Blackdale in 20.
+War fell upon Deepgate in 20.
+In 20, Rurik Jadewalker was born in Greengate.
+Envoys plied their words between courts in 20.
+In 20, Uldric the Wise declares a festival in Greenshire-2.
+Quillon Glimmerstone of Coldbridge was joined in marriage during 20.
+Through Celeste Dawnwhisper's diplomacy, Westdale secured an alliance in 20.
+The people of Greenford celebrated the marriage of Caius Stormborn in 20.
+Greenford raided Coldstone and seized 50 wealth (20)
+Voren Dawnwhisper of Northhold-3 was joined in marriage during 20.
+Darkforge mourned Garrick Holloway throughout 20.
+Envoys plied their words between courts in 20.
+It is recorded that in 20, Golddale forms alliance with Redgate
+In 20, steel met steel as rival hosts collided on the blood-soaked plains, and a rout that scattered the defeated across the wilderness.
+Through Eldrin Nightfall's diplomacy, Redforge secured an alliance in 20.
+War fell upon Greenshire-2 in 20.
+Quillon Blackwood of Redfall-3 changed their destiny in 20, rising as Explorer.
+A wave of arcane prosperity washed over Redfall-3 in 20.
+In 20, Obarin Ravenhill was born in Highmount.
+Highmount flourished in 20 as a guild of alchemists established a permanent quarter in the heart of town filled its coffers.
+Envoys plied their words between courts in 20.
+It is recorded that in 20, Northford raided Greenshire-2 but was driven off
+Envoys plied their words between courts in 20.
+Envoys plied their words between courts in 20.
+
+Simulation completed successfully.
