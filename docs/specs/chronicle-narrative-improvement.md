@@ -1,6 +1,6 @@
 # Chronicle Narrative Quality Improvement — Refined Spec
 
-Status: DRAFT (guides the implementation phase of wayfinder map [Map: Chronicle narrative quality improvement](https://github.com/thalesraymond/world-generation-go/issues/18))
+Status: ACCEPTED (implemented via wayfinder map [Map: Chronicle narrative quality improvement](https://github.com/thalesraymond/world-generation-go/issues/18))
 
 ## 1. Destination
 

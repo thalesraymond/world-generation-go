@@ -50,7 +50,7 @@ The orchestrator exposes a small interface (e.g. `Run(config) → (State, Events
 
 The existing `runner.go` may be replaced or subsumed by the orchestrator.
 
-> **Note (narration sliver, landed).** Action 2 has been partially implemented for the narration path only: a concrete `Chronicle` service in `internal/usecase/simulation/chronicle.go` now owns the narration pipeline (`Stream(ctx, events, preset, out)`), with `GrammarProvider` and `FigureResolver` interfaces declared in usecase and implemented by infra. This kills the `cmd → infra/narrative` import for narration. The rest of Action 2 (agent setup, event collection, JSON file writing, runner fate) is deferred to the full orchestration pass.
+> **Note (narration sliver, landed).** Action 2 has been partially implemented for the narration path only: a concrete `Chronicle` service in `internal/usecase/simulation/chronicle.go` now owns the narration pipeline (`Stream(ctx, events, preset, out)`), with `GrammarProvider` and `FigureResolver` interfaces declared in usecase and implemented by infra. The service handles preset validation (`quiet`/`normal`/`verbose`), cross-settlement per-year aggregation of `Economy|Expansion` events, and the `.figure → base rule → event.Description` fallback chain. This kills the `cmd → infra/narrative` import for narration and makes the CLI a thin adapter for the chronicle stream. The rest of Action 2 (agent setup, event collection, JSON file writing, runner fate) is deferred to the full orchestration pass.
 
 ### 3. Merge geography/pointcrawl into domain/pointcrawl (When touched next)
 
