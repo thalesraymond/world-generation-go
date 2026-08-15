@@ -16,7 +16,7 @@ func (e *Explorer) Name() string { return "Explorer" }
 
 // GenerateEvents produces a single Discovery event, possibly tied to the pointcrawl graph.
 // Events are generated roughly 20% of the time.
-func (e *Explorer) GenerateEvents(figure *HistoricalFigure, settlementName string, settlementPop float64, graph *pointcrawl.Graph, settlementX, settlementY int, rng *randv2.Rand) []simulation.Event {
+func (e *Explorer) GenerateEvents(figure *HistoricalFigure, year int, settlementName string, settlementPop float64, graph *pointcrawl.Graph, settlementX, settlementY int, rng *randv2.Rand) []simulation.Event {
 	if rng.IntN(5) != 0 {
 		return nil
 	}
@@ -39,7 +39,7 @@ func (e *Explorer) GenerateEvents(figure *HistoricalFigure, settlementName strin
 		desc = fmt.Sprintf("%s %s %s", figure.Name, actions[rng.IntN(len(actions))], settlementName)
 	}
 
-	figure.AddReputation(ReputationEntry{Year: 0, Event: "Discovery", Delta: 1, Description: desc})
+	figure.AddReputation(ReputationEntry{Year: year, Event: "Discovery", Delta: 1, Description: desc})
 
 	return []simulation.Event{
 		{

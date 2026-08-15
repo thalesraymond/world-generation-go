@@ -12,11 +12,37 @@ import (
 	appconfig "github.com/thalesraymond/world-generation-go/config"
 	adapter "github.com/thalesraymond/world-generation-go/internal/adapter/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/artifact"
+	"github.com/thalesraymond/world-generation-go/internal/domain/settlement"
 	domsim "github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/state"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 	ucsim "github.com/thalesraymond/world-generation-go/internal/usecase/simulation"
 )
+
+// buildSignificanceContext derives the artifact significance inputs from the
+// world state: per-year figure reputation deltas and settlement size classes
+// (spec 4.4). The world state records no historical population, so the size
+// class is classified from the settlement's recorded population at pass time;
+// the lump sum is still awarded exactly once, at the acquisition year.
+func buildSignificanceContext(state *world.State) artifact.SignificanceContext {
+	sig := artifact.SignificanceContext{
+		FigureReputation: make(map[string]map[int]int),
+		SettlementClass:  make(map[string]string),
+	}
+	for i := range state.Settlements {
+		s := &state.Settlements[i]
+		sig.SettlementClass[s.Name] = settlement.Classify(s.Population)
+		for j := range s.Figures {
+			f := &s.Figures[j]
+			byYear := make(map[int]int)
+			for _, e := range f.Reputation {
+				byYear[e.Year] += e.Delta
+			}
+			sig.FigureReputation[f.ID] = byYear
+		}
+	}
+	return sig
+}
 
 func newSimulateCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -102,7 +128,7 @@ func newSimulateCommand() *cobra.Command {
 			sim.Run(eventChan)
 			wg.Wait()
 
-			if err := artifact.PostProcess(worldState.Artifacts, events); err != nil {
+			if err := artifact.PostProcess(worldState.Artifacts, events, buildSignificanceContext(worldState)); err != nil {
 				return fmt.Errorf("post-process artifact state: %w", err)
 			}
 

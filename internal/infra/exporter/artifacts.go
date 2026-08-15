@@ -9,15 +9,24 @@ import (
 	"strings"
 
 	"github.com/thalesraymond/world-generation-go/internal/domain/artifact"
+	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 )
 
 // ExportArtifacts writes one markdown note per artifact plus an index note
 // under targetDir/artifacts/. Rendering is deterministic: artifacts are a
-// slice and the index rows are sorted by name.
-func ExportArtifacts(state *world.State, targetDir string) error {
+// slice and the index rows are sorted by name. events supplies the category
+// lookup for the pivotal-event line in the Significance section (spec 8.3).
+func ExportArtifacts(state *world.State, events []simulation.Event, targetDir string) error {
 	if state == nil || len(state.Artifacts) == 0 {
 		return nil
+	}
+
+	eventCategories := make(map[string]string, len(events))
+	for _, e := range events {
+		if _, ok := eventCategories[e.ID]; !ok {
+			eventCategories[e.ID] = e.Category
+		}
 	}
 
 	artifactsDir := filepath.Join(targetDir, "artifacts")
@@ -34,7 +43,7 @@ func ExportArtifacts(state *world.State, targetDir string) error {
 
 	for _, a := range state.Artifacts {
 		path := filepath.Join(artifactsDir, names[a.ID]+".md")
-		content := artifactFrontmatter(buildArtifactFields(a)) + "\n" + buildArtifactBody(a, links)
+		content := artifactFrontmatter(buildArtifactFields(a)) + "\n" + buildArtifactBody(a, eventCategories, links)
 		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 			return fmt.Errorf("write artifact %s: %w", a.Name, err)
 		}
@@ -158,7 +167,7 @@ func artifactPowersYAML(powers []artifact.Power, score int) string {
 	return b.String()
 }
 
-func buildArtifactBody(a artifact.Artifact, links map[string]string) string {
+func buildArtifactBody(a artifact.Artifact, eventCategories map[string]string, links map[string]string) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "# %s\n\n", a.Name)
 
@@ -207,8 +216,17 @@ func buildArtifactBody(a artifact.Artifact, links map[string]string) string {
 	}
 
 	b.WriteString("## Significance\n\n")
-	if a.SignificanceSource == "intrinsic" {
+	switch {
+	case a.SignificanceSource == "intrinsic":
 		fmt.Fprintf(&b, "Significant at creation in Year %d (intrinsic).\n", a.SignificanceYear)
+	case a.IsSignificant && a.PivotalEventID != "":
+		if category := eventCategories[a.PivotalEventID]; category != "" {
+			fmt.Fprintf(&b, "Became significant in Year %d after [[%s]] (%s).\n", a.SignificanceYear, a.PivotalEventID, category)
+		} else {
+			fmt.Fprintf(&b, "Became significant in Year %d after [[%s]].\n", a.SignificanceYear, a.PivotalEventID)
+		}
+	case a.IsSignificant:
+		fmt.Fprintf(&b, "Became significant in Year %d.\n", a.SignificanceYear)
 	}
 
 	return b.String()
