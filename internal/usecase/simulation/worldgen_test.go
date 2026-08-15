@@ -2,6 +2,7 @@ package simulation
 
 import (
 	"bytes"
+	"encoding/json"
 	"testing"
 
 	"github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
@@ -182,6 +183,58 @@ func TestGenerateWorldRejectsInvalidDimensions(t *testing.T) {
 	_, err := GenerateWorld(config)
 	if err == nil {
 		t.Fatalf("expected error for invalid dimensions, got nil")
+	}
+}
+
+func TestGenerateWorldCreatesPlantedRelicsPerRuin(t *testing.T) {
+	config := WorldGenConfig{Seed: 42, Width: 48, Height: 48, Years: 100}
+
+	worldState, err := GenerateWorld(config)
+	if err != nil {
+		t.Fatalf("GenerateWorld() error = %v", err)
+	}
+
+	ruinCount := 0
+	for _, node := range worldState.PointcrawlGraph.Nodes {
+		if node.Kind == "ruin" {
+			ruinCount++
+		}
+	}
+
+	if ruinCount == 0 {
+		t.Fatalf("expected the test world to contain ruin nodes")
+	}
+
+	if len(worldState.Artifacts) != ruinCount {
+		t.Fatalf("artifact count = %d, want %d ruin nodes", len(worldState.Artifacts), ruinCount)
+	}
+}
+
+func TestGenerateWorldArtifactsAreDeterministic(t *testing.T) {
+	config := WorldGenConfig{Seed: 42, Width: 48, Height: 48, Years: 100}
+
+	first, err := GenerateWorld(config)
+	if err != nil {
+		t.Fatalf("GenerateWorld() first run error = %v", err)
+	}
+
+	second, err := GenerateWorld(config)
+	if err != nil {
+		t.Fatalf("GenerateWorld() second run error = %v", err)
+	}
+
+	firstJSON, err := json.Marshal(first.Artifacts)
+	if err != nil {
+		t.Fatalf("json.Marshal() first error = %v", err)
+	}
+
+	secondJSON, err := json.Marshal(second.Artifacts)
+	if err != nil {
+		t.Fatalf("json.Marshal() second error = %v", err)
+	}
+
+	if !bytes.Equal(firstJSON, secondJSON) {
+		t.Fatalf("expected identical artifacts for same seed")
 	}
 }
 
