@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	appconfig "github.com/thalesraymond/world-generation-go/config"
+	adapter "github.com/thalesraymond/world-generation-go/internal/adapter/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/agent"
 	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	dompointcrawl "github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
@@ -18,7 +19,6 @@ import (
 	domsim "github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/state"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
-	infranarrative "github.com/thalesraymond/world-generation-go/internal/infra/narrative"
 	ucsim "github.com/thalesraymond/world-generation-go/internal/usecase/simulation"
 )
 
@@ -299,8 +299,7 @@ func newSimulateCommand() *cobra.Command {
 			cmd.Printf("Timeline saved to %s\n", timelinePath)
 
 			narrativeRNG := engine.GetPRNG("narrative")
-			resolver := ucsim.NewWorldFigureResolver(worldState)
-			chronicle, err := ucsim.NewChronicle(narrativeRNG, infranarrative.DefaultGrammarProvider{}, resolver)
+			chronicle, err := adapter.NewChronicleForWorld(narrativeRNG, worldState, cfg.Events)
 			if err != nil {
 				return fmt.Errorf("create chronicle: %w", err)
 			}
