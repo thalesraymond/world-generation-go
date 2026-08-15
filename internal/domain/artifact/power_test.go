@@ -3,6 +3,7 @@ package artifact
 import (
 	"encoding/json"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -174,6 +175,20 @@ func TestAppliedPowersActiveStatuses(t *testing.T) {
 	}
 }
 
+// TestAppliedPowersFailClosedUnknownStatus pins the fail-closed contract:
+// a status outside the documented vocabulary — empty (zero value) or
+// unknown — applies no powers, so a typo or future status never leaks them.
+func TestAppliedPowersFailClosedUnknownStatus(t *testing.T) {
+	for _, status := range []string{"", "gremlin"} {
+		t.Run(strconv.Quote(status), func(t *testing.T) {
+			a := poweredArtifact(status)
+			if got := AppliedPowers(a); got != nil {
+				t.Errorf("AppliedPowers(%q) = %v, want nil (fail-closed)", status, got)
+			}
+		})
+	}
+}
+
 // TestAppliedPowersUnaffectedByOwnershipChange pins the transfer half of
 // spec 7.7: powers are intrinsic to the artifact, so an ownership change —
 // recorded here as a new provenance entry, exactly what the transfer
@@ -231,21 +246,19 @@ func TestEffectiveMagnitudeDeterministic(t *testing.T) {
 		}
 	}
 
-	// Magnitudes must derive from the lane, not hardcoded: a different seed
-	// producing all-identical magnitudes is improbable enough (1 in 3^4
-	// draws over the 1..3 base range, pinned) to catch lane-regression.
+	// Magnitudes must derive from the lane, not hardcoded bases. Seeds 1 and
+	// 2 are a fixed pair verified to diverge (seed 1: [3 1 3 3], seed 2:
+	// [1 1 2 2] for PCG(seed, 1)), so the check is deterministic — no
+	// probabilistic assertion that could flake in CI.
 	other := run(2)
-	differ := false
 	for i := range first {
-		if first[i].Powers[0].EffectiveMagnitude(first[i].SignificanceScore) !=
-			other[i].Powers[0].EffectiveMagnitude(other[i].SignificanceScore) {
-			differ = true
-			break
+		got := first[i].Powers[0].EffectiveMagnitude(first[i].SignificanceScore)
+		want := other[i].Powers[0].EffectiveMagnitude(other[i].SignificanceScore)
+		if got != want {
+			return // divergent, as verified
 		}
 	}
-	if !differ {
-		t.Fatal("different seeds produced identical effective magnitudes: draws ignore the RNG lane")
-	}
+	t.Fatal("different seeds produced identical effective magnitudes: draws ignore the RNG lane")
 }
 
 // powerSourceForTest extracts the Source field from a power for assertions.

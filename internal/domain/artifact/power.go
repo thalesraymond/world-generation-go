@@ -48,17 +48,21 @@ func scaleMagnitude(base, score int) int {
 // AppliedPowers returns the powers that currently apply to the artifact
 // (spec 7.7). Powers are intrinsic to the artifact, not the owner: they
 // follow the artifact on transfer and are never cleared by ownership
-// changes. While the artifact is lost, its powers are dormant — the
-// artifact still has them, but they do not apply until rediscovery (status
-// no longer "lost"). Destroyed artifacts are terminal: their powers vanish
-// (cleared at destruction), so nothing applies. This is the query seam for
-// power application (§9.2): consumers gate on the returned slice, not on
-// the stored Powers field.
+// changes. The gate is fail-closed: only the four active statuses
+// (`created`, `held`, `significant`, `rediscovered`) expose powers — while
+// the artifact is `lost` its powers are dormant (the artifact still has
+// them, but they do not apply until rediscovery), and `destroyed` artifacts
+// are terminal, their powers vanished (cleared at destruction). Any other
+// status — empty or unknown — applies nothing. This is the gate for power
+// application (§9.2): consumers check the returned slice, not the stored
+// Powers field.
 func AppliedPowers(a Artifact) []Power {
-	if a.Status == "lost" || a.Status == "destroyed" {
+	switch a.Status {
+	case "created", "held", "significant", "rediscovered":
+		return a.Powers
+	default:
 		return nil
 	}
-	return a.Powers
 }
 
 // NarrativePower produces a static narrative effect.

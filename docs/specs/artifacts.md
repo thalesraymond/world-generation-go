@@ -392,7 +392,7 @@ Narrative powers: no magnitude (effect string only).
 
 **Narrative powers:** don't scale (effect string is static).
 
-**Implementation (issue #75):** `EffectiveMagnitude` already existed on the concrete power types (`scaleMagnitude` in `internal/domain/artifact/power.go`); issue #75 adds the application gate. `AppliedPowers(a Artifact) []Power` returns the artifact's powers for every active status (`created`, `held`, `significant`, `rediscovered`) and `nil` while `lost` (dormant) or `destroyed` (terminal). The future power-application consumer (§9.2 `ArtifactQuerier`, deferred until power-to-action integration lands) gates on the returned slice, never on the stored `Powers` field — the powers themselves are never mutated by lifecycle steps, so the artifact keeps them for export and later rediscovery.
+**Implementation (issue #75):** `EffectiveMagnitude` already existed on the concrete power types (`scaleMagnitude` in `internal/domain/artifact/power.go`); issue #75 adds the application gate. `AppliedPowers(a Artifact) []Power` returns the artifact's powers for every active status (`created`, `held`, `significant`, `rediscovered`) and `nil` otherwise — `lost` (dormant), `destroyed` (terminal), or any empty/unknown status (fail-closed). The future power-application consumer (§9.2 `ArtifactQuerier`, deferred until power-to-action integration lands) gates on the returned slice, never on the stored `Powers` field — the powers themselves are never mutated by lifecycle steps, so the artifact keeps them for export and later rediscovery.
 
 ### 7.7 Power loss/transfer behavior
 
