@@ -11,7 +11,7 @@ import (
 )
 
 // AgentEnv exposes the world context an action needs for preconditions and
-// execution. Implemented by the simulation adapter (see cmd/simulate.go).
+// execution. Implemented by the simulation adapter (see internal/adapter/simulation/env.go).
 type AgentEnv interface {
 	// Suitability returns the terrain suitability score at (x, y), or 0
 	// when the coordinates are unknown.

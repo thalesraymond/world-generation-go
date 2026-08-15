@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	adapter "github.com/thalesraymond/world-generation-go/internal/adapter/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	dompointcrawl "github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 	domsim "github.com/thalesraymond/world-generation-go/internal/domain/simulation"
@@ -72,12 +73,7 @@ func TestSettlementTickEmitsAgentEvents(t *testing.T) {
 	for i := range ws.Suitability {
 		ws.Suitability[i] = 0.8
 	}
-	env := &agentEnv{
-		worldState: ws,
-		graph:      nil,
-		all:        &settlements,
-		usedNames:  map[string]bool{"Haven": true, "Blackgate": true},
-	}
+	env := adapter.NewAgentEnv(ws, nil, &settlements, map[string]bool{"Haven": true, "Blackgate": true})
 
 	entity := &settlementEntity{
 		settlement:      &settlements[0],
@@ -148,12 +144,7 @@ func TestSettlementTickExpandAppendsSettlement(t *testing.T) {
 
 	settlements := []world.Settlement{haven}
 
-	env := &agentEnv{
-		worldState: ws,
-		graph:      graph,
-		all:        &settlements,
-		usedNames:  map[string]bool{"Haven": true},
-	}
+	env := adapter.NewAgentEnv(ws, graph, &settlements, map[string]bool{"Haven": true})
 
 	engine := state.NewEngine(11)
 	entity := &settlementEntity{
@@ -261,7 +252,7 @@ func TestSettlementTickNoYearZeroEvents(t *testing.T) {
 	settlements := []world.Settlement{s}
 
 	engine := state.NewEngine(1)
-	env := &agentEnv{all: &settlements, usedNames: map[string]bool{"Haven": true}}
+	env := adapter.NewAgentEnv(nil, nil, &settlements, map[string]bool{"Haven": true})
 	entity := &settlementEntity{
 		settlement:      &settlements[0],
 		figureRNG:       engine.GetPRNG("figures:Haven"),
@@ -298,7 +289,7 @@ func TestTickDeterministicPerSeed(t *testing.T) {
 		settlements[1].Relations = world.InitRelations(settlements[1], settlements)
 
 		engine := state.NewEngine(99)
-		env := &agentEnv{all: &settlements, usedNames: map[string]bool{"Haven": true, "Blackgate": true}}
+		env := adapter.NewAgentEnv(nil, nil, &settlements, map[string]bool{"Haven": true, "Blackgate": true})
 
 		var b strings.Builder
 		eventChan := make(chan domsim.Event, 512)
