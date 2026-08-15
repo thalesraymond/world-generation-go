@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	appconfig "github.com/thalesraymond/world-generation-go/config"
+	adapter "github.com/thalesraymond/world-generation-go/internal/adapter/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
-	"github.com/thalesraymond/world-generation-go/internal/infra/exporter"
 )
 
 func newExportCommand() *cobra.Command {
@@ -35,28 +35,17 @@ func newExportCommand() *cobra.Command {
 				return fmt.Errorf("parse world state: %w", err)
 			}
 
-			if err := exporter.Export(state, cfg.Output); err != nil {
-				return fmt.Errorf("export world: %w", err)
-			}
-
-			if err := exporter.ExportPointcrawl(state, cfg.Output); err != nil {
-				return fmt.Errorf("export pointcrawl: %w", err)
-			}
-
 			var events []simulation.Event
 			timelinePath := filepath.Join(cfg.Output, "timeline.json")
 			if timelineData, err := os.ReadFile(timelinePath); err == nil {
 				if err := json.Unmarshal(timelineData, &events); err != nil {
 					return fmt.Errorf("parse timeline: %w", err)
 				}
-
-				if err := exporter.ExportTimeline(state, events, cfg.Output); err != nil {
-					return fmt.Errorf("export timeline: %w", err)
-				}
 			}
 
-			if err := exporter.ExportFigures(state, events, cfg.Output); err != nil {
-				return fmt.Errorf("export figures: %w", err)
+			exporter := adapter.ObsidianExporter{}
+			if err := exporter.Export(state, events, cfg.Output); err != nil {
+				return fmt.Errorf("export world: %w", err)
 			}
 
 			factionSet := make(map[string]struct{})
@@ -69,10 +58,11 @@ func newExportCommand() *cobra.Command {
 				nodeCount = state.PointcrawlGraph.NodeCount()
 			}
 
-			cmd.Printf("Export complete: %d settlements, %d factions, %d pointcrawl nodes, %d timeline events.\n",
+			cmd.Printf("Export complete: %d settlements, %d factions, %d pointcrawl nodes, %d artifacts, %d timeline events.\n",
 				len(state.Settlements),
 				len(factionSet),
 				nodeCount,
+				len(state.Artifacts),
 				len(events),
 			)
 			return nil

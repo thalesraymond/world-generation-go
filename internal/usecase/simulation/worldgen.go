@@ -77,5 +77,7 @@ func GenerateWorld(config WorldGenConfig) (*world.State, error) {
 
 	worldState.PointcrawlGraph = graph
 
+	worldState.Artifacts = GeneratePlantedRelics(graph, genesisYear)
+
 	return worldState, nil
 }
