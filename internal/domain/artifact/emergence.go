@@ -209,6 +209,11 @@ func birthEmergent(origin string, year int, eventID, eventType string, owner Own
 	}
 	nameCounts[base] = nameCounts[base] + 1
 
+	var powers []Power
+	if p, ok := IntrinsicPower(typ); ok {
+		powers = append(powers, p)
+	}
+
 	return Artifact{
 		ID:                 fmt.Sprintf("artifact-%s-%d", origin, idx),
 		Name:               name,
@@ -217,6 +222,7 @@ func birthEmergent(origin string, year int, eventID, eventType string, owner Own
 		Status:             "held",
 		SignificanceScore:  0,
 		IsSignificant:      false,
+		Powers:             powers,
 		Provenance: []ProvenanceEntry{{
 			Year:      year,
 			Owner:     owner,
