@@ -9,8 +9,8 @@ type Owner struct {
 	ID   string `json:"id"`
 }
 
-// ValidOwnerKinds enumerates accepted Owner.Kind values.
-var ValidOwnerKinds = map[string]bool{
+// validOwnerKinds enumerates accepted Owner.Kind values.
+var validOwnerKinds = map[string]bool{
 	"figure":     true,
 	"settlement": true,
 	"expedition": true,
@@ -20,7 +20,7 @@ var ValidOwnerKinds = map[string]bool{
 
 // Validate checks that Owner.Kind is an accepted value.
 func (o Owner) Validate() error {
-	if !ValidOwnerKinds[o.Kind] {
+	if !validOwnerKinds[o.Kind] {
 		return fmt.Errorf("invalid owner kind %q", o.Kind)
 	}
 	return nil

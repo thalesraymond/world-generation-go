@@ -20,11 +20,7 @@ type CombatPower struct {
 func (p CombatPower) Type() string       { return "combat" }
 func (p CombatPower) BaseMagnitude() int { return p.Base }
 func (p CombatPower) EffectiveMagnitude(score int) int {
-	mag := int(float64(p.Base) * (1 + float64(score)/10))
-	if mag > p.Base*5 {
-		return p.Base * 5
-	}
-	return mag
+	return scaleMagnitude(p.Base, score)
 }
 
 // InfluencePower adds political sway.
@@ -35,9 +31,14 @@ type InfluencePower struct {
 func (p InfluencePower) Type() string       { return "influence" }
 func (p InfluencePower) BaseMagnitude() int { return p.Base }
 func (p InfluencePower) EffectiveMagnitude(score int) int {
-	mag := int(float64(p.Base) * (1 + float64(score)/10))
-	if mag > p.Base*5 {
-		return p.Base * 5
+	return scaleMagnitude(p.Base, score)
+}
+
+// scaleMagnitude applies the significance-scaled magnitude formula with a 5× cap.
+func scaleMagnitude(base, score int) int {
+	mag := int(float64(base) * (1 + float64(score)/10))
+	if mag > base*5 {
+		return base * 5
 	}
 	return mag
 }
@@ -83,66 +84,40 @@ func powerFromJSON(pj powerJSON) (Power, error) {
 	}
 }
 
-type artifactAlias struct {
-	ID                 string            `json:"id"`
-	Name               string            `json:"name"`
-	Type               string            `json:"type"`
-	SignificanceSource string            `json:"significanceSource"`
-	Description        string            `json:"description,omitempty"`
-	Status             string            `json:"status"`
-	SignificanceScore  int               `json:"significanceScore"`
-	IsSignificant      bool              `json:"isSignificant"`
-	PivotalEventID     string            `json:"pivotalEventID,omitempty"`
-	SignificanceYear   int               `json:"significanceYear,omitempty"`
-	Provenance         []ProvenanceEntry `json:"provenance"`
-	AssociatedEventIDs []string          `json:"associatedEventIDs,omitempty"`
-	Powers             []powerJSON       `json:"powers,omitempty"`
-}
-
 // MarshalJSON serializes an Artifact, encoding each Power with a type discriminator.
 func (a Artifact) MarshalJSON() ([]byte, error) {
-	aux := artifactAlias{
-		ID:                 a.ID,
-		Name:               a.Name,
-		Type:               a.Type,
-		SignificanceSource: a.SignificanceSource,
-		Description:        a.Description,
-		Status:             a.Status,
-		SignificanceScore:  a.SignificanceScore,
-		IsSignificant:      a.IsSignificant,
-		PivotalEventID:     a.PivotalEventID,
-		SignificanceYear:   a.SignificanceYear,
-		Provenance:         a.Provenance,
-		AssociatedEventIDs: a.AssociatedEventIDs,
+	type alias Artifact
+	aux := struct {
+		alias
+		Powers []powerJSON `json:"powers,omitempty"`
+	}{
+		alias: alias(a),
 	}
 	for _, p := range a.Powers {
 		aux.Powers = append(aux.Powers, powerToJSON(p))
 	}
-	return json.Marshal(aux)
+	data, err := json.Marshal(aux)
+	if err != nil {
+		return nil, fmt.Errorf("marshal artifact: %w", err)
+	}
+	return data, nil
 }
 
 // UnmarshalJSON deserializes an Artifact, resolving each Power to its concrete type.
 func (a *Artifact) UnmarshalJSON(data []byte) error {
-	var aux artifactAlias
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
+	type alias Artifact
+	var aux struct {
+		alias
+		Powers []powerJSON `json:"powers,omitempty"`
 	}
-	a.ID = aux.ID
-	a.Name = aux.Name
-	a.Type = aux.Type
-	a.SignificanceSource = aux.SignificanceSource
-	a.Description = aux.Description
-	a.Status = aux.Status
-	a.SignificanceScore = aux.SignificanceScore
-	a.IsSignificant = aux.IsSignificant
-	a.PivotalEventID = aux.PivotalEventID
-	a.SignificanceYear = aux.SignificanceYear
-	a.Provenance = aux.Provenance
-	a.AssociatedEventIDs = aux.AssociatedEventIDs
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return fmt.Errorf("unmarshal artifact: %w", err)
+	}
+	*a = Artifact(aux.alias)
 	for _, pj := range aux.Powers {
 		p, err := powerFromJSON(pj)
 		if err != nil {
-			return err
+			return fmt.Errorf("unmarshal artifact powers: %w", err)
 		}
 		a.Powers = append(a.Powers, p)
 	}
