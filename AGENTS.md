@@ -152,6 +152,14 @@ Before merging, ensure all are true:
 - Always use conventional commit messages with clear scope and type (e.g., `feat`, `fix`, `refactor`, `test`, `docs`).
 - The conventional commit should also be the title of the PR for clarity in history and changelog generation. Always use the "bigger" scope for the PR title if multiple commits are squashed. If a PR has a "feat" commit and a "fix" commit, the PR title should be "feat: ..." to reflect the larger scope.
 
+### Merge Strategy (Force Squash on Main)
+
+- `main` is protected and accepts **force squash merges only**: every merged PR collapses into a single commit on `main` (`--squash`); individual branch commits are discarded.
+- Never rebase, merge, or force-push directly onto `main`. All work lands via a PR, and GitHub applies the squash.
+- Because branch commit messages are dropped on merge, the **PR title** (and body, when it carries meaningful context) is the only artifact preserved in `main` history — keep it accurate, conventional, and self-descriptive.
+- Keep your branch up to date by rebasing on `main` (or merging `main` into your feature branch); do not rewrite `main` itself.
+- After a PR is squashed and merged, the branch should be deleted; rebase or recreate feature branches off the updated `main` rather than reusing stale ones.
+
 ## Agent Behavior in This Repo
 
 When acting as a coding agent:
