@@ -31,7 +31,7 @@ func (ObsidianExporter) Export(state *world.State, events []domsim.Event, target
 	if err := exporter.ExportFigures(state, events, targetDir); err != nil {
 		return fmt.Errorf("export figures: %w", err)
 	}
-	if err := exporter.ExportArtifacts(state, targetDir); err != nil {
+	if err := exporter.ExportArtifacts(state, events, targetDir); err != nil {
 		return fmt.Errorf("export artifacts: %w", err)
 	}
 	return nil

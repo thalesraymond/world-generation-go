@@ -12,7 +12,7 @@ type Diplomat struct{}
 
 func (d *Diplomat) Name() string { return "Diplomat" }
 
-func (d *Diplomat) GenerateEvents(figure *HistoricalFigure, settlementName string, settlementPop float64, graph *pointcrawl.Graph, settlementX, settlementY int, rng *randv2.Rand) []simulation.Event {
+func (d *Diplomat) GenerateEvents(figure *HistoricalFigure, year int, settlementName string, settlementPop float64, graph *pointcrawl.Graph, settlementX, settlementY int, rng *randv2.Rand) []simulation.Event {
 	if rng.IntN(4) != 0 {
 		return nil
 	}
@@ -31,7 +31,7 @@ func (d *Diplomat) GenerateEvents(figure *HistoricalFigure, settlementName strin
 		repDelta = -1
 	}
 
-	figure.AddReputation(ReputationEntry{Year: 0, Event: "Diplomacy", Delta: repDelta, Description: desc})
+	figure.AddReputation(ReputationEntry{Year: year, Event: "Diplomacy", Delta: repDelta, Description: desc})
 
 	return []simulation.Event{{
 		Category: "Politics", Description: desc, FigureID: figure.ID,

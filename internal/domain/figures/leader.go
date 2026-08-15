@@ -16,7 +16,7 @@ func (l *Leader) Name() string { return "Leader" }
 
 // GenerateEvents produces a single political, settlement, or conflict event.
 // Events are generated roughly 25% of the time.
-func (l *Leader) GenerateEvents(figure *HistoricalFigure, settlementName string, settlementPop float64, graph *pointcrawl.Graph, settlementX, settlementY int, rng *randv2.Rand) []simulation.Event {
+func (l *Leader) GenerateEvents(figure *HistoricalFigure, year int, settlementName string, settlementPop float64, graph *pointcrawl.Graph, settlementX, settlementY int, rng *randv2.Rand) []simulation.Event {
 	if rng.IntN(4) != 0 {
 		return nil
 	}
@@ -37,7 +37,7 @@ func (l *Leader) GenerateEvents(figure *HistoricalFigure, settlementName string,
 		desc = fmt.Sprintf("%s %s %s", figure.Name, actions[rng.IntN(len(actions))], settlementName)
 	}
 
-	figure.AddReputation(ReputationEntry{Year: 0, Event: category, Delta: 1, Description: desc})
+	figure.AddReputation(ReputationEntry{Year: year, Event: category, Delta: 1, Description: desc})
 
 	return []simulation.Event{
 		{

@@ -12,7 +12,7 @@ type General struct{}
 
 func (g *General) Name() string { return "General" }
 
-func (g *General) GenerateEvents(figure *HistoricalFigure, settlementName string, settlementPop float64, graph *pointcrawl.Graph, settlementX, settlementY int, rng *randv2.Rand) []simulation.Event {
+func (g *General) GenerateEvents(figure *HistoricalFigure, year int, settlementName string, settlementPop float64, graph *pointcrawl.Graph, settlementX, settlementY int, rng *randv2.Rand) []simulation.Event {
 	if rng.IntN(4) != 0 {
 		return nil
 	}
@@ -31,7 +31,7 @@ func (g *General) GenerateEvents(figure *HistoricalFigure, settlementName string
 		repDelta = -1
 	}
 
-	figure.AddReputation(ReputationEntry{Year: 0, Event: "Raid", Delta: repDelta, Description: desc})
+	figure.AddReputation(ReputationEntry{Year: year, Event: "Raid", Delta: repDelta, Description: desc})
 
 	return []simulation.Event{{
 		Category: "Conflict", Description: desc, FigureID: figure.ID,

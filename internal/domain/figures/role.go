@@ -11,7 +11,7 @@ import (
 // Role defines the behavior of a historical figure's position in society.
 type Role interface {
 	Name() string
-	GenerateEvents(figure *HistoricalFigure, settlementName string, settlementPop float64, graph *pointcrawl.Graph, settlementX, settlementY int, rng *randv2.Rand) []simulation.Event
+	GenerateEvents(figure *HistoricalFigure, year int, settlementName string, settlementPop float64, graph *pointcrawl.Graph, settlementX, settlementY int, rng *randv2.Rand) []simulation.Event
 	CanTransitionTo(other Role) bool
 }
 

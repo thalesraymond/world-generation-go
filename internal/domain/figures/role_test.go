@@ -66,7 +66,7 @@ func TestLeader_GenerateEvents(t *testing.T) {
 
 	var nilCount, eventCount int
 	for i := 0; i < 20; i++ {
-		events := (&Leader{}).GenerateEvents(figure, settlement, 1000, nil, 0, 0, rng)
+		events := (&Leader{}).GenerateEvents(figure, 7, settlement, 1000, nil, 0, 0, rng)
 		if events == nil {
 			nilCount++
 			continue
@@ -108,7 +108,7 @@ func TestExplorer_GenerateEvents(t *testing.T) {
 	figure := &HistoricalFigure{ID: "fig-2", Name: "Brisa Mosswood"}
 	settlement := "Thornhaven"
 
-	events := (&Explorer{}).GenerateEvents(figure, settlement, 1000, nil, 10, 20, rng)
+	events := (&Explorer{}).GenerateEvents(figure, 7, settlement, 1000, nil, 10, 20, rng)
 	if len(events) != 1 {
 		t.Fatalf("GenerateEvents returned %d events, want 1", len(events))
 	}
@@ -142,7 +142,7 @@ func TestExplorer_GenerateEvents_NilGraph(t *testing.T) {
 		}
 	}()
 
-	events := (&Explorer{}).GenerateEvents(figure, "Dawnwhisper", 500, nil, 5, 5, rng)
+	events := (&Explorer{}).GenerateEvents(figure, 7, "Dawnwhisper", 500, nil, 5, 5, rng)
 	if len(events) != 1 {
 		t.Fatalf("nil graph fallback returned %d events, want 1", len(events))
 	}
@@ -194,8 +194,8 @@ func TestRole_GenerateEvents_Determinism(t *testing.T) {
 
 			var got1, got2 [][]simulation.Event
 			for i := 0; i < 10; i++ {
-				got1 = append(got1, tc.role.GenerateEvents(figure, "Det Settlement", 1000, nil, 0, 0, r1))
-				got2 = append(got2, tc.role.GenerateEvents(figure, "Det Settlement", 1000, nil, 0, 0, r2))
+				got1 = append(got1, tc.role.GenerateEvents(figure, 7, "Det Settlement", 1000, nil, 0, 0, r1))
+				got2 = append(got2, tc.role.GenerateEvents(figure, 7, "Det Settlement", 1000, nil, 0, 0, r2))
 			}
 
 			if !reflect.DeepEqual(got1, got2) {
@@ -224,7 +224,7 @@ func TestGeneral_GenerateEvents(t *testing.T) {
 
 	var nilCount, eventCount int
 	for i := 0; i < 20; i++ {
-		events := gen.GenerateEvents(figure, "Ashfield", 1000, nil, 0, 0, rng)
+		events := gen.GenerateEvents(figure, 7, "Ashfield", 1000, nil, 0, 0, rng)
 		if events == nil {
 			nilCount++
 			continue
@@ -253,7 +253,7 @@ func TestDiplomat_GenerateEvents(t *testing.T) {
 	rng := randv2.New(randv2.NewPCG(42, 7))
 	figure := &HistoricalFigure{ID: "dip-1", Name: "Lyra Silvertongue", Stats: Stats{Martial: 5, Diplomatic: 16, Infamy: 1}}
 
-	events := (&Diplomat{}).GenerateEvents(figure, "Goldhaven", 1000, nil, 0, 0, rng)
+	events := (&Diplomat{}).GenerateEvents(figure, 7, "Goldhaven", 1000, nil, 0, 0, rng)
 	if events == nil {
 		t.Skip("no event generated — probabilistic")
 		return
@@ -271,7 +271,7 @@ func TestMasterSmith_GenerateEvents(t *testing.T) {
 	rng := randv2.New(randv2.NewPCG(42, 7))
 	figure := &HistoricalFigure{ID: "smith-1", Name: "Borin Forgehand", Stats: Stats{Martial: 10, Diplomatic: 10, Infamy: 1}}
 
-	events := (&MasterSmith{}).GenerateEvents(figure, "Ironforge", 1000, nil, 0, 0, rng)
+	events := (&MasterSmith{}).GenerateEvents(figure, 7, "Ironforge", 1000, nil, 0, 0, rng)
 	if events == nil {
 		t.Skip("no event generated — probabilistic")
 		return
@@ -313,7 +313,7 @@ func TestNewRoles_CanTransitionTo(t *testing.T) {
 func TestLeader_GenerateEvents_AddsReputation(t *testing.T) {
 	rng := randv2.New(randv2.NewPCG(42, 7))
 	figure := &HistoricalFigure{ID: "l-rep", Name: "Queen Elara", Stats: Stats{Martial: 10, Diplomatic: 15, Infamy: 1}}
-	events := (&Leader{}).GenerateEvents(figure, "Valewatch", 1000, nil, 0, 0, rng)
+	events := (&Leader{}).GenerateEvents(figure, 7, "Valewatch", 1000, nil, 0, 0, rng)
 	if events == nil {
 		return
 	}
@@ -323,17 +323,23 @@ func TestLeader_GenerateEvents_AddsReputation(t *testing.T) {
 	if figure.TotalReputation() <= 0 {
 		t.Errorf("expected positive reputation, got %d", figure.TotalReputation())
 	}
+	if got := figure.Reputation[len(figure.Reputation)-1].Year; got != 7 {
+		t.Errorf("reputation entry year = %d, want the event year 7", got)
+	}
 }
 
 func TestExplorer_GenerateEvents_AddsReputation(t *testing.T) {
 	rng := randv2.New(randv2.NewPCG(2, 1))
 	figure := &HistoricalFigure{ID: "e-rep", Name: "Pathfinder", Stats: Stats{Martial: 8, Diplomatic: 8, Infamy: 1}}
-	events := (&Explorer{}).GenerateEvents(figure, "Thornhaven", 1000, nil, 0, 0, rng)
+	events := (&Explorer{}).GenerateEvents(figure, 7, "Thornhaven", 1000, nil, 0, 0, rng)
 	if events == nil {
 		return
 	}
 	if len(figure.Reputation) == 0 {
 		t.Error("expected reputation entry from Explorer event")
+	}
+	if got := figure.Reputation[len(figure.Reputation)-1].Year; got != 7 {
+		t.Errorf("reputation entry year = %d, want the event year 7", got)
 	}
 }
 
@@ -394,7 +400,7 @@ func TestExplorer_GenerateEvents_WithGraph(t *testing.T) {
 
 	rng := randv2.New(randv2.NewPCG(2, 1))
 	figure := &HistoricalFigure{ID: "fig-graph", Name: "Brisa Mosswood"}
-	events := (&Explorer{}).GenerateEvents(figure, "Thornhaven", 1000, graph, 10, 10, rng)
+	events := (&Explorer{}).GenerateEvents(figure, 7, "Thornhaven", 1000, graph, 10, 10, rng)
 	if len(events) != 1 {
 		t.Fatalf("GenerateEvents with graph returned %d events, want 1", len(events))
 	}
@@ -409,7 +415,7 @@ func TestDiplomat_GenerateEvents_FailureAddsReputation(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		rng := randv2.New(randv2.NewPCG(uint64(i), 7))
 		figure := &HistoricalFigure{ID: "dip-f", Name: "Lyra", Stats: Stats{Martial: 5, Diplomatic: 16, Infamy: 1}}
-		events := (&Diplomat{}).GenerateEvents(figure, "Goldhaven", 1000, nil, 0, 0, rng)
+		events := (&Diplomat{}).GenerateEvents(figure, 7, "Goldhaven", 1000, nil, 0, 0, rng)
 		if events == nil {
 			continue
 		}

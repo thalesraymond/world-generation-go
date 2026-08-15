@@ -12,7 +12,7 @@ type MasterSmith struct{}
 
 func (ms *MasterSmith) Name() string { return "Master Smith" }
 
-func (ms *MasterSmith) GenerateEvents(figure *HistoricalFigure, settlementName string, settlementPop float64, graph *pointcrawl.Graph, settlementX, settlementY int, rng *randv2.Rand) []simulation.Event {
+func (ms *MasterSmith) GenerateEvents(figure *HistoricalFigure, year int, settlementName string, settlementPop float64, graph *pointcrawl.Graph, settlementX, settlementY int, rng *randv2.Rand) []simulation.Event {
 	if rng.IntN(5) != 0 {
 		return nil
 	}
@@ -21,7 +21,7 @@ func (ms *MasterSmith) GenerateEvents(figure *HistoricalFigure, settlementName s
 	item := items[rng.IntN(len(items))]
 
 	desc := fmt.Sprintf("The master smith %s of %s forged %s", figure.Name, settlementName, item)
-	figure.AddReputation(ReputationEntry{Year: 0, Event: "Craftsmanship", Delta: 1, Description: desc})
+	figure.AddReputation(ReputationEntry{Year: year, Event: "Craftsmanship", Delta: 1, Description: desc})
 
 	return []simulation.Event{{
 		Category: "Settlement", Description: desc, FigureID: figure.ID,

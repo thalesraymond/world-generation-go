@@ -93,7 +93,7 @@ func (s *SettlementEntity) Tick(year int, eventChan chan<- domsim.Event, rng *ra
 		if err != nil {
 			continue
 		}
-		roleEvents := role.GenerateEvents(&s.settlement.Figures[i], s.settlement.Name, s.settlement.Population, s.pointcrawlGraph, s.settlement.X, s.settlement.Y, s.figureRNG)
+		roleEvents := role.GenerateEvents(&s.settlement.Figures[i], year, s.settlement.Name, s.settlement.Population, s.pointcrawlGraph, s.settlement.X, s.settlement.Y, s.figureRNG)
 		for j := range roleEvents {
 			roleEvents[j].Year = year
 			roleEvents[j].SettlementName = s.settlement.Name

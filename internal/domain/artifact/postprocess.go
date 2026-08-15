@@ -28,11 +28,22 @@ import (
 // those rules' engines, and the event is only associated with the artifact
 // here. Status transitions (lost, held, destroyed) are owned by the lifecycle
 // engines and are never touched by this pass.
-func PostProcess(artifacts []Artifact, events []simulation.Event) error {
+//
+// The pass then evaluates significance for every artifact (spec 4): weighted
+// event contributions from the fixed category table, owner-importance accrual
+// from sig, threshold crossing with a monotonic latch, and score freezing
+// while lost. sig may be the zero value to disable the owner fallback.
+func PostProcess(artifacts []Artifact, events []simulation.Event, sig SignificanceContext) error {
 	byID := make(map[string]*Artifact, len(artifacts))
+	byIdx := make(map[string]int, len(artifacts))
 	for i := range artifacts {
 		byID[artifacts[i].ID] = &artifacts[i]
+		byIdx[artifacts[i].ID] = i
 	}
+
+	// eventContributions records, per artifact (parallel to artifacts), the
+	// weight-bearing events the walk associates with it.
+	eventContributions := make([][]significanceEvent, len(artifacts))
 
 	yearCounts := make(map[int]int)
 	for i := range events {
@@ -51,7 +62,16 @@ func PostProcess(artifacts []Artifact, events []simulation.Event) error {
 		}
 		a.AssociatedEventIDs = append(a.AssociatedEventIDs, event.ID)
 		recordProvenance(a, event)
+		if weight := eventWeights[event.Category]; weight > 0 {
+			eventContributions[byIdx[event.ArtifactID]] = append(eventContributions[byIdx[event.ArtifactID]], significanceEvent{
+				year:    event.Year,
+				weight:  weight,
+				eventID: event.ID,
+			})
+		}
 	}
+
+	evaluateSignificance(artifacts, events, eventContributions, sig)
 	return nil
 }
 

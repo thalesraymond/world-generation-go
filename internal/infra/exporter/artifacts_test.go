@@ -9,6 +9,7 @@ import (
 
 	"github.com/thalesraymond/world-generation-go/internal/domain/artifact"
 	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
+	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 )
 
@@ -42,7 +43,7 @@ func plantedRelicsState() *world.State {
 func TestExportArtifactsNilStateCreatesNoDirectory(t *testing.T) {
 	targetDir := t.TempDir()
 
-	if err := ExportArtifacts(nil, targetDir); err != nil {
+	if err := ExportArtifacts(nil, nil, targetDir); err != nil {
 		t.Fatalf("ExportArtifacts(nil) error = %v", err)
 	}
 
@@ -55,7 +56,7 @@ func TestExportArtifactsEmptyStateCreatesNoDirectory(t *testing.T) {
 	targetDir := t.TempDir()
 	state := &world.State{Artifacts: []artifact.Artifact{}}
 
-	if err := ExportArtifacts(state, targetDir); err != nil {
+	if err := ExportArtifacts(state, nil, targetDir); err != nil {
 		t.Fatalf("ExportArtifacts() error = %v", err)
 	}
 
@@ -67,7 +68,7 @@ func TestExportArtifactsEmptyStateCreatesNoDirectory(t *testing.T) {
 func TestExportArtifactsWritesSanitizedFiles(t *testing.T) {
 	targetDir := t.TempDir()
 
-	if err := ExportArtifacts(plantedRelicsState(), targetDir); err != nil {
+	if err := ExportArtifacts(plantedRelicsState(), nil, targetDir); err != nil {
 		t.Fatalf("ExportArtifacts() error = %v", err)
 	}
 
@@ -96,7 +97,7 @@ func TestExportArtifactsWritesSanitizedFiles(t *testing.T) {
 
 func TestExportArtifactsFrontmatter(t *testing.T) {
 	targetDir := t.TempDir()
-	if err := ExportArtifacts(plantedRelicsState(), targetDir); err != nil {
+	if err := ExportArtifacts(plantedRelicsState(), nil, targetDir); err != nil {
 		t.Fatalf("ExportArtifacts() error = %v", err)
 	}
 
@@ -127,7 +128,7 @@ func TestExportArtifactsFrontmatter(t *testing.T) {
 
 func TestExportArtifactsBodySections(t *testing.T) {
 	targetDir := t.TempDir()
-	if err := ExportArtifacts(plantedRelicsState(), targetDir); err != nil {
+	if err := ExportArtifacts(plantedRelicsState(), nil, targetDir); err != nil {
 		t.Fatalf("ExportArtifacts() error = %v", err)
 	}
 
@@ -162,7 +163,7 @@ func TestExportArtifactsBodySections(t *testing.T) {
 
 func TestExportArtifactsIndexNote(t *testing.T) {
 	targetDir := t.TempDir()
-	if err := ExportArtifacts(plantedRelicsState(), targetDir); err != nil {
+	if err := ExportArtifacts(plantedRelicsState(), nil, targetDir); err != nil {
 		t.Fatalf("ExportArtifacts() error = %v", err)
 	}
 
@@ -211,7 +212,7 @@ func TestExportArtifactsOwnerFromProvenance(t *testing.T) {
 	}
 
 	targetDir := t.TempDir()
-	if err := ExportArtifacts(state, targetDir); err != nil {
+	if err := ExportArtifacts(state, nil, targetDir); err != nil {
 		t.Fatalf("ExportArtifacts() error = %v", err)
 	}
 
@@ -281,7 +282,7 @@ func TestExportArtifactsProvenanceLinksResolveToOwnerNotes(t *testing.T) {
 	}
 
 	targetDir := t.TempDir()
-	if err := ExportArtifacts(state, targetDir); err != nil {
+	if err := ExportArtifacts(state, nil, targetDir); err != nil {
 		t.Fatalf("ExportArtifacts() error = %v", err)
 	}
 
@@ -312,7 +313,7 @@ func TestExportArtifactsQuotesStringLikeNames(t *testing.T) {
 	}
 
 	targetDir := t.TempDir()
-	if err := ExportArtifacts(state, targetDir); err != nil {
+	if err := ExportArtifacts(state, nil, targetDir); err != nil {
 		t.Fatalf("ExportArtifacts() error = %v", err)
 	}
 
@@ -335,7 +336,7 @@ func TestExportArtifactsQuotesStringLikeNames(t *testing.T) {
 
 func TestExportArtifactsPowersFieldAlwaysPresent(t *testing.T) {
 	targetDir := t.TempDir()
-	if err := ExportArtifacts(plantedRelicsState(), targetDir); err != nil {
+	if err := ExportArtifacts(plantedRelicsState(), nil, targetDir); err != nil {
 		t.Fatalf("ExportArtifacts() error = %v", err)
 	}
 
@@ -369,7 +370,7 @@ func TestExportArtifactsRendersPowers(t *testing.T) {
 	}
 
 	targetDir := t.TempDir()
-	if err := ExportArtifacts(state, targetDir); err != nil {
+	if err := ExportArtifacts(state, nil, targetDir); err != nil {
 		t.Fatalf("ExportArtifacts() error = %v", err)
 	}
 
@@ -393,15 +394,115 @@ func TestExportArtifactsRendersPowers(t *testing.T) {
 	}
 }
 
+func TestExportArtifactsSignificanceSection(t *testing.T) {
+	state := &world.State{
+		Artifacts: []artifact.Artifact{
+			{
+				ID:                 "artifact-settlement-0",
+				Name:               "Crown of Deepcrest",
+				Type:               "crown",
+				SignificanceSource: "historical",
+				Status:             "significant",
+				SignificanceScore:  5,
+				IsSignificant:      true,
+				PivotalEventID:     "event-42-0",
+				SignificanceYear:   42,
+				Provenance: []artifact.ProvenanceEntry{
+					{Year: 12, Owner: artifact.Owner{Kind: "figure", ID: "Deepcrest-3"}, EventType: "Discovery", EventID: "event-12-0"},
+					{Year: 42, Owner: artifact.Owner{Kind: "figure", ID: "Deepcrest-3"}, EventType: "War", EventID: "event-42-0"},
+				},
+			},
+			{
+				ID:                 "artifact-settlement-1",
+				Name:               "Horn of the Reach",
+				Type:               "relic",
+				SignificanceSource: "historical",
+				Status:             "held",
+				SignificanceScore:  4,
+				IsSignificant:      true,
+				SignificanceYear:   12,
+				Provenance: []artifact.ProvenanceEntry{
+					{Year: 12, Owner: artifact.Owner{Kind: "figure", ID: "Deepcrest-3"}, EventType: "Discovery", EventID: "event-12-0"},
+				},
+			},
+			{
+				ID:                 "artifact-settlement-2",
+				Name:               "Plain Ring",
+				Type:               "jewelry",
+				SignificanceSource: "historical",
+				Status:             "held",
+				SignificanceScore:  1,
+				IsSignificant:      false,
+			},
+			{
+				ID:                 "artifact-settlement-3",
+				Name:               "Mystery Blade",
+				Type:               "weapon",
+				SignificanceSource: "historical",
+				Status:             "significant",
+				SignificanceScore:  6,
+				IsSignificant:      true,
+				PivotalEventID:     "event-7-0",
+				SignificanceYear:   7,
+			},
+		},
+	}
+	events := []simulation.Event{
+		{Year: 42, Category: "War", ID: "event-42-0", Description: "war"},
+	}
+
+	targetDir := t.TempDir()
+	if err := ExportArtifacts(state, events, targetDir); err != nil {
+		t.Fatalf("ExportArtifacts() error = %v", err)
+	}
+
+	crown, err := os.ReadFile(filepath.Join(targetDir, "artifacts", "Crown of Deepcrest.md"))
+	if err != nil {
+		t.Fatalf("read crown file: %v", err)
+	}
+	if !strings.Contains(string(crown), "Became significant in Year 42 after [[event-42-0]] (War).") {
+		t.Errorf("crown note missing pivotal-event significance line, got:\n%s", crown)
+	}
+
+	horn, err := os.ReadFile(filepath.Join(targetDir, "artifacts", "Horn of the Reach.md"))
+	if err != nil {
+		t.Fatalf("read horn file: %v", err)
+	}
+	if !strings.Contains(string(horn), "Became significant in Year 12.") {
+		t.Errorf("horn note missing accrual significance line, got:\n%s", horn)
+	}
+	if strings.Contains(string(horn), "[[event-") {
+		t.Errorf("horn note must not link a pivotal event (crossing was not an event)")
+	}
+
+	ring, err := os.ReadFile(filepath.Join(targetDir, "artifacts", "Plain Ring.md"))
+	if err != nil {
+		t.Fatalf("read ring file: %v", err)
+	}
+	if strings.Contains(string(ring), "Became significant") {
+		t.Errorf("non-significant artifact must not render a significance line, got:\n%s", ring)
+	}
+
+	// Pivotal event whose category is not in the timeline still renders the
+	// event link, just without the category suffix.
+	blade, err := os.ReadFile(filepath.Join(targetDir, "artifacts", "Mystery Blade.md"))
+	if err != nil {
+		t.Fatalf("read blade file: %v", err)
+	}
+	if !strings.Contains(string(blade), "Became significant in Year 7 after [[event-7-0]].") {
+		t.Errorf("blade note missing category-less significance line, got:\n%s", blade)
+	}
+}
+
 func TestExportArtifactsIsDeterministic(t *testing.T) {
 	state := plantedRelicsState()
 	targetA := t.TempDir()
 	targetB := t.TempDir()
 
-	if err := ExportArtifacts(state, targetA); err != nil {
+	if err := ExportArtifacts(state, nil, targetA); err != nil {
 		t.Fatalf("ExportArtifacts() targetA error = %v", err)
 	}
-	if err := ExportArtifacts(state, targetB); err != nil {
+	if err := ExportArtifacts(state, nil, targetB); err != nil {
 		t.Fatalf("ExportArtifacts() targetB error = %v", err)
 	}
 
