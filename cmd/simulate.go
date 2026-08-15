@@ -5,62 +5,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	appconfig "github.com/thalesraymond/world-generation-go/config"
 	adapter "github.com/thalesraymond/world-generation-go/internal/adapter/simulation"
-	"github.com/thalesraymond/world-generation-go/internal/domain/artifact"
-	"github.com/thalesraymond/world-generation-go/internal/domain/settlement"
-	domsim "github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/state"
-	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 	ucsim "github.com/thalesraymond/world-generation-go/internal/usecase/simulation"
 )
-
-// buildFigureContexts summarizes the figures the emergence fallback needs:
-// home settlement (the artifact ID origin) and reputation history (the
-// threshold-crossing year).
-func buildFigureContexts(settlements []world.Settlement) []artifact.FigureContext {
-	ctx := make([]artifact.FigureContext, 0, len(settlements)*4)
-	for i := range settlements {
-		for j := range settlements[i].Figures {
-			f := &settlements[i].Figures[j]
-			rep := make([]artifact.ReputationDelta, 0, len(f.Reputation))
-			for _, e := range f.Reputation {
-				rep = append(rep, artifact.ReputationDelta{Year: e.Year, Delta: e.Delta, Event: e.Event})
-			}
-			ctx = append(ctx, artifact.FigureContext{ID: f.ID, Settlement: settlements[i].Name, Reputation: rep})
-		}
-	}
-	return ctx
-}
-
-// buildSignificanceContext derives the artifact significance inputs from the
-// world state: per-year figure reputation deltas and settlement size classes
-// (spec 4.4). The world state records no historical population, so the size
-// class is classified from the settlement's recorded population at pass time;
-// the lump sum is still awarded exactly once, at the acquisition year.
-func buildSignificanceContext(state *world.State) artifact.SignificanceContext {
-	sig := artifact.SignificanceContext{
-		FigureReputation: make(map[string]map[int]int),
-		SettlementClass:  make(map[string]string),
-	}
-	for i := range state.Settlements {
-		s := &state.Settlements[i]
-		sig.SettlementClass[s.Name] = settlement.Classify(s.Population)
-		for j := range s.Figures {
-			f := &s.Figures[j]
-			byYear := make(map[int]int)
-			for _, e := range f.Reputation {
-				byYear[e.Year] += e.Delta
-			}
-			sig.FigureReputation[f.ID] = byYear
-		}
-	}
-	return sig
-}
 
 func newSimulateCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -78,79 +30,23 @@ func newSimulateCommand() *cobra.Command {
 
 			cmd.Printf("Generating world: %dx%d with seed %d ...\n", width, height, cfg.Seed)
 
-			worldConfig := ucsim.WorldGenConfig{
-				Seed:   cfg.Seed,
-				Width:  width,
-				Height: height,
-				Years:  cfg.Years,
-			}
-
-			worldState, err := ucsim.GenerateWorld(worldConfig)
-			if err != nil {
-				return fmt.Errorf("generate world: %w", err)
-			}
-
-			cmd.Printf("World generated: %d x %d, %d settlements.\n", worldState.Width, worldState.Height, len(worldState.Settlements))
-
 			if err := os.MkdirAll(outputDir, 0755); err != nil {
 				return fmt.Errorf("create output directory: %w", err)
 			}
 
 			cmd.Printf("Starting timeline simulation for %d years with event density %q.\n", cfg.Years, cfg.Events)
 
-			engine := state.NewEngine(uint64(cfg.Seed))
-			timelineRNG := engine.GetPRNG("timeline")
-
-			usedNames := make(map[string]bool)
-			for i := range worldState.Settlements {
-				usedNames[worldState.Settlements[i].Name] = true
-			}
-			env := adapter.NewAgentEnv(worldState, worldState.PointcrawlGraph, &worldState.Settlements, usedNames)
-
-			// Pre-size the settlements slice so expansion appends never
-			// reallocate mid-simulation; entities below anchor to the final
-			// backing array.
-			if extra := cap(worldState.Settlements) - len(worldState.Settlements); extra < ucsim.ExpansionHeadroom {
-				grown := make([]world.Settlement, len(worldState.Settlements), len(worldState.Settlements)+ucsim.ExpansionHeadroom)
-				copy(grown, worldState.Settlements)
-				worldState.Settlements = grown
-			}
-
-			sim := domsim.New(1, cfg.Years, timelineRNG)
-			entities := make([]*ucsim.SettlementEntity, 0, len(worldState.Settlements))
-			for i := range worldState.Settlements {
-				s := &worldState.Settlements[i]
-				entities = append(entities, ucsim.NewSettlementEntity(
-					s,
-					engine.GetPRNG("figures:"+s.Name),
-					engine.GetPRNG("agent:"+s.Name),
-					worldState.PointcrawlGraph,
-					&worldState.Settlements,
-					env,
-				))
-			}
-			for _, entity := range entities {
-				sim.AddEntity(entity)
-			}
-
-			eventChan := make(chan domsim.Event, 100)
-			var events []domsim.Event
-			var wg sync.WaitGroup
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				for event := range eventChan {
-					events = append(events, event)
-				}
-			}()
-			sim.Run(eventChan)
-			wg.Wait()
-
-			artifactRNG := engine.GetPRNG("artifacts")
-			worldState.Artifacts, err = artifact.EmergencePass(worldState.Artifacts, events, buildFigureContexts(worldState.Settlements), buildSignificanceContext(worldState), artifactRNG)
+			events, worldState, err := ucsim.RunSimulation(cmd.Context(), ucsim.OrchestratorConfig{
+				Seed:   uint64(cfg.Seed),
+				Width:  width,
+				Height: height,
+				Years:  cfg.Years,
+			})
 			if err != nil {
-				return fmt.Errorf("post-process artifact state: %w", err)
+				return fmt.Errorf("run simulation: %w", err)
 			}
+
+			cmd.Printf("World generated: %d x %d, %d settlements.\n", worldState.Width, worldState.Height, len(worldState.Settlements))
 
 			stateJSON, err := json.Marshal(worldState)
 			if err != nil {
@@ -174,7 +70,7 @@ func newSimulateCommand() *cobra.Command {
 			}
 			cmd.Printf("Timeline saved to %s\n", timelinePath)
 
-			narrativeRNG := engine.GetPRNG("narrative")
+			narrativeRNG := state.NewEngine(uint64(cfg.Seed)).GetPRNG("narrative")
 			chronicle, err := adapter.NewChronicleForWorld(narrativeRNG, worldState, cfg.Events)
 			if err != nil {
 				return fmt.Errorf("create chronicle: %w", err)
