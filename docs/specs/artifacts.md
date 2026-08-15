@@ -189,6 +189,17 @@ Class at acquisition, not later growth.
 - All emergent artifacts are `historical`.
 - Emergent artifacts begin `created` — the birth event is their creation; the pass immediately applies the first transfer → `held`.
 
+**Implementation (issue #72, in `internal/domain/artifact/emergence.go`):**
+
+- `EmergencePass` runs the provenance/event-ID walk first, then a second stream-order walk; it returns the extended artifact slice.
+- Qualifying events are `Conquest` events with a `TargetSettlement` (spoils go to the aggressor settlement) and `Discovery` events naming a figure (the discovering figure). Events that already carry an `ArtifactID` (they involve an existing artifact) never trigger a draw — the spoils are that artifact.
+- Per qualifying event the artifacts lane is consumed in a fixed order: type draw, rarity-gate draw, then (on a birth) a name draw.
+- The type draw picks from the 5.6-weighted pool (common : rare = 2 : 1); the gate passes with 25% probability for common types and 10% for rare types.
+- On a pass, the artifact is born at the event: origin = the aggressor settlement (Conquest) or the figure's settlement (Discovery), ID `artifact-{origin}-{index}`, provenance entry `{year: event year, owner: beneficiary, eventID, eventType}`, status `held`.
+- On a fail, the fallback applies to figure beneficiaries only (settlements track no reputation): if the figure's recorded reputation history reaches the threshold (cumulative ≥ 10), one backdated artifact is born (at most one per figure per pass). The provenance entry is backdated to the crossing year with the crossing reputation event's name; status `held`. Note: production reputation entries currently record year 0, so fallback provenance backdates to year 0 until the figures system records real years.
+- Names combine a per-type word drawn from the lane with the origin settlement; repeated names are disambiguated with Roman numeral suffixes so note filenames stay unique.
+- Artifacts born mid-walk join the provenance walk like planted relics: later events that terminate their owner are attached and associated by the same rules as in §5.4.
+
 ### 5.4 Post-processing materialization
 
 One domain pass after simulation:

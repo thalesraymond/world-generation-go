@@ -19,6 +19,24 @@ import (
 	ucsim "github.com/thalesraymond/world-generation-go/internal/usecase/simulation"
 )
 
+// buildFigureContexts summarizes the figures the emergence fallback needs:
+// home settlement (the artifact ID origin) and reputation history (the
+// threshold-crossing year).
+func buildFigureContexts(settlements []world.Settlement) []artifact.FigureContext {
+	ctx := make([]artifact.FigureContext, 0, len(settlements)*4)
+	for i := range settlements {
+		for j := range settlements[i].Figures {
+			f := &settlements[i].Figures[j]
+			rep := make([]artifact.ReputationDelta, 0, len(f.Reputation))
+			for _, e := range f.Reputation {
+				rep = append(rep, artifact.ReputationDelta{Year: e.Year, Delta: e.Delta, Event: e.Event})
+			}
+			ctx = append(ctx, artifact.FigureContext{ID: f.ID, Settlement: settlements[i].Name, Reputation: rep})
+		}
+	}
+	return ctx
+}
+
 // buildSignificanceContext derives the artifact significance inputs from the
 // world state: per-year figure reputation deltas and settlement size classes
 // (spec 4.4). The world state records no historical population, so the size
@@ -128,7 +146,9 @@ func newSimulateCommand() *cobra.Command {
 			sim.Run(eventChan)
 			wg.Wait()
 
-			if err := artifact.PostProcess(worldState.Artifacts, events, buildSignificanceContext(worldState)); err != nil {
+			artifactRNG := engine.GetPRNG("artifacts")
+			worldState.Artifacts, err = artifact.EmergencePass(worldState.Artifacts, events, buildFigureContexts(worldState.Settlements), buildSignificanceContext(worldState), artifactRNG)
+			if err != nil {
 				return fmt.Errorf("post-process artifact state: %w", err)
 			}
 
