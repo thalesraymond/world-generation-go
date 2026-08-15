@@ -30,7 +30,7 @@ func TestEmergencePassDiscoveryBirthsArtifact(t *testing.T) {
 		{ID: "Deepcrest-3", Settlement: "Deepcrest"},
 	}
 
-	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, artifactsRNG(1))
+	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, TransferContext{}, artifactsRNG(1))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -89,7 +89,7 @@ func TestEmergencePassConquestSpoils(t *testing.T) {
 		{Year: 5, Category: "Conquest", SettlementName: "Blackgate", TargetSettlement: "Ironforge", Description: "Blackgate conquered Ironforge"},
 	}
 
-	got, err := EmergencePass(nil, events, nil, SignificanceContext{}, artifactsRNG(1))
+	got, err := EmergencePass(nil, events, nil, SignificanceContext{}, TransferContext{}, artifactsRNG(1))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -123,7 +123,7 @@ func TestEmergencePassRarityGateFailNoBirth(t *testing.T) {
 		{ID: "Deepcrest-1", Settlement: "Deepcrest", Reputation: []ReputationDelta{{Year: 5, Delta: 1, Event: "Discovery"}}},
 	}
 
-	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, artifactsRNG(3))
+	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, TransferContext{}, artifactsRNG(3))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -152,7 +152,7 @@ func TestEmergencePassFallbackBackdatesProvenance(t *testing.T) {
 		},
 	}
 
-	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, artifactsRNG(3))
+	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, TransferContext{}, artifactsRNG(3))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -197,7 +197,7 @@ func TestEmergencePassFallbackRequiresThreshold(t *testing.T) {
 		{ID: "D-1", Settlement: "Deepcrest", Reputation: []ReputationDelta{{Year: 5, Delta: 9, Event: "Raid"}}},
 	}
 
-	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, artifactsRNG(3))
+	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, TransferContext{}, artifactsRNG(3))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -212,7 +212,7 @@ func TestEmergencePassIndexAndNameUniquePerOrigin(t *testing.T) {
 		{Year: 7, Category: "Conquest", SettlementName: "Blackgate", TargetSettlement: "Haven", Description: "took Haven"},
 	}
 
-	got, err := EmergencePass(nil, events, nil, SignificanceContext{}, artifactsRNG(2))
+	got, err := EmergencePass(nil, events, nil, SignificanceContext{}, TransferContext{}, artifactsRNG(2))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -238,7 +238,7 @@ func TestEmergencePassSkipsEventsAlreadyInvolvingArtifact(t *testing.T) {
 		{Year: 5, Category: "Conquest", SettlementName: "Blackgate", TargetSettlement: "Ironforge", ArtifactID: "artifact-ruin-0", Description: "spoils"},
 	}
 
-	got, err := EmergencePass(artifacts, events, nil, SignificanceContext{}, artifactsRNG(1))
+	got, err := EmergencePass(artifacts, events, nil, SignificanceContext{}, TransferContext{}, artifactsRNG(1))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -259,7 +259,7 @@ func TestEmergencePassSkipsNonQualifyingEvents(t *testing.T) {
 		{Year: 5, Category: "Economy", SettlementName: "Blackgate", Description: "trade"},
 	}
 
-	got, err := EmergencePass(nil, events, nil, SignificanceContext{}, artifactsRNG(1))
+	got, err := EmergencePass(nil, events, nil, SignificanceContext{}, TransferContext{}, artifactsRNG(1))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -277,8 +277,11 @@ func TestEmergencePassBornArtifactJoinsProvenanceWalk(t *testing.T) {
 	figures := []FigureContext{
 		{ID: "Deepcrest-3", Settlement: "Deepcrest"},
 	}
+	transfers := TransferContext{Figures: []FigureLifecycle{
+		{ID: "Deepcrest-3", Settlement: "Deepcrest", BirthYear: 1},
+	}}
 
-	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, artifactsRNG(1))
+	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, transfers, artifactsRNG(1))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -286,8 +289,9 @@ func TestEmergencePassBornArtifactJoinsProvenanceWalk(t *testing.T) {
 	if len(got) != 1 {
 		t.Fatalf("artifact count = %d, want 1", len(got))
 	}
-	// The born artifact's owner dies at year 9: the death event is attached
-	// and associated like any owned artifact.
+	// The born artifact's owner dies at year 9: the death event is attached,
+	// associated, and transferred like any owned artifact. No heir exists, so
+	// the artifact passes to the deceased's settlement treasury (spec 6.3).
 	if events[1].ArtifactID != "artifact-Deepcrest-0" {
 		t.Errorf("owner death ArtifactID = %q, want artifact-Deepcrest-0", events[1].ArtifactID)
 	}
@@ -297,6 +301,16 @@ func TestEmergencePassBornArtifactJoinsProvenanceWalk(t *testing.T) {
 	want := []string{"event-5-0", "event-9-0"}
 	if !reflect.DeepEqual(got[0].AssociatedEventIDs, want) {
 		t.Errorf("AssociatedEventIDs = %v, want %v", got[0].AssociatedEventIDs, want)
+	}
+	wantProv := []ProvenanceEntry{
+		{Year: 5, Owner: Owner{Kind: "figure", ID: "Deepcrest-3"}, EventID: "event-5-0", EventType: "Discovery"},
+		{Year: 9, Owner: Owner{Kind: "settlement", ID: "Deepcrest"}, EventID: "event-9-0", EventType: "Death"},
+	}
+	if !reflect.DeepEqual(got[0].Provenance, wantProv) {
+		t.Errorf("Provenance = %+v, want %+v", got[0].Provenance, wantProv)
+	}
+	if owner := CurrentOwner(got[0]); owner.Kind != "settlement" || owner.ID != "Deepcrest" {
+		t.Errorf("current owner = %+v, want (settlement, Deepcrest)", owner)
 	}
 }
 
@@ -309,7 +323,7 @@ func TestEmergencePassFallbackOncePerFigure(t *testing.T) {
 		{ID: "D-1", Settlement: "Deepcrest", Reputation: []ReputationDelta{{Year: 3, Delta: 12, Event: "Raid"}}},
 	}
 
-	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, artifactsRNG(4))
+	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, TransferContext{}, artifactsRNG(4))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -326,7 +340,7 @@ func TestEmergencePassUnknownFigureSkipsFallback(t *testing.T) {
 		{Year: 5, Category: "Discovery", FigureID: "ghost", SettlementName: "Deepcrest", Description: "found"},
 	}
 
-	got, err := EmergencePass(nil, events, nil, SignificanceContext{}, artifactsRNG(3))
+	got, err := EmergencePass(nil, events, nil, SignificanceContext{}, TransferContext{}, artifactsRNG(3))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -340,7 +354,7 @@ func TestEmergencePassSkipsBirthWithoutOrigin(t *testing.T) {
 		{Year: 5, Category: "Discovery", FigureID: "ghost", Description: "found"},
 	}
 
-	got, err := EmergencePass(nil, events, nil, SignificanceContext{}, artifactsRNG(1))
+	got, err := EmergencePass(nil, events, nil, SignificanceContext{}, TransferContext{}, artifactsRNG(1))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -354,7 +368,7 @@ func TestEmergencePassPropagatesPostProcessErrors(t *testing.T) {
 		{Year: 1, Category: "Discovery", FigureID: "D-1", SettlementName: "Deepcrest", ArtifactID: "ghost", Description: "found"},
 	}
 
-	if _, err := EmergencePass(nil, events, nil, SignificanceContext{}, artifactsRNG(1)); err == nil {
+	if _, err := EmergencePass(nil, events, nil, SignificanceContext{}, TransferContext{}, artifactsRNG(1)); err == nil {
 		t.Fatal("EmergencePass with unknown ArtifactID: expected error, got nil")
 	}
 }
@@ -367,7 +381,7 @@ func TestEmergencePassDiscoveryWithoutSettlementUsesFigureOrigin(t *testing.T) {
 		{ID: "D-1", Settlement: "Deepcrest"},
 	}
 
-	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, artifactsRNG(1))
+	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, TransferContext{}, artifactsRNG(1))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -390,7 +404,7 @@ func TestEmergencePassFallbackReputationEventFallback(t *testing.T) {
 		{ID: "D-1", Settlement: "Deepcrest", Reputation: []ReputationDelta{{Year: 4, Delta: 12}}},
 	}
 
-	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, artifactsRNG(3))
+	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, TransferContext{}, artifactsRNG(3))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -409,7 +423,7 @@ func TestEmergencePassNilRNGReturnsError(t *testing.T) {
 	events := []simulation.Event{
 		{Year: 5, Category: "Discovery", FigureID: "D-1", SettlementName: "Deepcrest", Description: "found"},
 	}
-	if _, err := EmergencePass(nil, events, nil, SignificanceContext{}, nil); err == nil {
+	if _, err := EmergencePass(nil, events, nil, SignificanceContext{}, TransferContext{}, nil); err == nil {
 		t.Fatal("EmergencePass with nil RNG: expected error, got nil")
 	}
 }
@@ -424,7 +438,7 @@ func TestEmergencePassPreservesPostProcessBehavior(t *testing.T) {
 		{Year: 2, Category: "Economy", Description: "trade"},
 	}
 
-	got, err := EmergencePass(artifacts, events, nil, SignificanceContext{}, artifactsRNG(3))
+	got, err := EmergencePass(artifacts, events, nil, SignificanceContext{}, TransferContext{}, artifactsRNG(3))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -460,7 +474,7 @@ func TestEmergencePassDeterministicWithPowers(t *testing.T) {
 		evs := make([]simulation.Event, len(events))
 		copy(evs, events)
 		rng := randv2.New(randv2.NewPCG(1, 2))
-		arts, err := EmergencePass(nil, evs, figures, SignificanceContext{}, rng)
+		arts, err := EmergencePass(nil, evs, figures, SignificanceContext{}, TransferContext{}, rng)
 		if err != nil {
 			t.Fatalf("EmergencePass: %v", err)
 		}
@@ -497,7 +511,7 @@ func TestEmergencePassDeterministic(t *testing.T) {
 	run := func() ([]Artifact, []simulation.Event, error) {
 		evs := make([]simulation.Event, len(events))
 		copy(evs, events)
-		arts, err := EmergencePass(nil, evs, figures, SignificanceContext{}, artifactsRNG(42))
+		arts, err := EmergencePass(nil, evs, figures, SignificanceContext{}, TransferContext{}, artifactsRNG(42))
 		return arts, evs, err
 	}
 
@@ -535,7 +549,7 @@ func TestEmergencePassDeterministic(t *testing.T) {
 	// A different seed must change the birth stream: emergence is seeded.
 	evs := make([]simulation.Event, len(events))
 	copy(evs, events)
-	otherArts, err := EmergencePass(nil, evs, figures, SignificanceContext{}, artifactsRNG(7))
+	otherArts, err := EmergencePass(nil, evs, figures, SignificanceContext{}, TransferContext{}, artifactsRNG(7))
 	if err != nil {
 		t.Fatalf("EmergencePass with other seed: %v", err)
 	}
@@ -551,7 +565,7 @@ func TestEmergencePassNamesAreSettlementSuffixed(t *testing.T) {
 	events := []simulation.Event{
 		{Year: 5, Category: "Conquest", SettlementName: "Blackgate", TargetSettlement: "Ironforge", Description: "took Ironforge"},
 	}
-	got, err := EmergencePass(nil, events, nil, SignificanceContext{}, artifactsRNG(1))
+	got, err := EmergencePass(nil, events, nil, SignificanceContext{}, TransferContext{}, artifactsRNG(1))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}

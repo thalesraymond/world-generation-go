@@ -260,14 +260,27 @@ Synthetic lifecycle events carry **no significance weight** — they are a separ
 | Death of figure owner | Inherited by heir (`GetHeir`); no heir → settlement treasury. |
 | Conquest / Raid of owning settlement | Spoils transfer to the aggressor settlement. |
 
+**Implementation (issue #69, in `internal/domain/artifact/transfers.go`):**
+
+- The post-processing pass (both the first provenance walk and the emergence second walk) records transfers for every event that terminates an artifact's current owner: a `Death` of the owner figure, or a `Conquest`/`Raid` against the owner settlement.
+- Each terminated artifact gains a `ProvenanceEntry` `{year, owner: new owner, eventID, eventType}` and is associated with the event; the event's `ArtifactID` is attached to the first terminated artifact in artifact order (first-match-wins, deterministic).
+- Death destinations: the eldest living child (smallest `BirthYear`; ties resolve to earlier world-state order) who is alive at the event year (`DeathYear == 0` or `DeathYear > event year`) inherits; with no eligible heir the artifact passes to the deceased figure's settlement treasury; a figure absent from the transfer context (degenerate, zero-value context) is recorded `lost`.
+- Conquest/Raid destinations are the aggressor's `SettlementName`. An unresolvable spoils event — Conquest/Raid whose `SettlementName` is empty — is treated as terminating nothing: no provenance entry, no `ArtifactID`, no association (a spoils transfer requires the aggressor's identity).
+- Transfer destinations are resolved from a `TransferContext` figure summary built from the world state by the caller, so the artifact domain stays decoupled from the figures package. Powers follow the artifact on transfer (spec 7.7): only provenance is mutated.
+
 **Out of scope**: marriage, gift, trade transfers — no natural simulation hook.
 
 ### 6.4 Loss
 
-- Owner figure dies with no heir → `lost`.
 - Owner settlement drops to `Abandoned` → `lost`.
 - Recorded in provenance with `Owner.Kind = lost`.
 - Score freezes while lost.
+
+> **Spec contradiction resolved (issue #69):** an earlier revision made "owner
+> figure dies with no heir" a loss trigger. That contradicted §6.3 and #69's
+> acceptance criteria (no heir → settlement treasury). Death-without-heir now
+> transfers to the settlement treasury per §6.3; loss happens only when the
+> owner settlement drops to `Abandoned`.
 
 ### 6.5 Rediscovery
 
@@ -421,8 +434,6 @@ powers:
 ```markdown
 # Crown of Deepcrest
 
-> **Status:** Lost since Year 287
-
 ## Description
 
 No description recorded.
@@ -442,7 +453,7 @@ _For narrative powers, render effect strings as prose instead of table._
 |---|---|---|
 | 12 | Conquest | [[Deepcrest-3]] |
 | 42 | War | [[Deepcrest-3]] |
-| 287 | Owner death | _Lost_ |
+| 287 | Owner death | [[Deepcrest-4]] |
 
 ## Associated Events
 
