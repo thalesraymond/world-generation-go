@@ -29,6 +29,10 @@ func ExportArtifacts(state *world.State, events []simulation.Event, targetDir st
 		}
 	}
 
+	// horizon is the last chronicled year (0 with no events): the fallback
+	// loss year for artifacts lost before any recorded provenance entry.
+	horizon := artifact.HorizonYear(events)
+
 	artifactsDir := filepath.Join(targetDir, "artifacts")
 	if err := os.MkdirAll(artifactsDir, 0o755); err != nil {
 		return fmt.Errorf("create artifacts dir: %w", err)
@@ -43,7 +47,7 @@ func ExportArtifacts(state *world.State, events []simulation.Event, targetDir st
 
 	for _, a := range state.Artifacts {
 		path := filepath.Join(artifactsDir, names[a.ID]+".md")
-		content := artifactFrontmatter(buildArtifactFields(a)) + "\n" + buildArtifactBody(a, eventCategories, links)
+		content := artifactFrontmatter(buildArtifactFields(a)) + "\n" + buildArtifactBody(a, eventCategories, links, horizon)
 		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 			return fmt.Errorf("write artifact %s: %w", a.Name, err)
 		}
@@ -190,12 +194,17 @@ func powerSourceOrIntrinsic(source string) string {
 	return source
 }
 
-func buildArtifactBody(a artifact.Artifact, eventCategories map[string]string, links map[string]string) string {
+func buildArtifactBody(a artifact.Artifact, eventCategories map[string]string, links map[string]string, horizon int) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "# %s\n\n", a.Name)
 
+	// Terminal status banner (spec 8.5): shown only for lost artifacts (and
+	// destroyed once #71 lands). The year is the start of the current lost
+	// span: the most recent lost provenance entry, or the horizon for relics
+	// lost before any recorded entry — never the significance year, which is
+	// the creation year for intrinsic relics.
 	if a.Status == "lost" {
-		fmt.Fprintf(&b, "> **Status:** Lost since Year %d\n\n", a.SignificanceYear)
+		fmt.Fprintf(&b, "> **Status:** Lost since Year %d\n\n", lossYear(a, horizon))
 	}
 
 	b.WriteString("## Description\n\n")
@@ -253,6 +262,17 @@ func buildArtifactBody(a artifact.Artifact, eventCategories map[string]string, l
 	}
 
 	return b.String()
+}
+
+// lossYear returns the year the artifact's current lost span began: the year
+// of its most recent lost provenance entry (via artifact.LostSinceYear), or
+// the horizon — the end of the event stream, 0 when no events exist — for
+// artifacts lost before any recorded entry (planted relics never found).
+func lossYear(a artifact.Artifact, horizon int) int {
+	if year, ok := artifact.LostSinceYear(a); ok {
+		return year
+	}
+	return horizon
 }
 
 // renderArtifactPowers renders the Powers section body. Combat and influence

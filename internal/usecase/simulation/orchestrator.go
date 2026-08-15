@@ -98,7 +98,7 @@ func RunSimulation(ctx context.Context, config OrchestratorConfig) ([]domsim.Eve
 	wg.Wait()
 
 	artifactRNG := engine.GetPRNG("artifacts")
-	worldState.Artifacts, err = artifact.EmergencePass(worldState.Artifacts, events, buildFigureContexts(worldState.Settlements), buildSignificanceContext(worldState), buildTransferContext(worldState), artifactRNG)
+	worldState.Artifacts, events, err = artifact.EmergencePass(worldState.Artifacts, events, buildFigureContexts(worldState.Settlements), buildSignificanceContext(worldState), buildTransferContext(worldState), artifactRNG)
 	if err != nil {
 		return nil, nil, fmt.Errorf("post-process artifact state: %w", err)
 	}

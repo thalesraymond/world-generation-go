@@ -205,6 +205,7 @@ func TestExportArtifactsOwnerFromProvenance(t *testing.T) {
 				SignificanceYear:   42,
 				Provenance: []artifact.ProvenanceEntry{
 					{Year: 287, Owner: artifact.Owner{Kind: "figure", ID: "Deepcrest-3"}, EventType: "Conquest", EventID: "event-287-0"},
+					{Year: 300, Owner: artifact.Owner{Kind: "lost"}, EventType: "ArtifactLoss", EventID: ""},
 				},
 				AssociatedEventIDs: []string{"event-287-0"},
 			},
@@ -223,11 +224,13 @@ func TestExportArtifactsOwnerFromProvenance(t *testing.T) {
 	content := string(data)
 
 	wantSubstrings := []string{
-		`owner_kind: "figure"`,
-		`owner_id: "Deepcrest-3"`,
+		`owner_kind: "lost"`,
 		`pivotal_event: "[[event-42-0]]"`,
-		"> **Status:** Lost since Year 42",
+		// The banner uses the loss year (the lost provenance entry), never
+		// the significance year 42.
+		"> **Status:** Lost since Year 300",
 		"| 287 | Conquest | [[Deepcrest-3]] |",
+		"| 300 | ArtifactLoss | _Lost_ |",
 		"- [[event-287-0]]",
 	}
 	for _, want := range wantSubstrings {
@@ -240,8 +243,8 @@ func TestExportArtifactsOwnerFromProvenance(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read index file: %v", err)
 	}
-	if !strings.Contains(string(indexData), "| [[Crown of Deepcrest]] | crown | lost | [[Deepcrest-3]] |") {
-		t.Errorf("index file missing Crown of Deepcrest row with owner link")
+	if !strings.Contains(string(indexData), "| [[Crown of Deepcrest]] | crown | lost | _Lost_ |") {
+		t.Errorf("index file missing Crown of Deepcrest row with lost owner")
 	}
 }
 
@@ -496,6 +499,129 @@ func TestExportArtifactsSignificanceSection(t *testing.T) {
 	}
 	if !strings.Contains(string(blade), "Became significant in Year 7 after [[event-7-0]].") {
 		t.Errorf("blade note missing category-less significance line, got:\n%s", blade)
+	}
+}
+
+// lossYearBannerState builds a state whose single artifact has the given
+// provenance and status, for banner rendering tests.
+func lossYearBannerState(status string, prov []artifact.ProvenanceEntry, significanceYear int) *world.State {
+	return &world.State{
+		Artifacts: []artifact.Artifact{
+			{
+				ID:                 "artifact-1",
+				Name:               "Crown of Deepcrest",
+				Type:               "crown",
+				SignificanceSource: "historical",
+				Status:             status,
+				SignificanceScore:  5,
+				IsSignificant:      true,
+				SignificanceYear:   significanceYear,
+				Provenance:         prov,
+			},
+		},
+	}
+}
+
+func TestExportArtifactsLostBannerUsesLossYear(t *testing.T) {
+	state := lossYearBannerState("lost", []artifact.ProvenanceEntry{
+		{Year: 42, Owner: artifact.Owner{Kind: "figure", ID: "Deepcrest-3"}, EventType: "War", EventID: "event-42-0"},
+		// The loss entry year is the banner year, not the significance year
+		// and not the stream horizon.
+		{Year: 287, Owner: artifact.Owner{Kind: "lost"}, EventType: "ArtifactLoss"},
+	}, 42)
+	events := []simulation.Event{
+		{Year: 500, Category: "Birth", ID: "event-500-0", Description: "born"},
+	}
+
+	targetDir := t.TempDir()
+	if err := ExportArtifacts(state, events, targetDir); err != nil {
+		t.Fatalf("ExportArtifacts() error = %v", err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(targetDir, "artifacts", "Crown of Deepcrest.md"))
+	if err != nil {
+		t.Fatalf("read artifact file: %v", err)
+	}
+	if !strings.Contains(string(data), "> **Status:** Lost since Year 287") {
+		t.Errorf("banner year = wrong, want Lost since Year 287, got:\n%s", data)
+	}
+}
+
+func TestExportArtifactsLostBannerNeverFoundUsesHorizon(t *testing.T) {
+	t.Run("with events falls back to the horizon", func(t *testing.T) {
+		// A relic that began lost and was never found has no lost provenance
+		// entry: the banner falls back to the end of the chronicle.
+		state := lossYearBannerState("lost", nil, 0)
+		events := []simulation.Event{
+			{Year: 42, Category: "Birth", ID: "event-42-0", Description: "born"},
+			{Year: 500, Category: "Birth", ID: "event-500-0", Description: "born"},
+		}
+
+		targetDir := t.TempDir()
+		if err := ExportArtifacts(state, events, targetDir); err != nil {
+			t.Fatalf("ExportArtifacts() error = %v", err)
+		}
+
+		data, err := os.ReadFile(filepath.Join(targetDir, "artifacts", "Crown of Deepcrest.md"))
+		if err != nil {
+			t.Fatalf("read artifact file: %v", err)
+		}
+		if !strings.Contains(string(data), "> **Status:** Lost since Year 500") {
+			t.Errorf("banner = wrong, want Lost since Year 500 (horizon), got:\n%s", data)
+		}
+	})
+
+	t.Run("no events falls back to year 0", func(t *testing.T) {
+		state := lossYearBannerState("lost", nil, 0)
+		targetDir := t.TempDir()
+		if err := ExportArtifacts(state, nil, targetDir); err != nil {
+			t.Fatalf("ExportArtifacts() error = %v", err)
+		}
+		data, err := os.ReadFile(filepath.Join(targetDir, "artifacts", "Crown of Deepcrest.md"))
+		if err != nil {
+			t.Fatalf("read artifact file: %v", err)
+		}
+		if !strings.Contains(string(data), "> **Status:** Lost since Year 0") {
+			t.Errorf("banner = wrong, want Lost since Year 0, got:\n%s", data)
+		}
+	})
+}
+
+func TestExportArtifactsNoBannerForActiveStatuses(t *testing.T) {
+	events := []simulation.Event{
+		{Year: 500, Category: "Birth", ID: "event-500-0", Description: "born"},
+	}
+	held := lossYearBannerState("held", []artifact.ProvenanceEntry{
+		{Year: 42, Owner: artifact.Owner{Kind: "figure", ID: "Deepcrest-3"}, EventType: "War", EventID: "event-42-0"},
+	}, 42)
+	held.Artifacts = append(held.Artifacts, artifact.Artifact{
+		ID:                 "artifact-2",
+		Name:               "Tome of the Reach",
+		Type:               "tome",
+		SignificanceSource: "historical",
+		Status:             "significant",
+		SignificanceScore:  6,
+		IsSignificant:      true,
+		SignificanceYear:   12,
+		Provenance: []artifact.ProvenanceEntry{
+			{Year: 12, Owner: artifact.Owner{Kind: "figure", ID: "Deepcrest-3"}, EventType: "Discovery", EventID: "event-12-0"},
+		},
+	})
+
+	targetDir := t.TempDir()
+	if err := ExportArtifacts(held, events, targetDir); err != nil {
+		t.Fatalf("ExportArtifacts() error = %v", err)
+	}
+
+	// Spec 8.5: the terminal banner is not shown for active states.
+	for _, name := range []string{"Crown of Deepcrest", "Tome of the Reach"} {
+		data, err := os.ReadFile(filepath.Join(targetDir, "artifacts", name+".md"))
+		if err != nil {
+			t.Fatalf("read %s: %v", name, err)
+		}
+		if strings.Contains(string(data), "> **Status:**") {
+			t.Errorf("%s renders a terminal banner despite being held/significant:\n%s", name, data)
+		}
 	}
 }
 
