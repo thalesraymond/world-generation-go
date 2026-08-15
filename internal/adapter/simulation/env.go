@@ -25,19 +25,19 @@ const (
 // importing adapter packages.
 func NewAgentEnv(worldState *world.State, graph *dompointcrawl.Graph, settlements *[]world.Settlement, usedNames map[string]bool) agent.AgentEnv {
 	return &agentEnv{
-		worldState: worldState,
-		graph:      graph,
-		all:        settlements,
-		usedNames:  usedNames,
+		worldState:  worldState,
+		graph:       graph,
+		settlements: settlements,
+		usedNames:   usedNames,
 	}
 }
 
 // agentEnv is the concrete AgentEnv adapter backed by the live world state.
 type agentEnv struct {
-	worldState *world.State
-	graph      *dompointcrawl.Graph
-	all        *[]world.Settlement
-	usedNames  map[string]bool
+	worldState  *world.State
+	graph       *dompointcrawl.Graph
+	settlements *[]world.Settlement
+	usedNames   map[string]bool
 }
 
 func (e *agentEnv) Suitability(x, y int) float64 {
@@ -52,12 +52,12 @@ func (e *agentEnv) Suitability(x, y int) float64 {
 }
 
 func (e *agentEnv) FindExpansionTarget(self *world.Settlement, rng *randv2.Rand) (int, int, bool) {
-	if e.graph == nil || e.all == nil {
+	if e.graph == nil || e.settlements == nil {
 		return 0, 0, false
 	}
 
-	sites := make([]dompointcrawl.SettlementSite, 0, len(*e.all))
-	for _, s := range *e.all {
+	sites := make([]dompointcrawl.SettlementSite, 0, len(*e.settlements))
+	for _, s := range *e.settlements {
 		sites = append(sites, dompointcrawl.SettlementSite{
 			Name:    s.Name,
 			X:       s.X,

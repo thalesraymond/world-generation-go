@@ -1,9 +1,8 @@
 package simulation
 
 import (
-	"testing"
-
 	randv2 "math/rand/v2"
+	"testing"
 
 	"github.com/thalesraymond/world-generation-go/internal/domain/agent"
 	dompointcrawl "github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
