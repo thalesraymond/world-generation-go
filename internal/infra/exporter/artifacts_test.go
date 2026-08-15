@@ -274,9 +274,10 @@ func TestExportArtifactsProvenanceLinksResolveToOwnerNotes(t *testing.T) {
 				Provenance: []artifact.ProvenanceEntry{
 					{Year: 12, Owner: artifact.Owner{Kind: "figure", ID: "Deepcrest-3"}, EventType: "Discovery", EventID: "event-12-0"},
 					{Year: 42, Owner: artifact.Owner{Kind: "settlement", ID: "Ironforge"}, EventType: "War", EventID: "event-42-0"},
+					{Year: 100, Owner: artifact.Owner{Kind: "settlement", ID: "Ironforge"}, EventType: "Conquest", EventID: "event-100-0"},
 					{Year: 287, Owner: artifact.Owner{Kind: "lost", ID: ""}, EventType: "Owner death", EventID: "event-287-1"},
 				},
-				AssociatedEventIDs: []string{"event-12-0", "event-42-0", "event-287-1"},
+				AssociatedEventIDs: []string{"event-12-0", "event-42-0", "event-100-0", "event-287-1"},
 			},
 		},
 	}
@@ -295,6 +296,7 @@ func TestExportArtifactsProvenanceLinksResolveToOwnerNotes(t *testing.T) {
 	wantSubstrings := []string{
 		"| 12 | Discovery | [[Queen Elara]] |",
 		"| 42 | War | [[Ironforge]] |",
+		"| 100 | Conquest | [[Ironforge]] |",
 		"| 287 | Owner death | _Lost_ |",
 	}
 	for _, want := range wantSubstrings {

@@ -74,19 +74,18 @@ type ReputationDelta struct {
 // the stream-order walk, so identical seed and inputs produce identical
 // artifacts. Artifacts born mid-walk join the provenance walk like planted
 // relics: later events that terminate their owner (owner Death, Conquest or
-// Raid of the owner settlement) are attached and associated by the same rule.
-func EmergencePass(artifacts []Artifact, events []simulation.Event, figures []FigureContext, sigCtx SignificanceContext, rng *randv2.Rand) ([]Artifact, error) {
+// Raid of the owner settlement) are attached, associated, and transferred by
+// the same rule (recordTransfers applies to born artifacts only — the first
+// walk already handled the initial artifacts). transfers supplies the
+// figure lifecycle data for transfer destinations (spec 6.3).
+func EmergencePass(artifacts []Artifact, events []simulation.Event, figures []FigureContext, sigCtx SignificanceContext, transfers TransferContext, rng *randv2.Rand) ([]Artifact, error) {
 	if rng == nil {
 		return nil, fmt.Errorf("emergence pass requires the artifacts RNG lane")
 	}
-	if err := PostProcess(artifacts, events, sigCtx); err != nil {
+	if err := PostProcess(artifacts, events, sigCtx, transfers); err != nil {
 		return nil, err
 	}
 
-	byID := make(map[string]*Artifact, len(artifacts))
-	for i := range artifacts {
-		byID[artifacts[i].ID] = &artifacts[i]
-	}
 	byFigure := make(map[string]FigureContext, len(figures))
 	for _, f := range figures {
 		byFigure[f.ID] = f
@@ -96,14 +95,17 @@ func EmergencePass(artifacts []Artifact, events []simulation.Event, figures []Fi
 	nameCounts := make(map[string]int)
 	fallbackUsed := make(map[string]bool)
 
+	// initial anchors the first walk's artifacts: every element at or past
+	// this index was born mid-walk and must not be re-recorded by the second
+	// pass over earlier events.
+	initial := len(artifacts)
+	byID := rebuildByID(artifacts[initial:])
+
 	for i := range events {
 		event := &events[i]
-		if event.ArtifactID != "" {
-			continue
-		}
-		attachArtifactID(event, artifacts, byID)
-		if event.ArtifactID != "" {
-			byID[event.ArtifactID].AssociatedEventIDs = append(byID[event.ArtifactID].AssociatedEventIDs, event.ID)
+		already := event.ArtifactID != ""
+		recordTransfers(event, artifacts[initial:], byID, transfers)
+		if already || event.ArtifactID != "" {
 			continue
 		}
 		beneficiary, ok := emergenceBeneficiary(event)
@@ -119,7 +121,7 @@ func EmergencePass(artifacts []Artifact, events []simulation.Event, figures []Fi
 						fallbackUsed[beneficiary.ID] = true
 						a := birthEmergent(fc.Settlement, year, "", eventName, beneficiary, typ, originCounts, nameCounts, rng)
 						artifacts = append(artifacts, a)
-						byID = rebuildByID(artifacts)
+						byID = rebuildByID(artifacts[initial:])
 					}
 				}
 			}
@@ -135,7 +137,7 @@ func EmergencePass(artifacts []Artifact, events []simulation.Event, figures []Fi
 		}
 		a := birthEmergent(origin, event.Year, event.ID, event.Category, beneficiary, typ, originCounts, nameCounts, rng)
 		artifacts = append(artifacts, a)
-		byID = rebuildByID(artifacts)
+		byID = rebuildByID(artifacts[initial:])
 
 		born := &artifacts[len(artifacts)-1]
 		event.ArtifactID = born.ID

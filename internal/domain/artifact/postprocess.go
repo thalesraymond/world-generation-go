@@ -18,22 +18,26 @@ import (
 // separate owner field is maintained.
 //
 // An event involves an artifact when it already carries ArtifactID (minted or
-// attached by lifecycle engines such as rediscovery and transfers) or when it
-// terminates the artifact's current owner: a Death event of the owner figure,
-// or a Conquest/Raid event against the owner settlement. When several owned
+// attached by lifecycle engines such as rediscovery) or when it terminates the
+// artifact's current owner: a Death event of the owner figure, or a
+// Conquest/Raid event against the owner settlement. When several owned
 // artifacts match, the first in artifact order wins, keeping the pass
-// deterministic. Events that name the artifact's new owner directly (a
-// Discovery event carrying the discovering figure) record a provenance entry;
-// ownership changes whose destination requires lifecycle rules are recorded by
-// those rules' engines, and the event is only associated with the artifact
-// here. Status transitions (lost, held, destroyed) are owned by the lifecycle
-// engines and are never touched by this pass.
+// deterministic. Termination records the transfer itself (spec 6.3): every
+// terminated artifact gains a provenance entry naming its new owner — the
+// heir, the deceased's settlement treasury, or the aggressor settlement — and
+// is associated with the event (transfers records both, see recordTransfers).
+// Events that name the artifact's new owner directly (a Discovery event
+// carrying the discovering figure) also record a provenance entry via
+// recordProvenance. Status transitions (lost, held, destroyed) are owned by
+// the lifecycle engines and are never touched by this pass.
 //
 // The pass then evaluates significance for every artifact (spec 4): weighted
 // event contributions from the fixed category table, owner-importance accrual
 // from sig, threshold crossing with a monotonic latch, and score freezing
-// while lost. sig may be the zero value to disable the owner fallback.
-func PostProcess(artifacts []Artifact, events []simulation.Event, sig SignificanceContext) error {
+// while lost. sig may be the zero value to disable the owner fallback, and
+// transfers may be the zero value to disable heir/treasury resolution (death
+// transfers then record the lost fallback).
+func PostProcess(artifacts []Artifact, events []simulation.Event, sig SignificanceContext, transfers TransferContext) error {
 	byID := make(map[string]*Artifact, len(artifacts))
 	byIdx := make(map[string]int, len(artifacts))
 	for i := range artifacts {
@@ -51,7 +55,7 @@ func PostProcess(artifacts []Artifact, events []simulation.Event, sig Significan
 		event.ID = fmt.Sprintf("event-%d-%d", event.Year, yearCounts[event.Year])
 		yearCounts[event.Year]++
 
-		attachArtifactID(event, artifacts, byID)
+		terminated := recordTransfers(event, artifacts, byID, transfers)
 		if event.ArtifactID == "" {
 			continue
 		}
@@ -60,7 +64,9 @@ func PostProcess(artifacts []Artifact, events []simulation.Event, sig Significan
 		if !ok {
 			return fmt.Errorf("event %s references unknown artifact %q", event.ID, event.ArtifactID)
 		}
-		a.AssociatedEventIDs = append(a.AssociatedEventIDs, event.ID)
+		if !containsArtifact(terminated, a) {
+			a.AssociatedEventIDs = append(a.AssociatedEventIDs, event.ID)
+		}
 		recordProvenance(a, event)
 		if weight := eventWeights[event.Category]; weight > 0 {
 			eventContributions[byIdx[event.ArtifactID]] = append(eventContributions[byIdx[event.ArtifactID]], significanceEvent{
@@ -73,28 +79,6 @@ func PostProcess(artifacts []Artifact, events []simulation.Event, sig Significan
 
 	evaluateSignificance(artifacts, events, eventContributions, sig)
 	return nil
-}
-
-// attachArtifactID marks events that involve an artifact. An event already
-// carrying ArtifactID is left untouched; otherwise the artifacts whose current
-// owner the event terminates are matched in artifact order and the first
-// match wins, so the result is deterministic for a given input order.
-func attachArtifactID(event *simulation.Event, artifacts []Artifact, byID map[string]*Artifact) {
-	if event.ArtifactID != "" {
-		return
-	}
-	for i := range artifacts {
-		a := byID[artifacts[i].ID]
-		owner := CurrentOwner(*a)
-		if owner.Kind == "figure" && event.Category == "Death" && event.FigureID == owner.ID {
-			event.ArtifactID = a.ID
-			return
-		}
-		if owner.Kind == "settlement" && (event.Category == "Conquest" || event.Category == "Raid") && event.TargetSettlement == owner.ID {
-			event.ArtifactID = a.ID
-			return
-		}
-	}
 }
 
 // recordProvenance appends a provenance entry when the event encodes the

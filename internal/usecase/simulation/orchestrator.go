@@ -98,7 +98,7 @@ func RunSimulation(ctx context.Context, config OrchestratorConfig) ([]domsim.Eve
 	wg.Wait()
 
 	artifactRNG := engine.GetPRNG("artifacts")
-	worldState.Artifacts, err = artifact.EmergencePass(worldState.Artifacts, events, buildFigureContexts(worldState.Settlements), buildSignificanceContext(worldState), artifactRNG)
+	worldState.Artifacts, err = artifact.EmergencePass(worldState.Artifacts, events, buildFigureContexts(worldState.Settlements), buildSignificanceContext(worldState), buildTransferContext(worldState), artifactRNG)
 	if err != nil {
 		return nil, nil, fmt.Errorf("post-process artifact state: %w", err)
 	}
@@ -147,4 +147,29 @@ func buildSignificanceContext(state *world.State) artifact.SignificanceContext {
 		}
 	}
 	return sig
+}
+
+// buildTransferContext summarizes the figure lifecycle data the transfer
+// rules need (spec 6.3): home settlement (the treasury destination), birth
+// and death years, and parents (heir resolution). Slice order mirrors the
+// world state so heir tie-breaks resolve deterministically.
+func buildTransferContext(state *world.State) artifact.TransferContext {
+	ctx := artifact.TransferContext{
+		Figures: make([]artifact.FigureLifecycle, 0, len(state.Settlements)*4),
+	}
+	for i := range state.Settlements {
+		for j := range state.Settlements[i].Figures {
+			f := &state.Settlements[i].Figures[j]
+			parents := make([]string, len(f.Relationships.Parents))
+			copy(parents, f.Relationships.Parents)
+			ctx.Figures = append(ctx.Figures, artifact.FigureLifecycle{
+				ID:         f.ID,
+				Settlement: state.Settlements[i].Name,
+				BirthYear:  f.BirthYear,
+				DeathYear:  f.DeathYear,
+				Parents:    parents,
+			})
+		}
+	}
+	return ctx
 }
