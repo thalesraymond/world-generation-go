@@ -4,13 +4,12 @@ import (
 	randv2 "math/rand/v2"
 	"testing"
 
-	"github.com/thalesraymond/world-generation-go/internal/domain/agent"
 	dompointcrawl "github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 )
 
 func TestNewAgentEnvReturnsAgentEnv(t *testing.T) {
-	var env agent.AgentEnv = NewAgentEnv(nil, nil, nil, nil)
+	env := NewAgentEnv(nil, nil, nil, nil)
 	if env == nil {
 		t.Fatal("NewAgentEnv returned nil")
 	}
