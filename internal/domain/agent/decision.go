@@ -24,7 +24,7 @@ func ChooseAction(self *world.Settlement, all []world.Settlement, env AgentEnv, 
 		}
 		candidates = append(candidates, weightedAction{
 			action: action,
-			weight: ScoreAction(action, self.Goals, self),
+			weight: ScoreAction(action, self.Goals, self, env),
 		})
 	}
 
@@ -35,12 +35,13 @@ func ChooseAction(self *world.Settlement, all []world.Settlement, env AgentEnv, 
 	return weightedRandom(candidates, rng)
 }
 
-// ScoreAction returns the goal-alignment weight for an action: 3.0 when the
-// action directly serves one of the settlement's goals, 2.0 for indirect
-// support, 1.0 otherwise.
-func ScoreAction(action Action, goals []string, self *world.Settlement) float64 {
+// ScoreAction returns the weight for an action: the goal-alignment score
+// (3.0 when the action directly serves one of the settlement's goals, 2.0
+// for indirect support, 1.0 otherwise) plus the artifact-power bonus for the
+// power types the action cares about (spec 9.2).
+func ScoreAction(action Action, goals []string, self *world.Settlement, env AgentEnv) float64 {
 	_ = goals
-	return action.Score(self)
+	return action.Score(self, env)
 }
 
 // weightedRandom picks one action proportionally to its weight using the

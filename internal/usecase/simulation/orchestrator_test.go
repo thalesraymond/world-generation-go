@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 	ucsim "github.com/thalesraymond/world-generation-go/internal/usecase/simulation"
 )
 
@@ -131,6 +133,54 @@ func TestRunSimulationPlantedRelicLifecycle(t *testing.T) {
 	ev2, _ := json.Marshal(events2)
 	if !bytes.Equal(ev1, ev2) {
 		t.Error("event streams differ across identical seeded runs")
+	}
+}
+
+func TestRunSimulationArtifactRegistryDeterministic(t *testing.T) {
+	config := ucsim.OrchestratorConfig{Seed: 42, Width: 48, Height: 48, Years: 25}
+
+	run := func() (*ucsim.ArtifactRegistry, *world.State) {
+		_, state, err := ucsim.RunSimulation(context.Background(), config)
+		if err != nil {
+			t.Fatalf("RunSimulation() error = %v", err)
+		}
+		return ucsim.NewArtifactRegistry(state.Artifacts), state
+	}
+
+	first, firstState := run()
+	second, _ := run()
+
+	// Every owner index queried from the first registry must match the
+	// second: settlement and figure owners from world state, plus the
+	// lost/destroyed buckets the registry derives from status.
+	type ownerKey struct{ kind, id string }
+	owners := []ownerKey{{kind: "lost"}, {kind: "destroyed"}}
+	for _, s := range firstState.Settlements {
+		owners = append(owners, ownerKey{kind: "settlement", id: s.Name})
+		for _, f := range s.Figures {
+			owners = append(owners, ownerKey{kind: "figure", id: f.ID})
+		}
+	}
+
+	for _, owner := range owners {
+		want := first.ArtifactsFor(owner.kind, owner.id)
+		got := second.ArtifactsFor(owner.kind, owner.id)
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("ArtifactsFor(%q, %q) differs across identical seeds: %v vs %v", owner.kind, owner.id, got, want)
+		}
+	}
+
+	// ID lookups must agree too, and the registry must be non-empty for the
+	// comparison to be meaningful.
+	if len(firstState.Artifacts) == 0 {
+		t.Fatal("seeded run produced no artifacts")
+	}
+	for _, a := range firstState.Artifacts {
+		want, wantOK := first.Get(a.ID)
+		got, gotOK := second.Get(a.ID)
+		if wantOK != gotOK || !reflect.DeepEqual(got, want) {
+			t.Errorf("Get(%q) differs across identical seeds: %+v/%v vs %+v/%v", a.ID, got, gotOK, want, wantOK)
+		}
 	}
 }
 
