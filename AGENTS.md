@@ -9,7 +9,7 @@ The product scope is a clean-architecture application with three user commands:
 - `simulate`: run phased world simulation with timeline streaming
 - `export`: write Obsidian-compatible Markdown vault output
 
-Simulation scope defined in OpenSpec includes:
+Simulation scope (specified in `docs/specs/`) includes:
 
 - deterministic RNG/state engine
 - geographical genesis (terrain, climate, biomes)
@@ -21,13 +21,12 @@ Simulation scope defined in OpenSpec includes:
 
 ## Source of Truth
 
-When behavior is ambiguous, OpenSpec documents under `openspec/` are authoritative.
-Prioritize requirements from:
+Specs are written manually or via skills/IA in `docs/specs/` and are authoritative
+when behavior is ambiguous. Prioritize requirements from:
 
-- `openspec/specs/initial_concept.md`
-- `openspec/changes/*/specs/**/spec.md`
-- implementation details in each corresponding `design.md`
-- After changes are implemented, update the OpenSpec docs to reflect the final design and behavior. Run `openspec validate --all` to make sure the spec is consistent and valid.
+- `docs/specs/*.md` (feature and behavioral specs)
+- implementation details in each corresponding spec doc
+- After changes are implemented, update the spec docs in `docs/specs/` to reflect the final design and behavior.
 
 ## Architecture Rules (Non-Negotiable)
 
@@ -65,7 +64,7 @@ Do not move presentation or persistence concerns into `domain`.
 
 ### Simplicity and Optimization Discipline
 
-- Prefer the simplest implementation that satisfies current OpenSpec requirements.
+- Prefer the simplest implementation that satisfies current spec requirements (see `docs/specs/`).
 - Avoid speculative abstractions, extension points, and generic frameworks before a second concrete use case exists.
 - Avoid premature optimization: do not add caching, pooling, concurrency, or custom data structures without measured evidence.
 - Use benchmark/profile data to justify performance changes (for example, `go test -bench`, `pprof`) and summarize the evidence in the PR.
@@ -121,7 +120,7 @@ If coverage enforcement is automated later, keep CI thresholds aligned with this
 
 Every PR review must evaluate:
 
-1. Correctness against OpenSpec requirements.
+1. Correctness against spec requirements (see `docs/specs/`).
 2. Architecture boundary compliance (especially `domain` purity).
 3. Determinism safety (seed handling and RNG isolation).
 4. Error handling quality and context propagation.
@@ -157,7 +156,7 @@ Before merging, ensure all are true:
 
 When acting as a coding agent:
 
-- Read relevant OpenSpec docs before implementing behavior.
+- Read relevant spec docs (`docs/specs/`) before implementing behavior.
 - Prefer minimal, targeted edits over broad rewrites.
 - Preserve determinism and architecture constraints above convenience.
 - Add or update tests with every behavior change.
