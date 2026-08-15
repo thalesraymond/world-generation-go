@@ -202,7 +202,7 @@ func TestFullPipelineDeterminism(t *testing.T) {
 func compareExportDirs(t *testing.T, dir1, dir2 string) {
 	t.Helper()
 
-	subdirs := []string{"bases", "factions", "characters", "chronicles", "pointcrawl"}
+	subdirs := []string{"bases", "factions", "characters", "chronicles", "pointcrawl", "artifacts"}
 	for _, sub := range subdirs {
 		path1 := filepath.Join(dir1, sub)
 		path2 := filepath.Join(dir2, sub)

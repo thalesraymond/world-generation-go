@@ -30,16 +30,17 @@ func ExportArtifacts(state *world.State, targetDir string) error {
 	for _, a := range state.Artifacts {
 		names[a.ID] = tracker.sanitize(a.Name)
 	}
+	links := buildOwnerLinks(state, tracker)
 
 	for _, a := range state.Artifacts {
 		path := filepath.Join(artifactsDir, names[a.ID]+".md")
-		content := artifactFrontmatter(buildArtifactFields(a)) + "\n" + buildArtifactBody(a)
+		content := artifactFrontmatter(buildArtifactFields(a)) + "\n" + buildArtifactBody(a, links)
 		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 			return fmt.Errorf("write artifact %s: %w", a.Name, err)
 		}
 	}
 
-	if err := writeArtifactIndex(state.Artifacts, names, artifactsDir); err != nil {
+	if err := writeArtifactIndex(state.Artifacts, names, links, artifactsDir); err != nil {
 		return fmt.Errorf("write artifact index: %w", err)
 	}
 
@@ -131,11 +132,11 @@ func buildArtifactFields(a artifact.Artifact) []afield {
 // Planted relics are created with empty provenance and status lost, so the
 // current owner falls back to "lost" (creation is pre-timeline).
 func artifactOwner(a artifact.Artifact) (kind, id string) {
-	if len(a.Provenance) > 0 {
-		owner := a.Provenance[len(a.Provenance)-1].Owner
-		return owner.Kind, owner.ID
+	owner := artifact.CurrentOwner(a)
+	if owner.Kind == "" {
+		return "lost", ""
 	}
-	return "lost", ""
+	return owner.Kind, owner.ID
 }
 
 // artifactPowersYAML renders the powers list body for frontmatter. Each power
@@ -157,7 +158,7 @@ func artifactPowersYAML(powers []artifact.Power, score int) string {
 	return b.String()
 }
 
-func buildArtifactBody(a artifact.Artifact) string {
+func buildArtifactBody(a artifact.Artifact, links map[string]string) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "# %s\n\n", a.Name)
 
@@ -190,7 +191,7 @@ func buildArtifactBody(a artifact.Artifact) string {
 			if event == "" {
 				event = entry.EventID
 			}
-			fmt.Fprintf(&b, "| %d | %s | %s |\n", entry.Year, event, artifactIndexOwner(entry.Owner.Kind, entry.Owner.ID))
+			fmt.Fprintf(&b, "| %d | %s | %s |\n", entry.Year, event, artifactIndexOwner(entry.Owner.Kind, entry.Owner.ID, links))
 		}
 		b.WriteString("\n")
 	}
@@ -260,7 +261,7 @@ func powerDisplayName(t string) string {
 	return t
 }
 
-func writeArtifactIndex(artifacts []artifact.Artifact, names map[string]string, dir string) error {
+func writeArtifactIndex(artifacts []artifact.Artifact, names map[string]string, links map[string]string, dir string) error {
 	sorted := make([]artifact.Artifact, len(artifacts))
 	copy(sorted, artifacts)
 	sort.Slice(sorted, func(i, j int) bool {
@@ -280,7 +281,7 @@ func writeArtifactIndex(artifacts []artifact.Artifact, names map[string]string, 
 	for _, a := range sorted {
 		kind, id := artifactOwner(a)
 		fmt.Fprintf(&b, "| [[%s]] | %s | %s | %s |\n",
-			names[a.ID], a.Type, a.Status, artifactIndexOwner(kind, id))
+			names[a.ID], a.Type, a.Status, artifactIndexOwner(kind, id, links))
 	}
 
 	path := filepath.Join(dir, "Index.md")
@@ -290,11 +291,30 @@ func writeArtifactIndex(artifacts []artifact.Artifact, names map[string]string, 
 	return nil
 }
 
+// buildOwnerLinks maps owner entities to their note names so provenance
+// wiki-links resolve to the notes the character and base exporters write:
+// figures link by their character-note name, settlements by their base-note
+// name. Sanitization applies the same cleaning the other exporters use.
+func buildOwnerLinks(state *world.State, tracker *nameTracker) map[string]string {
+	links := make(map[string]string)
+	for _, s := range state.Settlements {
+		for _, f := range s.Figures {
+			links["figure:"+f.ID] = tracker.sanitize(f.Name)
+		}
+		links["settlement:"+s.Name] = tracker.sanitize(s.Name)
+	}
+	return links
+}
+
 // artifactIndexOwner renders the current owner cell for tables: a wiki-link
-// for owned artifacts, _Lost_ otherwise. Planted relics are always lost.
-func artifactIndexOwner(kind, id string) string {
+// to the owner entity's note when one exists, the raw owner ID otherwise, and
+// _Lost_ for lost artifacts. Planted relics are always lost.
+func artifactIndexOwner(kind, id string, links map[string]string) string {
 	switch kind {
 	case "figure", "settlement", "expedition":
+		if note, ok := links[kind+":"+id]; ok {
+			return "[[" + note + "]]"
+		}
 		return "[[" + id + "]]"
 	default:
 		return "_Lost_"
