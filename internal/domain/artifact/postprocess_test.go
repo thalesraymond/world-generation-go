@@ -182,8 +182,8 @@ func TestPostProcessDiscoveryRecordsProvenance(t *testing.T) {
 	}
 
 	// Current owner derives from the last provenance entry.
-	if kind, id := currentOwner(a); kind != "figure" || id != "Deepcrest-3" {
-		t.Errorf("current owner = (%q, %q), want (figure, Deepcrest-3)", kind, id)
+	if owner := CurrentOwner(a); owner.Kind != "figure" || owner.ID != "Deepcrest-3" {
+		t.Errorf("current owner = %+v, want (figure, Deepcrest-3)", owner)
 	}
 }
 

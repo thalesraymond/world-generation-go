@@ -21,7 +21,7 @@ import (
 // attached by lifecycle engines such as rediscovery and transfers) or when it
 // terminates the artifact's current owner: a Death event of the owner figure,
 // or a Conquest/Raid event against the owner settlement. When several owned
-// artifacts match, the lexicographically smallest ID wins, keeping the pass
+// artifacts match, the first in artifact order wins, keeping the pass
 // deterministic. Events that name the artifact's new owner directly (a
 // Discovery event carrying the discovering figure) record a provenance entry;
 // ownership changes whose destination requires lifecycle rules are recorded by
@@ -57,20 +57,20 @@ func PostProcess(artifacts []Artifact, events []simulation.Event) error {
 
 // attachArtifactID marks events that involve an artifact. An event already
 // carrying ArtifactID is left untouched; otherwise the artifacts whose current
-// owner the event terminates are matched, in artifact order, and the first
-// match wins so the result is independent of map iteration order.
+// owner the event terminates are matched in artifact order and the first
+// match wins, so the result is deterministic for a given input order.
 func attachArtifactID(event *simulation.Event, artifacts []Artifact, byID map[string]*Artifact) {
 	if event.ArtifactID != "" {
 		return
 	}
 	for i := range artifacts {
 		a := byID[artifacts[i].ID]
-		kind, id := currentOwner(*a)
-		if kind == "figure" && event.Category == "Death" && event.FigureID == id {
+		owner := CurrentOwner(*a)
+		if owner.Kind == "figure" && event.Category == "Death" && event.FigureID == owner.ID {
 			event.ArtifactID = a.ID
 			return
 		}
-		if kind == "settlement" && (event.Category == "Conquest" || event.Category == "Raid") && event.TargetSettlement == id {
+		if owner.Kind == "settlement" && (event.Category == "Conquest" || event.Category == "Raid") && event.TargetSettlement == owner.ID {
 			event.ArtifactID = a.ID
 			return
 		}
@@ -93,13 +93,12 @@ func recordProvenance(a *Artifact, event *simulation.Event) {
 	})
 }
 
-// currentOwner returns the owner kind and ID recorded by the last provenance
-// entry. Artifacts without provenance (e.g. planted relics, which begin lost
-// before the timeline) have no owner.
-func currentOwner(a Artifact) (kind, id string) {
+// CurrentOwner returns the owner recorded by the last provenance entry.
+// Artifacts without provenance (e.g. planted relics, which begin lost before
+// the timeline) return the zero Owner.
+func CurrentOwner(a Artifact) Owner {
 	if len(a.Provenance) == 0 {
-		return "", ""
+		return Owner{}
 	}
-	owner := a.Provenance[len(a.Provenance)-1].Owner
-	return owner.Kind, owner.ID
+	return a.Provenance[len(a.Provenance)-1].Owner
 }

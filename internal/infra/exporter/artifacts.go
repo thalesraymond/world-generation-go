@@ -132,11 +132,11 @@ func buildArtifactFields(a artifact.Artifact) []afield {
 // Planted relics are created with empty provenance and status lost, so the
 // current owner falls back to "lost" (creation is pre-timeline).
 func artifactOwner(a artifact.Artifact) (kind, id string) {
-	if len(a.Provenance) > 0 {
-		owner := a.Provenance[len(a.Provenance)-1].Owner
-		return owner.Kind, owner.ID
+	owner := artifact.CurrentOwner(a)
+	if owner.Kind == "" {
+		return "lost", ""
 	}
-	return "lost", ""
+	return owner.Kind, owner.ID
 }
 
 // artifactPowersYAML renders the powers list body for frontmatter. Each power
