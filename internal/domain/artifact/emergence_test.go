@@ -325,6 +325,20 @@ func TestEmergencePassUnknownFigureSkipsFallback(t *testing.T) {
 	}
 }
 
+func TestEmergencePassSkipsBirthWithoutOrigin(t *testing.T) {
+	events := []simulation.Event{
+		{Year: 5, Category: "Discovery", FigureID: "ghost", Description: "found"},
+	}
+
+	got, err := EmergencePass(nil, events, nil, SignificanceContext{}, artifactsRNG(1))
+	if err != nil {
+		t.Fatalf("EmergencePass: %v", err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("artifact count = %d, want 0 (no origin to derive artifact-{origin}-{index})", len(got))
+	}
+}
+
 func TestEmergencePassPropagatesPostProcessErrors(t *testing.T) {
 	events := []simulation.Event{
 		{Year: 1, Category: "Discovery", FigureID: "D-1", SettlementName: "Deepcrest", ArtifactID: "ghost", Description: "found"},

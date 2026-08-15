@@ -130,6 +130,9 @@ func EmergencePass(artifacts []Artifact, events []simulation.Event, figures []Fi
 		if origin == "" && beneficiary.Kind == "figure" {
 			origin = byFigure[beneficiary.ID].Settlement
 		}
+		if origin == "" {
+			continue
+		}
 		a := birthEmergent(origin, event.Year, event.ID, event.Category, beneficiary, typ, originCounts, nameCounts, rng)
 		artifacts = append(artifacts, a)
 		byID = rebuildByID(artifacts)
