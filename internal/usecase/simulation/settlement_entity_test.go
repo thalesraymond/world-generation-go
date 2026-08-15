@@ -1,4 +1,4 @@
-package cmd
+package simulation_test
 
 import (
 	"fmt"
@@ -12,6 +12,7 @@ import (
 	domsim "github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/state"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
+	ucsim "github.com/thalesraymond/world-generation-go/internal/usecase/simulation"
 )
 
 // newAgentTestSettlement builds a settlement with agent state for Tick tests.
@@ -75,14 +76,14 @@ func TestSettlementTickEmitsAgentEvents(t *testing.T) {
 	}
 	env := adapter.NewAgentEnv(ws, nil, &settlements, map[string]bool{"Haven": true, "Blackgate": true})
 
-	entity := &settlementEntity{
-		settlement:      &settlements[0],
-		figureRNG:       engine.GetPRNG("figures:Haven"),
-		agentRNG:        engine.GetPRNG("agent:Haven"),
-		pointcrawlGraph: dompointcrawl.NewGraph(),
-		allSettlements:  &settlements,
-		env:             env,
-	}
+	entity := ucsim.NewSettlementEntity(
+		&settlements[0],
+		engine.GetPRNG("figures:Haven"),
+		engine.GetPRNG("agent:Haven"),
+		dompointcrawl.NewGraph(),
+		&settlements,
+		env,
+	)
 
 	eventChan := make(chan domsim.Event, 256)
 	years := 10
@@ -147,14 +148,14 @@ func TestSettlementTickExpandAppendsSettlement(t *testing.T) {
 	env := adapter.NewAgentEnv(ws, graph, &settlements, map[string]bool{"Haven": true})
 
 	engine := state.NewEngine(11)
-	entity := &settlementEntity{
-		settlement:      &settlements[0],
-		figureRNG:       engine.GetPRNG("figures:Haven"),
-		agentRNG:        engine.GetPRNG("agent:Haven"),
-		pointcrawlGraph: graph,
-		allSettlements:  &settlements,
-		env:             env,
-	}
+	entity := ucsim.NewSettlementEntity(
+		&settlements[0],
+		engine.GetPRNG("figures:Haven"),
+		engine.GetPRNG("agent:Haven"),
+		graph,
+		&settlements,
+		env,
+	)
 
 	eventChan := make(chan domsim.Event, 256)
 	go func() {
@@ -219,15 +220,17 @@ func TestIsAgentCategory(t *testing.T) {
 }
 
 // TestAgentRNGAbsenceSkipsDecisionLoop guards the nil-safety of the agent
-// decision loop for legacy entity construction.
+// decision loop.
 func TestAgentRNGAbsenceSkipsDecisionLoop(t *testing.T) {
 	settlements := []world.Settlement{newAgentTestSettlement("Haven", 100)}
-	entity := &settlementEntity{
-		settlement:      &settlements[0],
-		figureRNG:       randv2.New(randv2.NewPCG(1, 2)),
-		pointcrawlGraph: dompointcrawl.NewGraph(),
-		allSettlements:  &settlements,
-	}
+	entity := ucsim.NewSettlementEntity(
+		&settlements[0],
+		randv2.New(randv2.NewPCG(1, 2)),
+		nil,
+		dompointcrawl.NewGraph(),
+		&settlements,
+		nil,
+	)
 
 	eventChan := make(chan domsim.Event, 16)
 	go func() {
@@ -253,14 +256,14 @@ func TestSettlementTickNoYearZeroEvents(t *testing.T) {
 
 	engine := state.NewEngine(1)
 	env := adapter.NewAgentEnv(nil, nil, &settlements, map[string]bool{"Haven": true})
-	entity := &settlementEntity{
-		settlement:      &settlements[0],
-		figureRNG:       engine.GetPRNG("figures:Haven"),
-		agentRNG:        engine.GetPRNG("agent:Haven"),
-		pointcrawlGraph: dompointcrawl.NewGraph(),
-		allSettlements:  &settlements,
-		env:             env,
-	}
+	entity := ucsim.NewSettlementEntity(
+		&settlements[0],
+		engine.GetPRNG("figures:Haven"),
+		engine.GetPRNG("agent:Haven"),
+		dompointcrawl.NewGraph(),
+		&settlements,
+		env,
+	)
 
 	eventChan := make(chan domsim.Event, 512)
 	go func() {
@@ -273,6 +276,56 @@ func TestSettlementTickNoYearZeroEvents(t *testing.T) {
 	for event := range eventChan {
 		if event.Year == 0 {
 			t.Fatalf("event has year 0: %+v", event)
+		}
+	}
+}
+
+// TestSettlementTickLifecycleEventPaths exercises the death, marriage, and
+// role-event branches of Tick that the primary tests do not reach, across a
+// fixed seed range so the run stays deterministic.
+func TestSettlementTickLifecycleEventPaths(t *testing.T) {
+	seen := make(map[string]bool)
+	for seed := uint64(1); seed <= 40; seed++ {
+		settlements := []world.Settlement{newAgentTestSettlement("Haven", 100)}
+		s := &settlements[0]
+		s.Figures = []figures.HistoricalFigure{
+			{ID: "Haven-0", Name: "Aldric", BirthYear: 0, MaxAge: 80, Role: "Leader", Faction: "testers"},
+			{ID: "Haven-1", Name: "Elowen", BirthYear: 3, MaxAge: 80, Faction: "testers"},
+			{ID: "Haven-2", Name: "Bram", BirthYear: 4, MaxAge: 80, Faction: "testers"},
+			{ID: "Haven-3", Name: "Oldwyn", BirthYear: 0, MaxAge: 3, Faction: "testers"},
+			{ID: "Haven-4", Name: "Mystra", BirthYear: 0, MaxAge: 80, Role: "FakeRole", Faction: "testers"},
+		}
+
+		engine := state.NewEngine(seed)
+		env := adapter.NewAgentEnv(nil, nil, &settlements, map[string]bool{"Haven": true})
+		entity := ucsim.NewSettlementEntity(
+			s,
+			engine.GetPRNG("figures:Haven"),
+			engine.GetPRNG("agent:Haven"),
+			dompointcrawl.NewGraph(),
+			&settlements,
+			env,
+		)
+
+		eventChan := make(chan domsim.Event, 512)
+		go func() {
+			for year := 1; year <= 40; year++ {
+				entity.Tick(year, eventChan, engine.GetPRNG("timeline"))
+			}
+			close(eventChan)
+		}()
+
+		for event := range eventChan {
+			if event.Year == 0 {
+				t.Fatalf("event has year 0: %+v", event)
+			}
+			seen[event.Category] = true
+		}
+	}
+
+	for _, cat := range []string{"Death", "Marriage", "Politics"} {
+		if !seen[cat] {
+			t.Errorf("expected category %q to appear across seeds, got %v", cat, seen)
 		}
 	}
 }
@@ -293,23 +346,23 @@ func TestTickDeterministicPerSeed(t *testing.T) {
 
 		var b strings.Builder
 		eventChan := make(chan domsim.Event, 512)
-		entities := []*settlementEntity{
-			{
-				settlement:      &settlements[0],
-				figureRNG:       engine.GetPRNG("figures:Haven"),
-				agentRNG:        engine.GetPRNG("agent:Haven"),
-				pointcrawlGraph: dompointcrawl.NewGraph(),
-				allSettlements:  &settlements,
-				env:             env,
-			},
-			{
-				settlement:      &settlements[1],
-				figureRNG:       engine.GetPRNG("figures:Blackgate"),
-				agentRNG:        engine.GetPRNG("agent:Blackgate"),
-				pointcrawlGraph: dompointcrawl.NewGraph(),
-				allSettlements:  &settlements,
-				env:             env,
-			},
+		entities := []*ucsim.SettlementEntity{
+			ucsim.NewSettlementEntity(
+				&settlements[0],
+				engine.GetPRNG("figures:Haven"),
+				engine.GetPRNG("agent:Haven"),
+				dompointcrawl.NewGraph(),
+				&settlements,
+				env,
+			),
+			ucsim.NewSettlementEntity(
+				&settlements[1],
+				engine.GetPRNG("figures:Blackgate"),
+				engine.GetPRNG("agent:Blackgate"),
+				dompointcrawl.NewGraph(),
+				&settlements,
+				env,
+			),
 		}
 
 		go func() {

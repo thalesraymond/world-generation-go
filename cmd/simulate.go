@@ -3,7 +3,6 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	randv2 "math/rand/v2"
 	"os"
 	"path/filepath"
 	"sync"
@@ -12,115 +11,12 @@ import (
 	"github.com/spf13/viper"
 	appconfig "github.com/thalesraymond/world-generation-go/config"
 	adapter "github.com/thalesraymond/world-generation-go/internal/adapter/simulation"
-	"github.com/thalesraymond/world-generation-go/internal/domain/agent"
 	"github.com/thalesraymond/world-generation-go/internal/domain/artifact"
-	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
-	dompointcrawl "github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 	domsim "github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/state"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 	ucsim "github.com/thalesraymond/world-generation-go/internal/usecase/simulation"
 )
-
-const (
-	// expansionHeadroom is the spare settlement-slice capacity reserved
-	// before simulation so expansion appends never reallocate mid-run.
-	expansionHeadroom = 1024
-)
-
-type settlementEntity struct {
-	settlement      *world.Settlement
-	figureRNG       *randv2.Rand
-	agentRNG        *randv2.Rand
-	pointcrawlGraph *dompointcrawl.Graph
-	allSettlements  *[]world.Settlement
-	env             agent.AgentEnv
-}
-
-func (s *settlementEntity) Tick(year int, eventChan chan<- domsim.Event, rng *randv2.Rand) {
-	// 1. Age figures
-	// Figures' Age is computed dynamically, no field to increment
-
-	// 2. Check deaths
-	deathEvents := figures.CheckDeaths(s.settlement.Figures, year, s.figureRNG)
-	for _, e := range deathEvents {
-		e.Year = year
-		e.SettlementName = s.settlement.Name
-		eventChan <- e
-	}
-
-	// 3. Check births
-	newborn := figures.CheckBirths(s.settlement.Figures, s.settlement.Population, year, s.settlement.Name, s.figureRNG)
-	if newborn != nil {
-		s.settlement.Figures = append(s.settlement.Figures, *newborn)
-		eventChan <- domsim.Event{
-			Year:           year,
-			Category:       "Birth",
-			Description:    newborn.Name + " is born in " + s.settlement.Name,
-			FigureID:       newborn.ID,
-			SettlementName: s.settlement.Name,
-		}
-	}
-
-	// 4. Check role vacancies
-	roleEvents := figures.AssignRoles(s.settlement.Figures, s.pointcrawlGraph, s.settlement.X, s.settlement.Y, s.figureRNG)
-	for _, e := range roleEvents {
-		e.Year = year
-		e.SettlementName = s.settlement.Name
-		eventChan <- e
-	}
-
-	// 4.5 Check marriages
-	marriageEvents := figures.CheckMarriages(s.settlement.Figures, s.settlement.Name, s.settlement.Faction, year, s.figureRNG)
-	for _, e := range marriageEvents {
-		e.Year = year
-		e.SettlementName = s.settlement.Name
-		eventChan <- e
-	}
-
-	// 5. Generate role events for figures with roles
-	var generatedEvents []domsim.Event
-	for i := range s.settlement.Figures {
-		if !s.settlement.Figures[i].IsAlive() {
-			continue
-		}
-		if s.settlement.Figures[i].Role == "" {
-			continue
-		}
-		role, err := figures.NewRole(s.settlement.Figures[i].Role)
-		if err != nil {
-			continue
-		}
-		roleEvents := role.GenerateEvents(&s.settlement.Figures[i], s.settlement.Name, s.settlement.Population, s.pointcrawlGraph, s.settlement.X, s.settlement.Y, s.figureRNG)
-		for j := range roleEvents {
-			roleEvents[j].Year = year
-			roleEvents[j].SettlementName = s.settlement.Name
-		}
-		generatedEvents = append(generatedEvents, roleEvents...)
-	}
-
-	// 5.5 Check role transitions driven by recent events
-	transEvents := figures.CheckTransitions(s.settlement.Figures, generatedEvents, s.figureRNG)
-	for _, e := range transEvents {
-		e.Year = year
-		e.SettlementName = s.settlement.Name
-		eventChan <- e
-	}
-
-	for _, e := range generatedEvents {
-		eventChan <- e
-	}
-
-	// 6. Agent decision loop: evaluate state, pick a goal-aligned action,
-	// execute it, and emit the resulting event. Expand may append a new
-	// settlement to allSettlements, affecting subsequent years.
-	if s.allSettlements != nil && s.agentRNG != nil {
-		action := agent.ChooseAction(s.settlement, *s.allSettlements, s.env, s.agentRNG)
-		event := action.Execute(s.settlement, s.allSettlements, s.env, s.agentRNG)
-		event.Year = year
-		eventChan <- event
-	}
-}
 
 func newSimulateCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -167,34 +63,30 @@ func newSimulateCommand() *cobra.Command {
 			}
 			env := adapter.NewAgentEnv(worldState, worldState.PointcrawlGraph, &worldState.Settlements, usedNames)
 
-			sim := domsim.New(1, cfg.Years, timelineRNG)
-			entities := make([]*settlementEntity, 0, len(worldState.Settlements))
-			for i := range worldState.Settlements {
-				s := &worldState.Settlements[i]
-				entities = append(entities, &settlementEntity{
-					settlement:      s,
-					figureRNG:       engine.GetPRNG("figures:" + s.Name),
-					agentRNG:        engine.GetPRNG("agent:" + s.Name),
-					pointcrawlGraph: worldState.PointcrawlGraph,
-					allSettlements:  &worldState.Settlements,
-					env:             env,
-				})
-			}
-			for _, entity := range entities {
-				sim.AddEntity(entity)
-			}
-
 			// Pre-size the settlements slice so expansion appends never
-			// reallocate mid-simulation, then anchor entity pointers to the
-			// final backing array.
-			if extra := cap(worldState.Settlements) - len(worldState.Settlements); extra < expansionHeadroom {
-				grown := make([]world.Settlement, len(worldState.Settlements), len(worldState.Settlements)+expansionHeadroom)
+			// reallocate mid-simulation; entities below anchor to the final
+			// backing array.
+			if extra := cap(worldState.Settlements) - len(worldState.Settlements); extra < ucsim.ExpansionHeadroom {
+				grown := make([]world.Settlement, len(worldState.Settlements), len(worldState.Settlements)+ucsim.ExpansionHeadroom)
 				copy(grown, worldState.Settlements)
 				worldState.Settlements = grown
 			}
-			for i, entity := range entities {
-				entity.settlement = &worldState.Settlements[i]
-				entity.allSettlements = &worldState.Settlements
+
+			sim := domsim.New(1, cfg.Years, timelineRNG)
+			entities := make([]*ucsim.SettlementEntity, 0, len(worldState.Settlements))
+			for i := range worldState.Settlements {
+				s := &worldState.Settlements[i]
+				entities = append(entities, ucsim.NewSettlementEntity(
+					s,
+					engine.GetPRNG("figures:"+s.Name),
+					engine.GetPRNG("agent:"+s.Name),
+					worldState.PointcrawlGraph,
+					&worldState.Settlements,
+					env,
+				))
+			}
+			for _, entity := range entities {
+				sim.AddEntity(entity)
 			}
 
 			eventChan := make(chan domsim.Event, 100)
