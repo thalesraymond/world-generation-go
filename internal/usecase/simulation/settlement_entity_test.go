@@ -220,7 +220,7 @@ func TestIsAgentCategory(t *testing.T) {
 }
 
 // TestAgentRNGAbsenceSkipsDecisionLoop guards the nil-safety of the agent
-// decision loop for legacy entity construction.
+// decision loop.
 func TestAgentRNGAbsenceSkipsDecisionLoop(t *testing.T) {
 	settlements := []world.Settlement{newAgentTestSettlement("Haven", 100)}
 	entity := ucsim.NewSettlementEntity(
