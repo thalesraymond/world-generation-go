@@ -98,7 +98,11 @@ type ReputationDelta struct {
 // relics: later events that terminate their owner (owner Death, Conquest or
 // Raid of the owner settlement) are attached, associated, and transferred by
 // the same rule (recordTransfers applies to born artifacts only — the first
-// walk already handled the initial artifacts). transfers supplies the
+// walk already handled the initial artifacts). Destruction draws (spec 6.6)
+// apply to born artifacts in this walk too, by the same rule and the same
+// artifacts lane: within each second-walk event the destruction draws for
+// terminated born artifacts precede that event's emergence draws, keeping
+// the canonical lane order (see destruction.go). transfers supplies the
 // figure lifecycle data for transfer destinations (spec 6.3).
 //
 // The pass extends the event stream (fake-discovery events are prepended,
@@ -108,10 +112,9 @@ func EmergencePass(artifacts []Artifact, events []simulation.Event, figures []Fi
 	if rng == nil {
 		return nil, nil, fmt.Errorf("emergence pass requires the artifacts RNG lane")
 	}
-
 	agent := newFakeDiscoveryAgent(figures, rng)
 	events = fakeDiscovery(artifacts, events, agent)
-	if err := PostProcess(artifacts, events, sigCtx, transfers); err != nil {
+	if err := PostProcess(artifacts, events, sigCtx, transfers, rng); err != nil {
 		return nil, nil, err
 	}
 	horizon := HorizonYear(events)
@@ -136,7 +139,7 @@ func EmergencePass(artifacts []Artifact, events []simulation.Event, figures []Fi
 	for i := range events {
 		event := &events[i]
 		already := event.ArtifactID != ""
-		recordTransfers(event, artifacts[initial:], byID, transfers)
+		recordTransfers(event, artifacts[initial:], byID, transfers, rng)
 		if already || event.ArtifactID != "" {
 			continue
 		}

@@ -1,6 +1,8 @@
 package artifact
 
 import (
+	randv2 "math/rand/v2"
+
 	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 )
 
@@ -62,17 +64,31 @@ func (ctx TransferContext) heirFor(deceasedID string, year int) string {
 // carrier (the walk skips the carrier's association here so each
 // artifact-event pair is recorded exactly once). Returns the terminated
 // artifacts.
-func recordTransfers(event *simulation.Event, artifacts []Artifact, byID map[string]*Artifact, ctx TransferContext) []*Artifact {
+//
+// Destruction (spec 6.6) hooks this walk: per terminated artifact, in
+// artifact order, destroyIfDrawn performs the seeded destruction draw on the
+// artifacts lane (rng). A passing draw makes the artifact terminal — the
+// destruction provenance entry replaces the transfer entry, and every
+// subsequent terminating event skips it. rng may be nil to disable
+// destruction draws entirely (transfers only).
+func recordTransfers(event *simulation.Event, artifacts []Artifact, byID map[string]*Artifact, ctx TransferContext, rng *randv2.Rand) []*Artifact {
 	// An unresolvable spoils transfer — a Conquest/Raid whose aggressor
 	// (SettlementName) is unknown — must not produce a bogus entry: the
 	// match rule needs only TargetSettlement, but without the aggressor
 	// there is no destination to record. Such an event is treated as if it
-	// terminated nothing: no ArtifactID, no association, no provenance.
+	// terminated nothing: no ArtifactID, no association, no provenance, and
+	// no destruction draw (it consumes no lane values).
 	unresolvable := (event.Category == "Conquest" || event.Category == "Raid") && event.SettlementName == ""
 
 	var terminated []*Artifact
 	for i := range artifacts {
 		a := byID[artifacts[i].ID]
+		// A destroyed artifact is terminal (spec 6.6): it exits all further
+		// lifecycle processing — no later event terminates, transfers,
+		// associates, or destroys it.
+		if a.Status == "destroyed" {
+			continue
+		}
 		if !terminatesOwner(event, CurrentOwner(*a)) {
 			continue
 		}
@@ -86,6 +102,13 @@ func recordTransfers(event *simulation.Event, artifacts []Artifact, byID map[str
 	}
 	for _, a := range terminated {
 		a.AssociatedEventIDs = append(a.AssociatedEventIDs, event.ID)
+		if destroyIfDrawn(event, a, rng) {
+			// The natural event is the lifecycle event (spec 6.1): the
+			// artifact is already associated above, and the destruction
+			// provenance entry records the terminal transition instead of a
+			// transfer. No synthetic event is minted.
+			continue
+		}
 		a.Provenance = append(a.Provenance, ProvenanceEntry{
 			Year:      event.Year,
 			Owner:     transferDestination(event, CurrentOwner(*a), ctx),

@@ -49,7 +49,7 @@ func TestTransfersDeathToHeir(t *testing.T) {
 		{ID: "Deepcrest-3", Settlement: "Deepcrest", BirthYear: 18, DeathYear: 60, Parents: []string{"Deepcrest-1"}},
 	}}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, ctx); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, ctx, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -81,7 +81,7 @@ func TestTransfersDeathWithoutHeirGoesToTreasury(t *testing.T) {
 		{ID: "Deepcrest-2", Settlement: "Ironforge", BirthYear: 20, Parents: []string{"Other-1"}},
 	}}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, ctx); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, ctx, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -108,7 +108,7 @@ func TestTransfersDeathOfUnknownFigureIsLost(t *testing.T) {
 		{ID: "Deepcrest-2", Settlement: "Deepcrest", BirthYear: 20, Parents: []string{"Deepcrest-1"}},
 	}}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, ctx); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, ctx, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -130,7 +130,7 @@ func TestTransfersConquestSpoilsGoToAggressor(t *testing.T) {
 		{Year: 5, Category: "Conquest", SettlementName: "Blackgate", TargetSettlement: "Ironforge", Description: "Ironforge falls"},
 	}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -169,7 +169,7 @@ func TestTransfersRaidSpoilsGoToAggressor(t *testing.T) {
 		{Year: 7, Category: "Raid", SettlementName: "Blackgate", TargetSettlement: "Ironforge", Description: "raided"},
 	}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -204,7 +204,7 @@ func TestTransfersDeathTransfersEveryOwnedArtifact(t *testing.T) {
 		{ID: "Deepcrest-2", Settlement: "Deepcrest", BirthYear: 10, Parents: []string{"Deepcrest-1"}},
 	}}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, ctx); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, ctx, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -237,7 +237,7 @@ func TestTransfersNonOwnerEventsRecordNothing(t *testing.T) {
 		{Year: 8, Category: "Birth", Description: "unrelated"},
 	}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -270,7 +270,7 @@ func TestTransfersUnresolvableSpoilsRecordNothing(t *testing.T) {
 		{Year: 6, Category: "Raid", TargetSettlement: "Ironforge", Description: "raided by no one"},
 	}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -313,7 +313,7 @@ func TestTransfersDeterministic(t *testing.T) {
 		copy(arts, artifacts)
 		evs := make([]simulation.Event, len(events))
 		copy(evs, events)
-		err := PostProcess(arts, evs, SignificanceContext{}, ctx)
+		err := PostProcess(arts, evs, SignificanceContext{}, ctx, nil)
 		return arts, evs, err
 	}
 
@@ -347,7 +347,7 @@ func TestTransfersHeirTieBreakUsesSliceOrder(t *testing.T) {
 		{ID: "Deepcrest-3", Settlement: "Deepcrest", BirthYear: 10, Parents: []string{"Deepcrest-1"}},
 	}}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, ctx); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, ctx, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -376,7 +376,7 @@ func TestTransfersPowersFollowArtifact(t *testing.T) {
 		{ID: "Deepcrest-2", Settlement: "Deepcrest", BirthYear: 5, Parents: []string{"Deepcrest-1"}},
 	}}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, ctx); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, ctx, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -403,7 +403,7 @@ func TestTransfersZeroValueContextRecordsLost(t *testing.T) {
 		{Year: 20, Category: "Death", FigureID: "Deepcrest-1", Description: "owner dies"},
 	}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 

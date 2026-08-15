@@ -143,8 +143,13 @@ func buildArtifactFields(a artifact.Artifact) []afield {
 
 // artifactOwner derives the current owner from the last provenance entry.
 // Planted relics are created with empty provenance and status lost, so the
-// current owner falls back to "lost" (creation is pre-timeline).
+// current owner falls back to "lost" (creation is pre-timeline). Destroyed
+// artifacts are terminal (spec 6.6): the owner renders as "destroyed" with
+// no owner ID, regardless of the provenance chain's last entry.
 func artifactOwner(a artifact.Artifact) (kind, id string) {
+	if a.Status == "destroyed" {
+		return "destroyed", ""
+	}
 	owner := artifact.CurrentOwner(a)
 	if owner.Kind == "" {
 		return "lost", ""
@@ -206,6 +211,9 @@ func buildArtifactBody(a artifact.Artifact, eventCategories map[string]string, l
 	if a.Status == "lost" {
 		fmt.Fprintf(&b, "> **Status:** Lost since Year %d\n\n", lossYear(a, horizon))
 	}
+	if a.Status == "destroyed" {
+		fmt.Fprintf(&b, "> **Status:** Destroyed in Year %d\n\n", artifact.DestructionYear(a))
+	}
 
 	b.WriteString("## Description\n\n")
 	if a.Description == "" {
@@ -227,12 +235,19 @@ func buildArtifactBody(a artifact.Artifact, eventCategories map[string]string, l
 	if len(a.Provenance) == 0 {
 		b.WriteString("_No provenance recorded._\n\n")
 	} else {
-		for _, entry := range a.Provenance {
+		for i, entry := range a.Provenance {
 			event := entry.EventType
 			if event == "" {
 				event = entry.EventID
 			}
-			fmt.Fprintf(&b, "| %d | %s | %s |\n", entry.Year, event, artifactIndexOwner(entry.Owner.Kind, entry.Owner.ID, links))
+			ownerCell := artifactIndexOwner(entry.Owner.Kind, entry.Owner.ID, links)
+			// The terminal provenance entry of a destroyed artifact records
+			// its destruction: the owner cell renders the terminal state
+			// (_Destroyed_) instead of the owner at destruction (spec 8.6).
+			if a.Status == "destroyed" && i == len(a.Provenance)-1 {
+				ownerCell = "_Destroyed_"
+			}
+			fmt.Fprintf(&b, "| %d | %s | %s |\n", entry.Year, event, ownerCell)
 		}
 		b.WriteString("\n")
 	}
@@ -367,8 +382,9 @@ func buildOwnerLinks(state *world.State, tracker *nameTracker) map[string]string
 }
 
 // artifactIndexOwner renders the current owner cell for tables: a wiki-link
-// to the owner entity's note when one exists, the raw owner ID otherwise, and
-// _Lost_ for lost artifacts. Planted relics are always lost.
+// to the owner entity's note when one exists, the raw owner ID otherwise,
+// _Lost_ for lost artifacts, and _Destroyed_ for destroyed artifacts (spec
+// 8.6). Planted relics are always lost.
 func artifactIndexOwner(kind, id string, links map[string]string) string {
 	switch kind {
 	case "figure", "settlement", "expedition":
@@ -376,6 +392,8 @@ func artifactIndexOwner(kind, id string, links map[string]string) string {
 			return "[[" + note + "]]"
 		}
 		return "[[" + id + "]]"
+	case "destroyed":
+		return "_Destroyed_"
 	default:
 		return "_Lost_"
 	}
