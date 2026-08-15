@@ -15,7 +15,6 @@ import (
 	"github.com/thalesraymond/world-generation-go/internal/domain/agent"
 	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	dompointcrawl "github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
-	"github.com/thalesraymond/world-generation-go/internal/domain/settlement"
 	domsim "github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/state"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
@@ -23,71 +22,10 @@ import (
 )
 
 const (
-	// agentMaxActionRange is the maximum Euclidean distance (in tiles) for
-	// Raid and Conquer targets.
-	agentMaxActionRange = 20.0
-	// agentExpandMaxRange is the search radius for expansion targets.
-	agentExpandMaxRange = 20.0
-	// agentExpandMinDistance is the minimum distance between a new
-	// settlement and every existing settlement.
-	agentExpandMinDistance = 3.0
 	// expansionHeadroom is the spare settlement-slice capacity reserved
 	// before simulation so expansion appends never reallocate mid-run.
 	expansionHeadroom = 1024
 )
-
-// agentEnv adapts the live world state to the agent.AgentEnv interface so
-// domain actions can query suitability, expansion sites, and names without
-// importing adapter packages.
-type agentEnv struct {
-	worldState *world.State
-	graph      *dompointcrawl.Graph
-	all        *[]world.Settlement
-	usedNames  map[string]bool
-}
-
-func (e *agentEnv) Suitability(x, y int) float64 {
-	if e.worldState == nil {
-		return 0
-	}
-	idx, ok := e.worldState.Index(x, y)
-	if !ok {
-		return 0
-	}
-	return e.worldState.Suitability[idx]
-}
-
-func (e *agentEnv) FindExpansionTarget(self *world.Settlement, rng *randv2.Rand) (int, int, bool) {
-	if e.graph == nil || e.all == nil {
-		return 0, 0, false
-	}
-
-	sites := make([]dompointcrawl.SettlementSite, 0, len(*e.all))
-	for _, s := range *e.all {
-		sites = append(sites, dompointcrawl.SettlementSite{
-			Name:    s.Name,
-			X:       s.X,
-			Y:       s.Y,
-			Faction: s.Faction,
-		})
-	}
-
-	node := dompointcrawl.FindExpansionTarget(e.graph, self.X, self.Y, self.Faction, sites, agentExpandMaxRange, agentExpandMinDistance, rng)
-	if node == nil {
-		return 0, 0, false
-	}
-	return node.X, node.Y, true
-}
-
-func (e *agentEnv) GenerateName(rng *randv2.Rand) string {
-	name := settlement.EnsureUniqueName(rng, e.usedNames)
-	e.usedNames[name] = true
-	return name
-}
-
-func (e *agentEnv) MaxActionRange() float64 {
-	return agentMaxActionRange
-}
 
 type settlementEntity struct {
 	settlement      *world.Settlement
@@ -95,7 +33,7 @@ type settlementEntity struct {
 	agentRNG        *randv2.Rand
 	pointcrawlGraph *dompointcrawl.Graph
 	allSettlements  *[]world.Settlement
-	env             *agentEnv
+	env             agent.AgentEnv
 }
 
 func (s *settlementEntity) Tick(year int, eventChan chan<- domsim.Event, rng *randv2.Rand) {
@@ -222,15 +160,11 @@ func newSimulateCommand() *cobra.Command {
 			engine := state.NewEngine(uint64(cfg.Seed))
 			timelineRNG := engine.GetPRNG("timeline")
 
-			env := &agentEnv{
-				worldState: worldState,
-				graph:      worldState.PointcrawlGraph,
-				all:        &worldState.Settlements,
-				usedNames:  make(map[string]bool),
-			}
+			usedNames := make(map[string]bool)
 			for i := range worldState.Settlements {
-				env.usedNames[worldState.Settlements[i].Name] = true
+				usedNames[worldState.Settlements[i].Name] = true
 			}
+			env := adapter.NewAgentEnv(worldState, worldState.PointcrawlGraph, &worldState.Settlements, usedNames)
 
 			sim := domsim.New(1, cfg.Years, timelineRNG)
 			entities := make([]*settlementEntity, 0, len(worldState.Settlements))
@@ -257,7 +191,6 @@ func newSimulateCommand() *cobra.Command {
 				copy(grown, worldState.Settlements)
 				worldState.Settlements = grown
 			}
-			env.all = &worldState.Settlements
 			for i, entity := range entities {
 				entity.settlement = &worldState.Settlements[i]
 				entity.allSettlements = &worldState.Settlements
