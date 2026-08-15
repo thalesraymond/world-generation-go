@@ -44,8 +44,12 @@ import (
 // lane (rng). A passing draw marks the artifact destroyed and terminal —
 // status "destroyed", a destruction provenance entry, powers cleared — and
 // every subsequent event skips it entirely (no transfers, no associations,
-// no significance contributions). rng may be nil to disable destruction
-// draws entirely; the pipeline always supplies the artifacts lane, so
+// no significance contributions).
+//
+// The lane is also threaded into significance evaluation: a pivotal crossing
+// grants the artifact's earned power, drawing its magnitude from the lane
+// (spec 7.4). rng may be nil to disable all lane draws (destruction and
+// earned powers); the pipeline always supplies the artifacts lane, so
 // identical seeds still produce identical outcomes.
 func PostProcess(artifacts []Artifact, events []simulation.Event, sig SignificanceContext, transfers TransferContext, rng *randv2.Rand) error {
 	byID := make(map[string]*Artifact, len(artifacts))
@@ -83,9 +87,10 @@ func PostProcess(artifacts []Artifact, events []simulation.Event, sig Significan
 		if a.Status == "destroyed" {
 			if weight := eventWeights[event.Category]; weight > 0 {
 				eventContributions[byIdx[event.ArtifactID]] = append(eventContributions[byIdx[event.ArtifactID]], significanceEvent{
-					year:    event.Year,
-					weight:  weight,
-					eventID: event.ID,
+					year:     event.Year,
+					weight:   weight,
+					eventID:  event.ID,
+					category: event.Category,
 				})
 			}
 			continue
@@ -96,14 +101,15 @@ func PostProcess(artifacts []Artifact, events []simulation.Event, sig Significan
 		recordProvenance(a, event)
 		if weight := eventWeights[event.Category]; weight > 0 {
 			eventContributions[byIdx[event.ArtifactID]] = append(eventContributions[byIdx[event.ArtifactID]], significanceEvent{
-				year:    event.Year,
-				weight:  weight,
-				eventID: event.ID,
+				year:     event.Year,
+				weight:   weight,
+				eventID:  event.ID,
+				category: event.Category,
 			})
 		}
 	}
 
-	evaluateSignificance(artifacts, events, eventContributions, sig)
+	evaluateSignificance(artifacts, events, eventContributions, sig, rng)
 	return nil
 }
 

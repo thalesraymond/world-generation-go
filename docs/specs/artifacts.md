@@ -290,7 +290,7 @@ Synthetic lifecycle events carry **no significance weight** — they are a separ
 
 **Implementation (issue #70, in `internal/domain/artifact/discovery.go` and `loss.go`):**
 
-- `EmergencePass` is the pipeline entry; it consumes the artifacts lane in a fixed order so #70 (loss/rediscovery), #71 (destruction), and #74 (earned powers) merge coherently: fake-discovery draws → (destruction draws, #71) → post-walk loss detection → rediscovery draws → (earned-power draws, #74) → emergence draws. The pass extends the event stream, so it returns the extended stream; callers must use the return value.
+- `EmergencePass` is the pipeline entry; it consumes the artifacts lane in one canonical fixed order across all lifecycle features: fake-discovery draws (pre-walk) → destruction draws (in-walk, both walks) → post-walk loss detection → rediscovery draws (post-walk) → earned-power draws (significance evaluation) → emergence draws (second walk). The pass extends the event stream, so it returns the extended stream; callers must use the return value.
 - Fake-discovery (§5.2) runs before the provenance walk, behind the temporary `DiscoveryAgent` interface — a seeded uniform figure draw on the artifacts lane, marked TODO until real expeditions exist (§9.5). Every planted relic (intrinsic source, still lost) draws one figure; a hit marks the relic `held` and mints a synthetic `Discovery` event at the genesis year carrying the relic's `ArtifactID`, PREPENDED to the stream so the walk assigns its ID (`event-0-{n}`) and records the first ownership via the existing Discovery provenance rule. When no figures exist the relic stays lost.
 - Loss (§6.4) is detected after the walk: the world state records no historical population, so abandonment is only observable at pass end. The owner settlement's FINAL class is read from the significance context; an abandoned owner is recorded lost at the horizon year (max event year, 0 with no events) with an `ArtifactLoss` provenance entry carrying no event ID (the loss is not a stream event) and Status becomes `lost`. Degenerate death transfers (no heir, no settlement; §6.3) are recorded mid-walk, and the same step propagates their Status to `lost`. Abandonment loss year is therefore always the horizon.
 - Rediscovery runs after loss detection: every artifact still `lost` — planted relics that failed fake-discovery, historically-lost artifacts, and abandonment losses — draws one pass/fail gate on the artifacts lane (fixed 50%). On a pass, the discovering figure is drawn through the same `DiscoveryAgent` seam and a synthetic `Discovery` event is minted at the horizon year, APPENDED to the stream with an ID continuing the walk's `event-{year}-{index}` scheme (index = count of events already at that year). The artifact records the rediscovery provenance entry — which closes the lost span for significance freezing — is associated with the event, and its Status returns to `held`. On a fail — or a pass with no figure available — the artifact stays lost and nothing is minted. Minted events carry `ArtifactID`, so the emergence second walk's "already" check skips them.
@@ -367,7 +367,7 @@ Simple, predictable mapping. No variation within type.
   - War/Conquest → CombatPower
   - Diplomacy/Politics → InfluencePower
   - Other → NarrativePower
-- Magnitude deterministic from event + artifact seed.
+- Magnitude deterministic from event + artifact seed — implemented as a draw on the master-seed `artifacts` RNG lane (§10.4), so the magnitude is fixed per seed rather than per artifact/event pair.
 
 ### 7.5 Base magnitude
 
@@ -407,6 +407,14 @@ Powers are intrinsic to the artifact, not the owner.
 - **Intrinsic narrative powers**: fixed per-type templates (relic = "inspires faith in followers", tome = "reveals hidden knowledge").
 - **Earned narrative powers**: derived from pivotal event type (Disaster = "survives calamity, bearer gains resilience").
 - Both deterministic from seed.
+
+**Implementation (issue #74, in `internal/domain/artifact/earned_powers.go`):**
+
+- Earned powers are granted during significance evaluation, exactly at the pivotal crossing: when the contribution that crosses the threshold carries an `eventID`, its event becomes pivotal and grants one earned power whose type comes from the event's category (spec 7.4 — War/Conquest → `CombatPower`, Diplomacy/Politics → `InfluencePower`, everything else → `NarrativePower`). The category rides along on the internal significance contribution (`significanceEvent`/`contribution` carry a `category` field populated by the stream walk); crossings caused by owner-importance accrual (no `eventID`) and intrinsic artifacts (no pivotal event, spec 4.3) grant nothing.
+- The base magnitude of earned combat/influence powers is drawn from the `artifacts` RNG lane — uniformly in 1..3 — so it is deterministic from the master seed; narrative earned powers carry no magnitude and consume no draw (spec 7.5). One draw per granted magnitude-bearing power, per artifact in artifact order, during significance evaluation. Lane consumption order across the pass is canonical (see §6.6): fake-discovery draws (pre-walk), destruction draws (in-walk), loss/rediscovery draws (post-walk), earned-power magnitude draws (significance evaluation), then emergence draws (second walk, in event order).
+- Earned powers reuse the concrete power types with `Source: "earned"` and append to the same `Powers` slice as intrinsic powers (they stack, spec 7.1). The monotonic latch grants at most one earned power per artifact, at the first crossing. `EffectiveMagnitude` is computed at export time from the artifact's significance score — no change to the formula (spec 7.6).
+- Earned narrative effects are a fixed category→effect table for the weight-bearing narrative categories (Raid, Expansion, Disaster) plus a generic default; Disaster uses the spec 7.8 example verbatim ("survives calamity, bearer gains resilience").
+- `PostProcess` accepts the artifacts lane but a nil lane disables all draws, so a drawless call grants no earned powers; the pipeline runs through `EmergencePass`, which always threads the lane. A destroyed artifact never gains a power — its powers vanish at destruction (§7.7), even when the destruction event itself is the pivotal event. Artifacts born mid-walk in the emergence second walk are never significance-evaluated (existing behavior) and therefore never earn a power; that remains a documented residual risk for future work.
 
 ## 8. Export format
 

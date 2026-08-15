@@ -108,6 +108,16 @@ type ReputationDelta struct {
 // The pass extends the event stream (fake-discovery events are prepended,
 // rediscovery events appended), so it returns the extended slice; callers
 // must use the returned stream, not the one they passed in.
+//
+// The pass threads the artifacts lane through significance evaluation, so a
+// pivotal crossing grants the artifact's earned power (spec 7.4). Lane
+// consumption across the whole pass is canonical (see destruction.go):
+// fake-discovery draws (pre-walk) → destruction draws (in-walk, both walks)
+// → rediscovery draws (post-walk) → earned-power magnitude draws during
+// significance evaluation (per initial artifact in artifact order) →
+// emergence draws of the second walk (per qualifying event in event order).
+// Artifacts born mid-walk are never significance-evaluated, so they can
+// never earn a power.
 func EmergencePass(artifacts []Artifact, events []simulation.Event, figures []FigureContext, sigCtx SignificanceContext, transfers TransferContext, rng *randv2.Rand) ([]Artifact, []simulation.Event, error) {
 	if rng == nil {
 		return nil, nil, fmt.Errorf("emergence pass requires the artifacts RNG lane")

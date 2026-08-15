@@ -2,6 +2,7 @@ package artifact
 
 import (
 	"math"
+	randv2 "math/rand/v2"
 	"sort"
 
 	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
@@ -49,28 +50,33 @@ type SignificanceContext struct {
 }
 
 // significanceEvent is the weight-bearing view of an event associated with
-// an artifact, captured during the stream walk.
+// an artifact, captured during the stream walk. category is carried so the
+// pivotal crossing can grant the matching earned power (spec 7.4).
 type significanceEvent struct {
-	year    int
-	weight  int
-	eventID string
+	year     int
+	weight   int
+	eventID  string
+	category string
 }
 
 // contribution is one score increment applied in chronological order.
 // order breaks year ties deterministically: acquisition lump sums first,
 // then events in stream order, then annual accrual.
 type contribution struct {
-	year    int
-	order   int
-	value   int
-	eventID string
+	year     int
+	order    int
+	value    int
+	eventID  string
+	category string
 }
 
 // evaluateSignificance computes the significance state of every artifact
 // from its completed provenance chain and the weight-bearing events the
 // stream walk associated with it. Contributions are merged chronologically
-// and the monotonic latch flips at the first crossing year.
-func evaluateSignificance(artifacts []Artifact, events []simulation.Event, contribs [][]significanceEvent, sig SignificanceContext) {
+// and the monotonic latch flips at the first crossing year. rng is the
+// artifacts RNG lane: a pivotal crossing grants the artifact's earned power
+// (spec 7.4); a nil lane grants nothing.
+func evaluateSignificance(artifacts []Artifact, events []simulation.Event, contribs [][]significanceEvent, sig SignificanceContext, rng *randv2.Rand) {
 	horizon := 0
 	for i := range events {
 		if events[i].Year > horizon {
@@ -78,15 +84,16 @@ func evaluateSignificance(artifacts []Artifact, events []simulation.Event, contr
 		}
 	}
 	for i := range artifacts {
-		applySignificance(&artifacts[i], contribs[i], horizon, sig)
+		applySignificance(&artifacts[i], contribs[i], horizon, sig, rng)
 	}
 }
 
 // applySignificance folds the artifact's contributions into its score and
 // updates the significance latch. A crossing caused by an event records that
-// event as pivotal; a crossing caused by owner-importance accrual has no
-// pivotal event (PivotalEventID stays empty).
-func applySignificance(a *Artifact, events []significanceEvent, horizon int, sig SignificanceContext) {
+// event as pivotal and grants the artifact's earned power from the event's
+// category; a crossing caused by owner-importance accrual has no pivotal
+// event (PivotalEventID stays empty) and grants no earned power.
+func applySignificance(a *Artifact, events []significanceEvent, horizon int, sig SignificanceContext, rng *randv2.Rand) {
 	contribs := buildContributions(a, events, horizon, sig)
 	sort.SliceStable(contribs, func(i, j int) bool {
 		if contribs[i].year != contribs[j].year {
@@ -113,6 +120,12 @@ func applySignificance(a *Artifact, events []significanceEvent, horizon int, sig
 			significanceYear = c.year
 			if c.eventID != "" {
 				pivotalEventID = c.eventID
+				// A destroyed artifact is terminal (spec 6.6): its powers
+				// vanish at destruction, so no earned power is granted even
+				// when the destruction event itself is the pivotal event.
+				if a.Status != "destroyed" {
+					grantEarnedPower(a, c.category, rng)
+				}
 			}
 		}
 	}
@@ -178,7 +191,7 @@ func buildContributions(a *Artifact, events []significanceEvent, horizon int, si
 		if inLostRange(lost, e.year) {
 			continue
 		}
-		contribs = append(contribs, contribution{year: e.year, order: 1, value: e.weight, eventID: e.eventID})
+		contribs = append(contribs, contribution{year: e.year, order: 1, value: e.weight, eventID: e.eventID, category: e.category})
 	}
 
 	return contribs

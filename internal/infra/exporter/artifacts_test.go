@@ -402,6 +402,52 @@ func TestExportArtifactsRendersPowers(t *testing.T) {
 	}
 }
 
+func TestExportArtifactsRendersEarnedNarrativePower(t *testing.T) {
+	state := &world.State{
+		Artifacts: []artifact.Artifact{
+			{
+				ID:                 "artifact-settlement-0",
+				Name:               "Crown of Deepcrest",
+				Type:               "crown",
+				SignificanceSource: "historical",
+				Status:             "significant",
+				SignificanceScore:  5,
+				IsSignificant:      true,
+				PivotalEventID:     "event-42-0",
+				SignificanceYear:   42,
+				Powers: []artifact.Power{
+					artifact.InfluencePower{Base: 5, Source: "intrinsic"},
+					artifact.NarrativePower{Effect: "survives calamity, bearer gains resilience", Source: "earned"},
+				},
+			},
+		},
+	}
+
+	targetDir := t.TempDir()
+	if err := ExportArtifacts(state, nil, targetDir); err != nil {
+		t.Fatalf("ExportArtifacts() error = %v", err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(targetDir, "artifacts", "Crown of Deepcrest.md"))
+	if err != nil {
+		t.Fatalf("read artifact file: %v", err)
+	}
+	content := string(data)
+
+	wantSubstrings := []string{
+		"powers:\n  - type: \"influence\"\n    base_magnitude: 5\n    effective_magnitude: 7\n    source: \"intrinsic\"",
+		"  - type: \"narrative\"\n    effect: \"survives calamity, bearer gains resilience\"\n    source: \"earned\"",
+		"| Type | Base | Effective | Source |",
+		"| Influence | 5 | 7 | intrinsic |",
+		"- **Narrative:** survives calamity, bearer gains resilience",
+	}
+	for _, want := range wantSubstrings {
+		if !strings.Contains(content, want) {
+			t.Errorf("artifact file missing %q", want)
+		}
+	}
+}
+
 func TestExportArtifactsSignificanceSection(t *testing.T) {
 	state := &world.State{
 		Artifacts: []artifact.Artifact{
