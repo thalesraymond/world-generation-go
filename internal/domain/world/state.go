@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/artifact"
 	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	"github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 )
@@ -25,13 +26,14 @@ type Settlement struct {
 
 // State stores simulation layers aligned to a terrain grid.
 type State struct {
-	Width             int               `json:"width"`
-	Height            int               `json:"height"`
-	PopulationDensity []float64         `json:"populationDensity"`
-	FactionInfluence  []string          `json:"factionInfluence"`
-	Suitability       []float64         `json:"suitability"`
-	Settlements       []Settlement      `json:"settlements"`
-	PointcrawlGraph   *pointcrawl.Graph `json:"pointcrawlGraph,omitempty"`
+	Width             int                 `json:"width"`
+	Height            int                 `json:"height"`
+	PopulationDensity []float64           `json:"populationDensity"`
+	FactionInfluence  []string            `json:"factionInfluence"`
+	Suitability       []float64           `json:"suitability"`
+	Settlements       []Settlement        `json:"settlements"`
+	PointcrawlGraph   *pointcrawl.Graph   `json:"pointcrawlGraph,omitempty"`
+	Artifacts         []artifact.Artifact `json:"artifacts,omitempty"`
 }
 
 // NewState creates an initialized world state for the provided dimensions.

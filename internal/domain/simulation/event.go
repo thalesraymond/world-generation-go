@@ -11,6 +11,8 @@ type Event struct {
 	RelatedFigures   []string `json:"relatedFigures,omitempty"`
 	SettlementName   string   `json:"settlementName,omitempty"`
 	TargetSettlement string   `json:"targetSettlement,omitempty"`
+	ID               string   `json:"id,omitempty"`
+	ArtifactID       string   `json:"artifactID,omitempty"`
 }
 
 // FormatEvent formats an Event into a human-readable string.

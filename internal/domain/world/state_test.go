@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/artifact"
 	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	"github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 )
@@ -378,5 +379,56 @@ func TestSettlementBackwardCompat(t *testing.T) {
 
 	if len(decoded.Figures) != 0 {
 		t.Fatalf("expected Figures nil or empty, got %v", decoded.Figures)
+	}
+}
+
+func TestStateJSONRoundTripIncludesArtifacts(t *testing.T) {
+	state := NewState(2, 2)
+	state.Artifacts = []artifact.Artifact{
+		{
+			ID:                 "artifact-settlement-0",
+			Name:               "Crown of Ironforge",
+			Type:               "crown",
+			SignificanceSource: "historical",
+			Status:             "held",
+			SignificanceScore:  2,
+			IsSignificant:      false,
+			Provenance:         []artifact.ProvenanceEntry{{Year: 10, Owner: artifact.Owner{Kind: "figure", ID: "Ironforge-1"}, EventID: "event-10-0", EventType: "Creation"}},
+			Powers:             []artifact.Power{artifact.InfluencePower{Base: 3}},
+		},
+	}
+
+	data, err := state.ToJSON()
+	if err != nil {
+		t.Fatalf("ToJSON() error = %v", err)
+	}
+
+	decoded, err := FromJSON(data)
+	if err != nil {
+		t.Fatalf("FromJSON() error = %v", err)
+	}
+
+	if !reflect.DeepEqual(state, decoded) {
+		t.Fatalf("state mismatch after round trip: got %+v want %+v", decoded, state)
+	}
+}
+
+func TestStateJSONBackwardCompatWithoutArtifacts(t *testing.T) {
+	legacy := `{
+		"width": 2,
+		"height": 2,
+		"populationDensity": [0, 0, 0, 0],
+		"factionInfluence": ["", "", "", ""],
+		"suitability": [0, 0, 0, 0],
+		"settlements": []
+	}`
+
+	decoded, err := FromJSON([]byte(legacy))
+	if err != nil {
+		t.Fatalf("FromJSON() error = %v", err)
+	}
+
+	if decoded.Artifacts != nil {
+		t.Fatalf("expected nil Artifacts, got %v", decoded.Artifacts)
 	}
 }

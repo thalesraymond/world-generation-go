@@ -195,3 +195,62 @@ func TestEventJSONRoundTripWithoutTargetSettlement(t *testing.T) {
 		t.Errorf("round-trip mismatch = %+v, want %+v", got, e)
 	}
 }
+
+func TestEventJSONRoundTripWithIDAndArtifactID(t *testing.T) {
+	e := Event{
+		Year:        42,
+		Category:    "War",
+		Description: "A great battle.",
+		ID:          "event-42-0",
+		ArtifactID:  "artifact-settlement-0",
+	}
+
+	data, err := json.Marshal(e)
+	if err != nil {
+		t.Fatalf("json.Marshal() error = %v", err)
+	}
+
+	var got Event
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("json.Unmarshal() error = %v", err)
+	}
+
+	if !reflect.DeepEqual(got, e) {
+		t.Errorf("round-trip mismatch = %+v, want %+v", got, e)
+	}
+}
+
+func TestEventJSONRoundTripOmitsIDAndArtifactID(t *testing.T) {
+	e := Event{
+		Year:        100,
+		Category:    "Politics",
+		Description: "A figure rose.",
+	}
+
+	data, err := json.Marshal(e)
+	if err != nil {
+		t.Fatalf("json.Marshal() error = %v", err)
+	}
+
+	for _, field := range []string{"\"id\"", "\"artifactID\""} {
+		if strings.Contains(string(data), field) {
+			t.Errorf("json.Marshal() output %q unexpectedly contains %s", string(data), field)
+		}
+	}
+}
+
+func TestEventBackwardCompatWithIDFields(t *testing.T) {
+	oldJSON := `{"year":100,"category":"War","description":"The siege began."}`
+
+	var got Event
+	if err := json.Unmarshal([]byte(oldJSON), &got); err != nil {
+		t.Fatalf("json.Unmarshal() error = %v", err)
+	}
+
+	if got.ID != "" {
+		t.Errorf("ID = %q, want empty", got.ID)
+	}
+	if got.ArtifactID != "" {
+		t.Errorf("ArtifactID = %q, want empty", got.ArtifactID)
+	}
+}
