@@ -3,11 +3,38 @@ package agent
 import (
 	"fmt"
 	randv2 "math/rand/v2"
+	"slices"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/artifact"
 	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 )
+
+// artifactPowerBonus sums the effective magnitudes of the artifacts the
+// settlement holds whose powers match one of the given power types (spec
+// 9.2/9.3). Only applied powers count — lost artifacts are dormant and
+// destroyed artifacts are terminal (spec 7.6) — so the bonus is zero for
+// every owner that holds no matching active artifact. env or its querier may
+// be nil; both fall back to zero.
+func artifactPowerBonus(env AgentEnv, ownerID string, powerTypes ...string) float64 {
+	if env == nil {
+		return 0
+	}
+	q := env.Artifacts()
+	if q == nil {
+		return 0
+	}
+	bonus := 0.0
+	for _, a := range q.ArtifactsFor("settlement", ownerID) {
+		for _, p := range artifact.AppliedPowers(a) {
+			if slices.Contains(powerTypes, p.Type()) {
+				bonus += float64(p.EffectiveMagnitude(a.SignificanceScore))
+			}
+		}
+	}
+	return bonus
+}
 
 // Expand action tuning.
 const (
@@ -31,7 +58,7 @@ func (a ExpandAction) Preconditions(self *world.Settlement, all []world.Settleme
 	return env != nil
 }
 
-func (ExpandAction) Score(self *world.Settlement) float64 {
+func (ExpandAction) Score(self *world.Settlement, env AgentEnv) float64 {
 	if hasGoal(self, "expand") {
 		return ExpandScoreAligned
 	}
@@ -90,7 +117,9 @@ const (
 	RaidOutcomeFailure = "failure"
 )
 
-// RaidAction steals wealth from a hostile neighbor within range.
+// RaidAction steals wealth from a hostile neighbor within range. Its score
+// factors the combat power of the artifacts the settlement holds
+// (power-to-action mapping, spec 9.3).
 type RaidAction struct{}
 
 func (RaidAction) Name() string { return "Raid" }
@@ -102,8 +131,8 @@ func (RaidAction) Preconditions(self *world.Settlement, all []world.Settlement, 
 	return raidTarget(self, all, env.MaxActionRange()) != ""
 }
 
-func (RaidAction) Score(self *world.Settlement) float64 {
-	return 1.0
+func (RaidAction) Score(self *world.Settlement, env AgentEnv) float64 {
+	return 1.0 + artifactPowerBonus(env, self.Name, "combat")
 }
 
 func (RaidAction) Execute(self *world.Settlement, all *[]world.Settlement, env AgentEnv, rng *randv2.Rand) simulation.Event {
@@ -166,7 +195,9 @@ const (
 	ConquerScoreAligned  = 2.0
 )
 
-// ConquerAction militarily absorbs a very hostile, weaker neighbor.
+// ConquerAction militarily absorbs a very hostile, weaker neighbor. Its score
+// factors the combat power of the artifacts the settlement holds
+// (power-to-action mapping, spec 9.3).
 type ConquerAction struct{}
 
 func (ConquerAction) Name() string { return "Conquer" }
@@ -178,11 +209,12 @@ func (ConquerAction) Preconditions(self *world.Settlement, all []world.Settlemen
 	return conquerTarget(self, all, env.MaxActionRange()) != ""
 }
 
-func (ConquerAction) Score(self *world.Settlement) float64 {
+func (ConquerAction) Score(self *world.Settlement, env AgentEnv) float64 {
+	score := 1.0
 	if hasGoal(self, "expand") {
-		return ConquerScoreAligned
+		score = ConquerScoreAligned
 	}
-	return 1.0
+	return score + artifactPowerBonus(env, self.Name, "combat")
 }
 
 func (ConquerAction) Execute(self *world.Settlement, all *[]world.Settlement, env AgentEnv, rng *randv2.Rand) simulation.Event {
@@ -239,7 +271,9 @@ const (
 	FortifyScoreGrow    = 2.0
 )
 
-// FortifyAction converts wealth into military strength.
+// FortifyAction converts wealth into military strength. Its score factors
+// the combat power of the artifacts the settlement holds (power-to-action
+// mapping, spec 9.3).
 type FortifyAction struct{}
 
 func (FortifyAction) Name() string { return "Fortify" }
@@ -248,14 +282,14 @@ func (FortifyAction) Preconditions(self *world.Settlement, all []world.Settlemen
 	return self.Wealth > FortifyMinWealth
 }
 
-func (FortifyAction) Score(self *world.Settlement) float64 {
+func (FortifyAction) Score(self *world.Settlement, env AgentEnv) float64 {
+	score := 1.0
 	if hasGoal(self, "defend") {
-		return FortifyScoreAligned
+		score = FortifyScoreAligned
+	} else if hasGoal(self, "grow") {
+		score = FortifyScoreGrow
 	}
-	if hasGoal(self, "grow") {
-		return FortifyScoreGrow
-	}
-	return 1.0
+	return score + artifactPowerBonus(env, self.Name, "combat")
 }
 
 func (FortifyAction) Execute(self *world.Settlement, all *[]world.Settlement, env AgentEnv, rng *randv2.Rand) simulation.Event {
@@ -277,7 +311,9 @@ const (
 	AllyScoreAligned = 1.5
 )
 
-// AllyAction formalizes an alliance with a friendly settlement.
+// AllyAction formalizes an alliance with a friendly settlement. Its score
+// factors the influence power of the artifacts the settlement holds
+// (power-to-action mapping, spec 9.3).
 type AllyAction struct{}
 
 func (AllyAction) Name() string { return "Ally" }
@@ -286,8 +322,8 @@ func (AllyAction) Preconditions(self *world.Settlement, all []world.Settlement, 
 	return allyTarget(self, all) != ""
 }
 
-func (AllyAction) Score(self *world.Settlement) float64 {
-	return 1.0
+func (AllyAction) Score(self *world.Settlement, env AgentEnv) float64 {
+	return 1.0 + artifactPowerBonus(env, self.Name, "influence")
 }
 
 func (AllyAction) Execute(self *world.Settlement, all *[]world.Settlement, env AgentEnv, rng *randv2.Rand) simulation.Event {
@@ -353,7 +389,7 @@ func (ProsperAction) Preconditions(self *world.Settlement, all []world.Settlemen
 	return true
 }
 
-func (ProsperAction) Score(self *world.Settlement) float64 {
+func (ProsperAction) Score(self *world.Settlement, env AgentEnv) float64 {
 	if hasGoal(self, "grow") {
 		return ProsperScoreGrow
 	}

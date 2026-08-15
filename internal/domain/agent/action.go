@@ -6,9 +6,21 @@ package agent
 import (
 	randv2 "math/rand/v2"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/artifact"
 	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 )
+
+// ArtifactQuerier answers which artifacts an owner currently holds. It is
+// implemented by the usecase ArtifactRegistry (see
+// internal/usecase/simulation/artifacts.go), which is built from world state
+// at orchestration time and handed to the agent env as the power-application
+// seam (spec 9.2).
+type ArtifactQuerier interface {
+	// ArtifactsFor returns the artifacts currently held by the owner
+	// identified by ownerKind and ownerID, in world-state order.
+	ArtifactsFor(ownerKind, ownerID string) []artifact.Artifact
+}
 
 // AgentEnv exposes the world context an action needs for preconditions and
 // execution. Implemented by the simulation adapter (see internal/usecase/simulation/env.go).
@@ -24,6 +36,9 @@ type AgentEnv interface {
 	// MaxActionRange is the maximum Euclidean distance (in tiles) for
 	// Raid and Conquer targets.
 	MaxActionRange() float64
+	// Artifacts returns the artifact querier for this world, or nil when
+	// artifact integration is disabled.
+	Artifacts() ArtifactQuerier
 }
 
 // Action is a settlement-level decision with preconditions, goal-aligned
@@ -31,7 +46,7 @@ type AgentEnv interface {
 type Action interface {
 	Name() string
 	Preconditions(self *world.Settlement, all []world.Settlement, env AgentEnv) bool
-	Score(self *world.Settlement) float64
+	Score(self *world.Settlement, env AgentEnv) float64
 	Execute(self *world.Settlement, all *[]world.Settlement, env AgentEnv, rng *randv2.Rand) simulation.Event
 }
 

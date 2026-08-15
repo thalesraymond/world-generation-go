@@ -21,14 +21,17 @@ const (
 )
 
 // NewAgentEnv adapts the live world state to the agent.AgentEnv interface so
-// domain actions can query suitability, expansion sites, and names without
-// importing adapter packages.
-func NewAgentEnv(worldState *world.State, graph *dompointcrawl.Graph, settlements *[]world.Settlement, usedNames map[string]bool) agent.AgentEnv {
+// domain actions can query suitability, expansion sites, names, and artifacts
+// without importing adapter packages. artifacts is the registry built from
+// world state at orchestration time; it may be nil to disable the artifact
+// query seam.
+func NewAgentEnv(worldState *world.State, graph *dompointcrawl.Graph, settlements *[]world.Settlement, usedNames map[string]bool, artifacts agent.ArtifactQuerier) agent.AgentEnv {
 	return &agentEnv{
 		worldState:  worldState,
 		graph:       graph,
 		settlements: settlements,
 		usedNames:   usedNames,
+		artifacts:   artifacts,
 	}
 }
 
@@ -38,6 +41,7 @@ type agentEnv struct {
 	graph       *dompointcrawl.Graph
 	settlements *[]world.Settlement
 	usedNames   map[string]bool
+	artifacts   agent.ArtifactQuerier
 }
 
 func (e *agentEnv) Suitability(x, y int) float64 {
@@ -81,4 +85,10 @@ func (e *agentEnv) GenerateName(rng *randv2.Rand) string {
 
 func (e *agentEnv) MaxActionRange() float64 {
 	return agentMaxActionRange
+}
+
+// Artifacts returns the registry wired at construction, or nil when artifact
+// integration is disabled.
+func (e *agentEnv) Artifacts() agent.ArtifactQuerier {
+	return e.artifacts
 }

@@ -44,7 +44,7 @@ func RunSimulation(ctx context.Context, config OrchestratorConfig) ([]domsim.Eve
 	for i := range worldState.Settlements {
 		usedNames[worldState.Settlements[i].Name] = true
 	}
-	env := NewAgentEnv(worldState, worldState.PointcrawlGraph, &worldState.Settlements, usedNames)
+	env := NewAgentEnv(worldState, worldState.PointcrawlGraph, &worldState.Settlements, usedNames, NewArtifactRegistry(worldState.Artifacts))
 
 	// Pre-size the settlements slice so expansion appends never reallocate
 	// mid-simulation; entities below anchor to the final backing array.

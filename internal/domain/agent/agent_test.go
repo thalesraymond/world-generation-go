@@ -5,6 +5,7 @@ import (
 	"slices"
 	"testing"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/artifact"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 )
 
@@ -17,6 +18,7 @@ type testEnv struct {
 	name          string
 	maxRange      float64
 	targetQueries int
+	artifacts     ArtifactQuerier
 }
 
 func (e *testEnv) Suitability(x, y int) float64 { return e.suitability }
@@ -26,6 +28,35 @@ func (e *testEnv) FindExpansionTarget(self *world.Settlement, rng *randv2.Rand) 
 }
 func (e *testEnv) GenerateName(rng *randv2.Rand) string { return e.name }
 func (e *testEnv) MaxActionRange() float64              { return e.maxRange }
+func (e *testEnv) Artifacts() ArtifactQuerier           { return e.artifacts }
+
+// testArtifactQuerier is a map-backed ArtifactQuerier stub keyed by
+// "ownerKind:ownerID".
+type testArtifactQuerier map[string][]artifact.Artifact
+
+func (q testArtifactQuerier) ArtifactsFor(ownerKind, ownerID string) []artifact.Artifact {
+	return q[ownerKind+":"+ownerID]
+}
+
+// heldArtifact builds a held artifact with a single power for score-bonus
+// tests. significance score 10 doubles the base magnitude (spec 7.6).
+func heldArtifact(id, powerType string, base int) artifact.Artifact {
+	var power artifact.Power
+	switch powerType {
+	case "combat":
+		power = artifact.CombatPower{Base: base}
+	case "influence":
+		power = artifact.InfluencePower{Base: base}
+	default:
+		power = artifact.NarrativePower{Effect: "test"}
+	}
+	return artifact.Artifact{
+		ID:                id,
+		Status:            "held",
+		SignificanceScore: 10,
+		Powers:            []artifact.Power{power},
+	}
+}
 
 func newTestRNG() *randv2.Rand {
 	return randv2.New(randv2.NewPCG(99, 13))
@@ -100,12 +131,12 @@ func TestExpandPreconditions(t *testing.T) {
 func TestExpandScore(t *testing.T) {
 	expander := baseSettlement()
 	expander.Goals = []string{"expand"}
-	if got := (ExpandAction{}).Score(&expander); got != ExpandScoreAligned {
+	if got := (ExpandAction{}).Score(&expander, nil); got != ExpandScoreAligned {
 		t.Fatalf("Expand score with expand goal = %v, want %v", got, ExpandScoreAligned)
 	}
 
 	neutral := baseSettlement()
-	if got := (ExpandAction{}).Score(&neutral); got != 1.0 {
+	if got := (ExpandAction{}).Score(&neutral, nil); got != 1.0 {
 		t.Fatalf("Expand score without goal = %v, want 1.0", got)
 	}
 }
@@ -220,7 +251,7 @@ func TestRaidPreconditions(t *testing.T) {
 
 func TestRaidScore(t *testing.T) {
 	self := baseSettlement()
-	if got := (RaidAction{}).Score(&self); got != 1.0 {
+	if got := (RaidAction{}).Score(&self, nil); got != 1.0 {
 		t.Fatalf("Raid score = %v, want 1.0", got)
 	}
 }
@@ -330,12 +361,12 @@ func TestConquerPreconditions(t *testing.T) {
 func TestConquerScore(t *testing.T) {
 	expansionist := baseSettlement()
 	expansionist.Goals = []string{"expand"}
-	if got := (ConquerAction{}).Score(&expansionist); got != ConquerScoreAligned {
+	if got := (ConquerAction{}).Score(&expansionist, nil); got != ConquerScoreAligned {
 		t.Fatalf("Conquer score with expand goal = %v, want %v", got, ConquerScoreAligned)
 	}
 
 	neutral := baseSettlement()
-	if got := (ConquerAction{}).Score(&neutral); got != 1.0 {
+	if got := (ConquerAction{}).Score(&neutral, nil); got != 1.0 {
 		t.Fatalf("Conquer score without goal = %v, want 1.0", got)
 	}
 }
@@ -383,12 +414,12 @@ func TestFortifyPreconditions(t *testing.T) {
 func TestFortifyScore(t *testing.T) {
 	defender := baseSettlement()
 	defender.Goals = []string{"defend"}
-	if got := (FortifyAction{}).Score(&defender); got != FortifyScoreAligned {
+	if got := (FortifyAction{}).Score(&defender, nil); got != FortifyScoreAligned {
 		t.Fatalf("Fortify score with defend goal = %v, want %v", got, FortifyScoreAligned)
 	}
 
 	grower := baseSettlement()
-	if got := (FortifyAction{}).Score(&grower); got != FortifyScoreGrow {
+	if got := (FortifyAction{}).Score(&grower, nil); got != FortifyScoreGrow {
 		t.Fatalf("Fortify score with grow goal = %v, want %v", got, FortifyScoreGrow)
 	}
 }
@@ -448,7 +479,7 @@ func TestAllyPreconditions(t *testing.T) {
 
 func TestAllyScore(t *testing.T) {
 	self := baseSettlement()
-	if got := (AllyAction{}).Score(&self); got != 1.0 {
+	if got := (AllyAction{}).Score(&self, nil); got != 1.0 {
 		t.Fatalf("Ally score = %v, want 1.0", got)
 	}
 }
@@ -495,13 +526,13 @@ func TestProsperPreconditionsAlwaysTrue(t *testing.T) {
 
 func TestProsperScore(t *testing.T) {
 	grower := baseSettlement()
-	if got := (ProsperAction{}).Score(&grower); got != ProsperScoreGrow {
+	if got := (ProsperAction{}).Score(&grower, nil); got != ProsperScoreGrow {
 		t.Fatalf("Prosper score with grow goal = %v, want %v", got, ProsperScoreGrow)
 	}
 
 	other := baseSettlement()
 	other.Goals = []string{"defend"}
-	if got := (ProsperAction{}).Score(&other); got != 1.0 {
+	if got := (ProsperAction{}).Score(&other, nil); got != 1.0 {
 		t.Fatalf("Prosper score without grow goal = %v, want 1.0", got)
 	}
 }
@@ -552,6 +583,130 @@ func TestProsperExecuteNilEnvZeroSuitability(t *testing.T) {
 
 	if all[0].Population != self.Population || all[0].Wealth != self.Wealth {
 		t.Fatalf("state changed with nil env: %+v", all[0])
+	}
+}
+
+// ── Power-to-action scoring ────────────────────────────
+
+// combatEnv wires a settlement's held combat artifact (base 2, score 10 →
+// effective 4) into the env querier.
+func combatEnv() *testEnv {
+	return &testEnv{artifacts: testArtifactQuerier{
+		"settlement:Alpha": {heldArtifact("artifact-a-0", "combat", 2)},
+	}}
+}
+
+func TestRaidScoreFactorsCombatArtifacts(t *testing.T) {
+	self := baseSettlement()
+	if got := (RaidAction{}).Score(&self, combatEnv()); got != 5.0 {
+		t.Fatalf("Raid score with combat artifact = %v, want 5.0 (1.0 base + 4.0 effective)", got)
+	}
+	if got := (RaidAction{}).Score(&self, &testEnv{}); got != 1.0 {
+		t.Fatalf("Raid score with no artifacts = %v, want 1.0", got)
+	}
+}
+
+func TestConquerScoreFactorsCombatArtifacts(t *testing.T) {
+	expansionist := baseSettlement()
+	expansionist.Goals = []string{"expand"}
+	if got := (ConquerAction{}).Score(&expansionist, combatEnv()); got != ConquerScoreAligned+4.0 {
+		t.Fatalf("Conquer score with combat artifact = %v, want %v", got, ConquerScoreAligned+4.0)
+	}
+
+	neutral := baseSettlement()
+	if got := (ConquerAction{}).Score(&neutral, combatEnv()); got != 5.0 {
+		t.Fatalf("Conquer score without goal = %v, want 5.0 (1.0 base + 4.0 effective)", got)
+	}
+}
+
+func TestFortifyScoreFactorsCombatArtifacts(t *testing.T) {
+	defender := baseSettlement()
+	defender.Goals = []string{"defend"}
+	if got := (FortifyAction{}).Score(&defender, combatEnv()); got != FortifyScoreAligned+4.0 {
+		t.Fatalf("Fortify score with combat artifact = %v, want %v", got, FortifyScoreAligned+4.0)
+	}
+}
+
+func TestAllyScoreFactorsInfluenceArtifacts(t *testing.T) {
+	self := baseSettlement()
+	env := &testEnv{artifacts: testArtifactQuerier{
+		"settlement:Alpha": {heldArtifact("artifact-a-0", "influence", 3)},
+	}}
+	// Base 3, score 10 → effective 6.
+	if got := (AllyAction{}).Score(&self, env); got != 7.0 {
+		t.Fatalf("Ally score with influence artifact = %v, want 7.0 (1.0 base + 6.0 effective)", got)
+	}
+}
+
+func TestScoreIgnoresNonMatchingPowerTypes(t *testing.T) {
+	env := &testEnv{artifacts: testArtifactQuerier{
+		"settlement:Alpha": {heldArtifact("artifact-a-0", "influence", 3)},
+	}}
+	self := baseSettlement()
+	if got := (RaidAction{}).Score(&self, env); got != 1.0 {
+		t.Fatalf("Raid score with influence artifact = %v, want 1.0 (no combat powers)", got)
+	}
+
+	env = &testEnv{artifacts: testArtifactQuerier{
+		"settlement:Alpha": {heldArtifact("artifact-a-0", "combat", 2)},
+	}}
+	if got := (AllyAction{}).Score(&self, env); got != 1.0 {
+		t.Fatalf("Ally score with combat artifact = %v, want 1.0 (no influence powers)", got)
+	}
+}
+
+func TestScoreStacksMultipleMatchingPowers(t *testing.T) {
+	env := &testEnv{artifacts: testArtifactQuerier{
+		"settlement:Alpha": {
+			heldArtifact("artifact-a-0", "combat", 2), // effective 4
+			heldArtifact("artifact-a-1", "combat", 3), // effective 6
+		},
+	}}
+	self := baseSettlement()
+	if got := (RaidAction{}).Score(&self, env); got != 11.0 {
+		t.Fatalf("Raid score with two combat artifacts = %v, want 11.0 (1.0 + 4.0 + 6.0)", got)
+	}
+}
+
+func TestScoreIgnoresDormantLostArtifacts(t *testing.T) {
+	lost := heldArtifact("artifact-a-0", "combat", 2)
+	lost.Status = "lost"
+	env := &testEnv{artifacts: testArtifactQuerier{"settlement:Alpha": {lost}}}
+
+	self := baseSettlement()
+	if got := (RaidAction{}).Score(&self, env); got != 1.0 {
+		t.Fatalf("Raid score with lost artifact = %v, want 1.0 (powers dormant)", got)
+	}
+}
+
+func TestScoreIgnoresNarrativeArtifacts(t *testing.T) {
+	env := &testEnv{artifacts: testArtifactQuerier{
+		"settlement:Alpha": {heldArtifact("artifact-a-0", "narrative", 0)},
+	}}
+	self := baseSettlement()
+	self.Goals = nil
+	for _, action := range []Action{RaidAction{}, ConquerAction{}, FortifyAction{}, AllyAction{}} {
+		if got := action.Score(&self, env); got != 1.0 {
+			t.Fatalf("%s score with narrative artifact = %v, want 1.0 (no magnitude)", action.Name(), got)
+		}
+	}
+}
+
+func TestScoreIgnoresOtherOwnersArtifacts(t *testing.T) {
+	env := &testEnv{artifacts: testArtifactQuerier{
+		"settlement:Beta": {heldArtifact("artifact-a-0", "combat", 2)},
+	}}
+	self := baseSettlement()
+	if got := (RaidAction{}).Score(&self, env); got != 1.0 {
+		t.Fatalf("Raid score with another settlement's artifact = %v, want 1.0", got)
+	}
+}
+
+func TestScoreActionThreadsPowerBonus(t *testing.T) {
+	self := baseSettlement()
+	got := ScoreAction(RaidAction{}, self.Goals, &self, combatEnv())
+	if got != 5.0 {
+		t.Fatalf("ScoreAction(Raid) with combat artifact = %v, want 5.0", got)
 	}
 }
 
@@ -607,15 +762,15 @@ func TestScoreActionGoalAlignment(t *testing.T) {
 	self := baseSettlement()
 	self.Goals = []string{"expand"}
 
-	if got := ScoreAction(ExpandAction{}, self.Goals, &self); got != ExpandScoreAligned {
+	if got := ScoreAction(ExpandAction{}, self.Goals, &self, nil); got != ExpandScoreAligned {
 		t.Fatalf("Expand score = %v, want %v", got, ExpandScoreAligned)
 	}
-	if got := ScoreAction(FortifyAction{}, self.Goals, &self); got != 1.0 {
+	if got := ScoreAction(FortifyAction{}, self.Goals, &self, nil); got != 1.0 {
 		t.Fatalf("Fortify score = %v, want 1.0", got)
 	}
 
 	self.Goals = []string{"grow"}
-	if got := ScoreAction(ProsperAction{}, self.Goals, &self); got != ProsperScoreGrow {
+	if got := ScoreAction(ProsperAction{}, self.Goals, &self, nil); got != ProsperScoreGrow {
 		t.Fatalf("Prosper score = %v, want %v", got, ProsperScoreGrow)
 	}
 }

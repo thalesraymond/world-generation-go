@@ -392,7 +392,7 @@ Narrative powers: no magnitude (effect string only).
 
 **Narrative powers:** don't scale (effect string is static).
 
-**Implementation (issue #75):** `EffectiveMagnitude` already existed on the concrete power types (`scaleMagnitude` in `internal/domain/artifact/power.go`); issue #75 adds the application gate. `AppliedPowers(a Artifact) []Power` returns the artifact's powers for every active status (`created`, `held`, `significant`, `rediscovered`) and `nil` otherwise — `lost` (dormant), `destroyed` (terminal), or any empty/unknown status (fail-closed). The future power-application consumer (§9.2 `ArtifactQuerier`, deferred until power-to-action integration lands) gates on the returned slice, never on the stored `Powers` field — the powers themselves are never mutated by lifecycle steps, so the artifact keeps them for export and later rediscovery.
+**Implementation (issue #75):** `EffectiveMagnitude` already existed on the concrete power types (`scaleMagnitude` in `internal/domain/artifact/power.go`); issue #75 adds the application gate. `AppliedPowers(a Artifact) []Power` returns the artifact's powers for every active status (`created`, `held`, `significant`, `rediscovered`) and `nil` otherwise — `lost` (dormant), `destroyed` (terminal), or any empty/unknown status (fail-closed). The power-application consumer (§9.2 `ArtifactQuerier`, landed in issue #76) gates on the returned slice, never on the stored `Powers` field — the powers themselves are never mutated by lifecycle steps, so the artifact keeps them for export and later rediscovery.
 
 ### 7.7 Power loss/transfer behavior
 
@@ -558,6 +558,13 @@ func (r *ArtifactRegistry) Unlose(id, newOwnerKind, newOwnerID, eventID string) 
 - `ArtifactsFor` is the query seam for power application.
 - `Unlose` is the named interface for expedition discovery (implementation deferred).
 
+**Implementation (issue #76, in `internal/usecase/simulation/artifacts.go`):**
+
+- `ArtifactRegistry` mirrors the `FigureResolver` pattern (usecase/simulation/chronicle.go) and lives next to it in the usecase package. `NewArtifactRegistry` indexes world-state artifacts in slice order: `byID` maps ID → artifact, `byOwner` maps `ownerKey{kind, id}` → artifacts in world-state order, so queries are deterministic.
+- Owner keys mirror the exporter's owner resolution (§8, `artifactOwner` in `internal/infra/exporter/artifacts.go`): the last provenance entry (spec 3.1) for artifacts with provenance, the `lost` bucket for artifacts without provenance (planted relics begin lost pre-timeline), and the `destroyed` bucket for destroyed artifacts regardless of provenance (terminal, spec 6.6).
+- The registry is built at orchestration time in `RunSimulation` from `world.State.Artifacts` — at that point the planted relics (all `lost`, so powers dormant) — and handed to the agent env (§9.2). Artifacts only become held in post-processing, after the simulation loop, so the power bonus is inert in current runs by design; the seam is live and the query path is fully tested.
+- `Unlose` is a stub in the shape the spec names: it validates the artifact exists and is `lost` (errors otherwise), flips its status to `held`, and re-indexes it under the new owner so `ArtifactsFor` finds it (appended after existing entries, deterministic). Minting the rediscovery `Discovery` event and recording the provenance entry — `eventID` is reserved for that event — is deferred to the expedition implementation (§9.5).
+
 ### 9.2 Power application seam
 
 Action scoring modifier:
@@ -575,9 +582,24 @@ type ArtifactQuerier interface {
 
 `agent.Action.Score()` queries artifacts via `AgentEnv.ArtifactsFor()` and factors in relevant powers during decision-making.
 
+**Implementation (issue #76, in `internal/domain/agent/action.go` and `internal/usecase/simulation/env.go`):**
+
+- `AgentEnv` is a domain interface, so `ArtifactQuerier` is declared next to it in `internal/domain/agent/action.go` (domain cannot import the usecase layer); the usecase `ArtifactRegistry` implements it (`var _ agent.ArtifactQuerier = (*ArtifactRegistry)(nil)`).
+- The interface gains an `Artifacts() ArtifactQuerier` accessor — the concrete `agentEnv` adapter carries the registry as a field (the "Artifacts field" of the spec sketch, mapped onto the interface), wired at construction by `NewAgentEnv(worldState, graph, settlements, usedNames, artifacts)`; a nil querier disables the seam.
+- `Action.Score` gains the `env AgentEnv` parameter (it previously had no env access) and `ScoreAction` threads it through from `ChooseAction`.
+- The bonus sums `EffectiveMagnitude` over the settlement's artifacts (`ArtifactsFor("settlement", self.Name)`) gated by `artifact.AppliedPowers` (§7.6) — lost artifacts are dormant, destroyed artifacts are terminal — and only for the power types the action cares about; a nil env or querier yields zero.
+
 ### 9.3 Power-to-action mapping
 
 Hardcoded per action. Each `agent.Action` knows which power types it cares about and filters accordingly. No speculative abstraction.
+
+**Implementation (issue #76, in `internal/domain/agent/actions.go`):**
+
+- The mapping is hardcoded inside each action's `Score` via the shared `artifactPowerBonus(env, ownerID, powerTypes...)` helper, which filters held artifacts by power type and sums effective magnitudes (narrative powers have no magnitude and contribute nothing even if matched):
+  - `Raid`, `Conquer`, `Fortify` → `combat` (military strength).
+  - `Ally` → `influence` (political sway).
+  - `Expand`, `Prosper` → none (no mechanical link).
+- Covered by deterministic unit tests: per-action bonuses, stacking multiple matching powers, non-matching/dormant/narrative/other-owner artifacts adding nothing, and `ScoreAction` threading the bonus.
 
 ### 9.4 War hooks
 
@@ -586,6 +608,8 @@ Deferred entirely. No new interface. Wars produce events with `ArtifactID` field
 ### 9.5 Expedition discovery interface
 
 Deferred. Spec names `ArtifactRegistry.Unlose()` but leaves the interface shape undefined until expeditions are specced.
+
+**Implementation (issue #76):** `Unlose` exists as a stub (§9.1): it flips a `lost` artifact to `held` under a new owner and re-indexes it, but does not mint the rediscovery event or record provenance — the expedition implementation owns those. The `eventID` parameter is reserved for that event.
 
 ### 9.6 Narrative power integration
 

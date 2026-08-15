@@ -4,12 +4,13 @@ import (
 	randv2 "math/rand/v2"
 	"testing"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/artifact"
 	dompointcrawl "github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 )
 
 func TestNewAgentEnvReturnsAgentEnv(t *testing.T) {
-	env := NewAgentEnv(nil, nil, nil, nil)
+	env := NewAgentEnv(nil, nil, nil, nil, nil)
 	if env == nil {
 		t.Fatal("NewAgentEnv returned nil")
 	}
@@ -19,7 +20,7 @@ func TestAgentEnvSuitability(t *testing.T) {
 	ws := world.NewState(4, 4)
 	ws.Suitability[5] = 0.7
 
-	env := NewAgentEnv(ws, nil, nil, nil)
+	env := NewAgentEnv(ws, nil, nil, nil, nil)
 
 	if got := env.Suitability(1, 1); got != 0.7 {
 		t.Errorf("Suitability(1, 1) = %v, want 0.7", got)
@@ -33,7 +34,7 @@ func TestAgentEnvSuitability(t *testing.T) {
 }
 
 func TestAgentEnvSuitabilityNilState(t *testing.T) {
-	env := NewAgentEnv(nil, nil, nil, nil)
+	env := NewAgentEnv(nil, nil, nil, nil, nil)
 	if got := env.Suitability(0, 0); got != 0 {
 		t.Errorf("Suitability with nil state = %v, want 0", got)
 	}
@@ -43,7 +44,7 @@ func TestAgentEnvFindExpansionTargetNilGraph(t *testing.T) {
 	self := &world.Settlement{Name: "Haven", X: 1, Y: 1, Faction: "testers"}
 	settlements := []world.Settlement{*self}
 
-	env := NewAgentEnv(nil, nil, &settlements, nil)
+	env := NewAgentEnv(nil, nil, &settlements, nil, nil)
 	if x, y, ok := env.FindExpansionTarget(self, randv2.New(randv2.NewPCG(1, 0))); ok {
 		t.Errorf("FindExpansionTarget with nil graph = (%d, %d, true), want ok=false", x, y)
 	}
@@ -56,7 +57,7 @@ func TestAgentEnvFindExpansionTarget(t *testing.T) {
 	self := &world.Settlement{Name: "Haven", X: 1, Y: 1, Faction: "testers"}
 	settlements := []world.Settlement{*self}
 
-	env := NewAgentEnv(nil, graph, &settlements, nil)
+	env := NewAgentEnv(nil, graph, &settlements, nil, nil)
 	x, y, ok := env.FindExpansionTarget(self, randv2.New(randv2.NewPCG(2, 0)))
 	if !ok {
 		t.Fatal("FindExpansionTarget did not find the ruin node")
@@ -67,7 +68,7 @@ func TestAgentEnvFindExpansionTarget(t *testing.T) {
 }
 
 func TestAgentEnvGenerateNameUnique(t *testing.T) {
-	env := NewAgentEnv(nil, nil, nil, map[string]bool{"Haven": true})
+	env := NewAgentEnv(nil, nil, nil, map[string]bool{"Haven": true}, nil)
 	rng := randv2.New(randv2.NewPCG(3, 0))
 
 	first := env.GenerateName(rng)
@@ -85,8 +86,29 @@ func TestAgentEnvGenerateNameUnique(t *testing.T) {
 }
 
 func TestAgentEnvMaxActionRange(t *testing.T) {
-	env := NewAgentEnv(nil, nil, nil, nil)
+	env := NewAgentEnv(nil, nil, nil, nil, nil)
 	if got := env.MaxActionRange(); got != agentMaxActionRange {
 		t.Errorf("MaxActionRange() = %v, want %v", got, agentMaxActionRange)
+	}
+}
+
+func TestAgentEnvArtifacts(t *testing.T) {
+	registry := NewArtifactRegistry([]artifact.Artifact{
+		{ID: "artifact-ruin-0", Status: "lost"},
+	})
+	env := NewAgentEnv(nil, nil, nil, nil, registry)
+
+	if got := env.Artifacts(); got != registry {
+		t.Errorf("Artifacts() = %v, want the wired registry", got)
+	}
+	if got, ok := registry.Get("artifact-ruin-0"); !ok || got.ID != "artifact-ruin-0" {
+		t.Errorf("registry query through env failed: got %+v, ok=%v", got, ok)
+	}
+}
+
+func TestAgentEnvArtifactsNil(t *testing.T) {
+	env := NewAgentEnv(nil, nil, nil, nil, nil)
+	if got := env.Artifacts(); got != nil {
+		t.Errorf("Artifacts() with nil querier = %v, want nil", got)
 	}
 }
