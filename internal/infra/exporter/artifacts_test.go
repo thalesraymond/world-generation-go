@@ -547,6 +547,70 @@ func TestExportArtifactsLostBannerUsesLossYear(t *testing.T) {
 	}
 }
 
+func TestExportArtifactsDestroyedBanner(t *testing.T) {
+	state := &world.State{
+		Artifacts: []artifact.Artifact{
+			{
+				ID:                 "artifact-settlement-0",
+				Name:               "Crown of Deepcrest",
+				Type:               "crown",
+				SignificanceSource: "historical",
+				Description:        "A crown worn by the first king of Deepcrest.",
+				Status:             "destroyed",
+				SignificanceScore:  5,
+				IsSignificant:      true,
+				PivotalEventID:     "event-42-0",
+				SignificanceYear:   42,
+				Provenance: []artifact.ProvenanceEntry{
+					{Year: 12, Owner: artifact.Owner{Kind: "figure", ID: "Deepcrest-3"}, EventType: "Discovery", EventID: "event-12-0"},
+					{Year: 287, Owner: artifact.Owner{Kind: "settlement", ID: "Ironforge"}, EventType: "Conquest", EventID: "event-287-0"},
+				},
+				AssociatedEventIDs: []string{"event-12-0", "event-287-0"},
+				// The domain pass cleared the powers on destruction (spec
+				// 7.7); the exporter fixture mirrors the pipeline output.
+				Powers: nil,
+			},
+		},
+	}
+
+	targetDir := t.TempDir()
+	if err := ExportArtifacts(state, nil, targetDir); err != nil {
+		t.Fatalf("ExportArtifacts() error = %v", err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(targetDir, "artifacts", "Crown of Deepcrest.md"))
+	if err != nil {
+		t.Fatalf("read artifact file: %v", err)
+	}
+
+	content := string(data)
+
+	wantSubstrings := []string{
+		`status: "destroyed"`,
+		// The terminal status banner (spec 8.5) uses the destruction year
+		// from the terminal provenance entry.
+		"> **Status:** Destroyed in Year 287",
+		// Owner rendering shows the terminal state, not the last owner.
+		`owner_kind: "destroyed"`,
+		// Powers vanish on destruction (spec 7.7): the frontmatter list is
+		// empty and the body renders the no-powers placeholder.
+		"powers: []",
+		"_No powers recorded._",
+		// The terminal timeline entry renders _Destroyed_ in the owner cell.
+		"| 287 | Conquest | _Destroyed_ |",
+	}
+	for _, want := range wantSubstrings {
+		if !strings.Contains(content, want) {
+			t.Errorf("artifact file missing %q\n%s", want, content)
+		}
+	}
+	for _, forbidden := range []string{"Lost since", `owner_kind: "figure"`, `owner_id: "Ironforge"`} {
+		if strings.Contains(content, forbidden) {
+			t.Errorf("artifact file must not contain %q\n%s", forbidden, content)
+		}
+	}
+}
+
 func TestExportArtifactsLostBannerNeverFoundUsesHorizon(t *testing.T) {
 	t.Run("with events falls back to the horizon", func(t *testing.T) {
 		// A relic that began lost and was never found has no lost provenance
@@ -622,6 +686,39 @@ func TestExportArtifactsNoBannerForActiveStatuses(t *testing.T) {
 		if strings.Contains(string(data), "> **Status:**") {
 			t.Errorf("%s renders a terminal banner despite being held/significant:\n%s", name, data)
 		}
+	}
+}
+
+func TestExportArtifactsDestroyedIndexCell(t *testing.T) {
+	state := &world.State{
+		Artifacts: []artifact.Artifact{
+			{
+				ID:                 "artifact-settlement-0",
+				Name:               "Crown of Deepcrest",
+				Type:               "crown",
+				SignificanceSource: "historical",
+				Status:             "destroyed",
+				SignificanceScore:  5,
+				IsSignificant:      true,
+				Provenance: []artifact.ProvenanceEntry{
+					{Year: 287, Owner: artifact.Owner{Kind: "settlement", ID: "Ironforge"}, EventType: "Conquest", EventID: "event-287-0"},
+				},
+			},
+		},
+	}
+
+	targetDir := t.TempDir()
+	if err := ExportArtifacts(state, nil, targetDir); err != nil {
+		t.Fatalf("ExportArtifacts() error = %v", err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(targetDir, "artifacts", "Index.md"))
+	if err != nil {
+		t.Fatalf("read index file: %v", err)
+	}
+	// Spec 8.6: the index Current Owner cell shows the terminal state.
+	if want := "| [[Crown of Deepcrest]] | crown | destroyed | _Destroyed_ |"; !strings.Contains(string(data), want) {
+		t.Errorf("index file missing %q\n%s", want, data)
 	}
 }
 

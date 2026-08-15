@@ -2,6 +2,7 @@ package artifact
 
 import (
 	"fmt"
+	randv2 "math/rand/v2"
 
 	"github.com/thalesraymond/world-generation-go/internal/domain/simulation"
 )
@@ -37,7 +38,16 @@ import (
 // while lost. sig may be the zero value to disable the owner fallback, and
 // transfers may be the zero value to disable heir/treasury resolution (death
 // transfers then record the lost fallback).
-func PostProcess(artifacts []Artifact, events []simulation.Event, sig SignificanceContext, transfers TransferContext) error {
+//
+// Destruction (spec 6.6) rides the same walk: per terminating event, per
+// terminated artifact, destroyIfDrawn performs a seeded draw on the artifacts
+// lane (rng). A passing draw marks the artifact destroyed and terminal —
+// status "destroyed", a destruction provenance entry, powers cleared — and
+// every subsequent event skips it entirely (no transfers, no associations,
+// no significance contributions). rng may be nil to disable destruction
+// draws entirely; the pipeline always supplies the artifacts lane, so
+// identical seeds still produce identical outcomes.
+func PostProcess(artifacts []Artifact, events []simulation.Event, sig SignificanceContext, transfers TransferContext, rng *randv2.Rand) error {
 	byID := make(map[string]*Artifact, len(artifacts))
 	byIdx := make(map[string]int, len(artifacts))
 	for i := range artifacts {
@@ -55,7 +65,7 @@ func PostProcess(artifacts []Artifact, events []simulation.Event, sig Significan
 		event.ID = fmt.Sprintf("event-%d-%d", event.Year, yearCounts[event.Year])
 		yearCounts[event.Year]++
 
-		terminated := recordTransfers(event, artifacts, byID, transfers)
+		terminated := recordTransfers(event, artifacts, byID, transfers, rng)
 		if event.ArtifactID == "" {
 			continue
 		}
@@ -63,6 +73,22 @@ func PostProcess(artifacts []Artifact, events []simulation.Event, sig Significan
 		a, ok := byID[event.ArtifactID]
 		if !ok {
 			return fmt.Errorf("event %s references unknown artifact %q", event.ID, event.ArtifactID)
+		}
+		// A destroyed artifact is terminal (spec 6.6): it exits all further
+		// lifecycle processing, so no later event associates with it or
+		// contributes significance. The destruction event itself was already
+		// associated by recordTransfers above and keeps its significance
+		// weight (spec 6.1: the natural lifecycle event keeps its weight);
+		// only the association and provenance are skipped here.
+		if a.Status == "destroyed" {
+			if weight := eventWeights[event.Category]; weight > 0 {
+				eventContributions[byIdx[event.ArtifactID]] = append(eventContributions[byIdx[event.ArtifactID]], significanceEvent{
+					year:    event.Year,
+					weight:  weight,
+					eventID: event.ID,
+				})
+			}
+			continue
 		}
 		if !containsArtifact(terminated, a) {
 			a.AssociatedEventIDs = append(a.AssociatedEventIDs, event.ID)

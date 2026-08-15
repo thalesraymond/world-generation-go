@@ -305,6 +305,14 @@ Synthetic lifecycle events carry **no significance weight** — they are a separ
 - Terminal: status `destroyed`, provenance records it, artifact exits all further lifecycle processing.
 - The note remains in export with a terminal timeline entry.
 
+**Implementation (issue #71, in `internal/domain/artifact/destruction.go`):**
+
+- The destruction draw hooks the transfer walk (`recordTransfers`, both the first provenance walk and the emergence second walk): per terminating event in stream order, per terminated artifact in artifact order, one seeded draw (`destructionPercent` = 10%, spec 6.6 "low probability") on the `artifacts` RNG lane. The lane order is canonical across lifecycle features: fake-discovery draws (pre-walk) → destruction draws (both walks, stream order) → rediscovery draws (post-walk) → earned-power draws → emergence draws (second walk).
+- The draw triggers when the owner settlement is destroyed by Conquest, or when the owner figure dies. Every owner-figure `Death` stands in for "dies in war" — the simulation has no war category, so it cannot distinguish war deaths. `Raid` plunder never destroys an artifact and consumes no lane values; unresolvable spoils events (no aggressor) terminate nothing and consume no lane values.
+- On a pass the artifact becomes terminal: status `destroyed`, a provenance entry records the destruction — the terminal timeline entry, whose `Owner` is the owner at destruction and whose `EventID`/`EventType` name the natural event — and the artifact's powers vanish (spec 7.7). No transfer entry is written and no synthetic event is minted: the natural event IS the lifecycle event (spec 6.1), so it carries the `ArtifactID` (first-match-wins) and is associated.
+- Destroyed artifacts exit all further lifecycle processing: every subsequent terminating event skips them (no transfers, no associations, no `ArtifactID` attachment), and events referencing them later contribute no significance. The destruction event itself keeps its natural significance weight (spec 6.1) — the conquest that ended the artifact is itself significant — and it may be the pivotal event. Significance accrual ends at the destruction year (the destruction entry itself never accrues — it records the end of tenure, not an acquisition). They never enter the loss/rediscovery path (status is `destroyed`, never `lost`).
+- Export renders the terminal state: a `> **Status:** Destroyed in Year %d` banner (spec 8.5, year from the terminal provenance entry), `owner_kind: "destroyed"` with no `owner_id` in frontmatter, `_Destroyed_` in the index Current Owner cell and the terminal provenance row (spec 8.6).
+
 ### 6.7 Rise to significance
 
 - **Derived status, not an event**: `held → significant`.

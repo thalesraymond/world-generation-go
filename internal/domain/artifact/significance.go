@@ -129,10 +129,27 @@ func applySignificance(a *Artifact, events []significanceEvent, horizon int, sig
 // transition exclusive); settlement ownership awards the size-class lump sum
 // once at the acquisition year. While the artifact is lost nothing accrues
 // and event weights are skipped (spec 4.6).
+//
+// A destroyed artifact is terminal (spec 6.6): significance ends at the
+// destruction year. The destruction provenance entry itself never accrues
+// (it records the end of tenure, not an acquisition), and event weights
+// after the destruction year are skipped; the destruction event's own
+// weight counts (spec 6.1). The stream walk already stops recording
+// contributions for a destroyed artifact, so the event truncation here is
+// a defensive guard that keeps the invariant local to the accrual logic.
 func buildContributions(a *Artifact, events []significanceEvent, horizon int, sig SignificanceContext) []contribution {
 	var contribs []contribution
 
+	destroyed := a.Status == "destroyed"
+	destructionYear := 0
+	if destroyed && len(a.Provenance) > 0 {
+		destructionYear = a.Provenance[len(a.Provenance)-1].Year
+	}
+
 	for i := range a.Provenance {
+		if destroyed && i == len(a.Provenance)-1 {
+			continue
+		}
 		entry := a.Provenance[i]
 		toYear := horizon
 		if i+1 < len(a.Provenance) {
@@ -155,6 +172,9 @@ func buildContributions(a *Artifact, events []significanceEvent, horizon int, si
 
 	lost := lostRanges(a, horizon)
 	for _, e := range events {
+		if destroyed && e.year > destructionYear {
+			continue
+		}
 		if inLostRange(lost, e.year) {
 			continue
 		}

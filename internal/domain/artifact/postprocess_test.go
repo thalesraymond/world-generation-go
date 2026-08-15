@@ -16,7 +16,7 @@ func TestPostProcessAssignsEventIDs(t *testing.T) {
 		{Year: 3, Category: "Economy", Description: "E"},
 	}
 
-	if err := PostProcess(nil, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(nil, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -42,7 +42,7 @@ func TestPostProcessDeterministic(t *testing.T) {
 		copy(arts, artifacts)
 		evs := make([]simulation.Event, len(events))
 		copy(evs, events)
-		err := PostProcess(arts, evs, SignificanceContext{}, TransferContext{})
+		err := PostProcess(arts, evs, SignificanceContext{}, TransferContext{}, nil)
 		return arts, evs, err
 	}
 
@@ -75,7 +75,7 @@ func TestPostProcessAttachesArtifactIDToOwnerDeath(t *testing.T) {
 		{Year: 6, Category: "Birth", FigureID: "Deepcrest-3", Description: "birth"},
 	}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -103,7 +103,7 @@ func TestPostProcessAttachesArtifactIDToOwnerSettlementAttack(t *testing.T) {
 		{Year: 7, Category: "Conquest", SettlementName: "Haven", TargetSettlement: "Other", Description: "elsewhere"},
 	}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -140,7 +140,7 @@ func TestPostProcessDoesNotAttachLostArtifacts(t *testing.T) {
 		{Year: 5, Category: "Death", FigureID: "Deepcrest-1", Description: "dies"},
 	}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -162,7 +162,7 @@ func TestPostProcessTieBreakDeterministic(t *testing.T) {
 		{Year: 5, Category: "Death", FigureID: "Deepcrest-1", Description: "owner dies"},
 	}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -181,7 +181,7 @@ func TestPostProcessDiscoveryRecordsProvenance(t *testing.T) {
 		{Year: 12, Category: "Discovery", FigureID: "Deepcrest-3", ArtifactID: "artifact-1", Description: "found"},
 	}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -210,7 +210,7 @@ func TestPostProcessDiscoveryWithoutFigureRecordsNoEntry(t *testing.T) {
 		{Year: 12, Category: "Discovery", ArtifactID: "artifact-1", Description: "found by no one"},
 	}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -232,7 +232,7 @@ func TestPostProcessAssociatesNonDiscoveryEvents(t *testing.T) {
 		{Year: 5, Category: "Death", FigureID: "Deepcrest-1", ArtifactID: "artifact-1", Description: "owner dies"},
 	}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -257,7 +257,7 @@ func TestPostProcessUnknownArtifactIDErrors(t *testing.T) {
 		{Year: 1, Category: "Discovery", FigureID: "Deepcrest-1", ArtifactID: "ghost", Description: "found"},
 	}
 
-	if err := PostProcess(nil, events, SignificanceContext{}, TransferContext{}); err == nil {
+	if err := PostProcess(nil, events, SignificanceContext{}, TransferContext{}, nil); err == nil {
 		t.Fatal("PostProcess with unknown ArtifactID: expected error, got nil")
 	}
 }
@@ -289,7 +289,7 @@ func TestPostProcessSignificanceWeightTable(t *testing.T) {
 		{Year: 9, Category: "Conquest", ArtifactID: "artifact-1", Description: "conquest"},
 	}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -335,7 +335,7 @@ func TestPostProcessSignificanceSingleEventPerCategory(t *testing.T) {
 				{Year: 5, Category: tc.category, ArtifactID: "artifact-1", Description: "event"},
 			}
 
-			if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+			if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 				t.Fatalf("PostProcess: %v", err)
 			}
 
@@ -366,7 +366,7 @@ func TestPostProcessSignificanceLatchIsMonotonic(t *testing.T) {
 			{Year: 5, Category: "War", ArtifactID: "artifact-1", Description: "war again"},
 		}
 
-		if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+		if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 			t.Fatalf("PostProcess: %v", err)
 		}
 
@@ -400,7 +400,7 @@ func TestPostProcessSignificanceLatchIsMonotonic(t *testing.T) {
 			{Year: 2, Category: "War", ArtifactID: "artifact-1", Description: "war"},
 		}
 
-		if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+		if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 			t.Fatalf("PostProcess: %v", err)
 		}
 
@@ -437,7 +437,7 @@ func TestPostProcessSignificanceFigureAnnualAccrual(t *testing.T) {
 		},
 	}
 
-	if err := PostProcess(artifacts, events, sig, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, sig, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -485,7 +485,7 @@ func TestPostProcessSignificanceSettlementLumpSum(t *testing.T) {
 			}}
 			sig := SignificanceContext{SettlementClass: map[string]string{"Ironforge": tc.class}}
 
-			if err := PostProcess(artifacts, nil, sig, TransferContext{}); err != nil {
+			if err := PostProcess(artifacts, nil, sig, TransferContext{}, nil); err != nil {
 				t.Fatalf("PostProcess: %v", err)
 			}
 
@@ -525,7 +525,7 @@ func TestPostProcessSignificanceSettlementLumpSum(t *testing.T) {
 		}
 		sig := SignificanceContext{SettlementClass: map[string]string{"Ironforge": "City"}}
 
-		if err := PostProcess(artifacts, events, sig, TransferContext{}); err != nil {
+		if err := PostProcess(artifacts, events, sig, TransferContext{}, nil); err != nil {
 			t.Fatalf("PostProcess: %v", err)
 		}
 
@@ -572,7 +572,7 @@ func TestPostProcessSignificanceFreezesWhileLost(t *testing.T) {
 		},
 	}
 
-	if err := PostProcess(artifacts, events, sig, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, sig, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -610,7 +610,7 @@ func TestPostProcessSignificanceIntrinsicBypass(t *testing.T) {
 		{Year: 4, Category: "War", ArtifactID: "artifact-ruin-0", Description: "war"},
 	}
 
-	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}); err != nil {
+	if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, nil); err != nil {
 		t.Fatalf("PostProcess: %v", err)
 	}
 
@@ -669,7 +669,7 @@ func TestPostProcessSignificanceDeterministic(t *testing.T) {
 		copy(arts, artifacts)
 		evs := make([]simulation.Event, len(events))
 		copy(evs, events)
-		err := PostProcess(arts, evs, sig, TransferContext{})
+		err := PostProcess(arts, evs, sig, TransferContext{}, nil)
 		return arts, evs, err
 	}
 

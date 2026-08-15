@@ -510,14 +510,15 @@ func TestEmergencePassRediscoveryClosesLostSpan(t *testing.T) {
 		},
 	}
 
-	got, _, err := EmergencePass(artifacts, events, figures, sig, TransferContext{}, artifactsRNG(2))
+	got, _, err := EmergencePass(artifacts, events, figures, sig, TransferContext{}, artifactsRNG(1))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
 
 	a := got[0]
-	// Seed 2: the rediscovery gate (5) passes, so the lost span [5, 12) is
-	// closed by the synthetic Discovery at the horizon.
+	// Seed 1: the death destruction draw (99) fails, so the degenerate death
+	// records the lost fallback; the rediscovery gate (10) passes, so the
+	// lost span [5, 12) is closed by the synthetic Discovery at the horizon.
 	if a.Status != "held" {
 		t.Errorf("status = %q, want held (rediscovered)", a.Status)
 	}
