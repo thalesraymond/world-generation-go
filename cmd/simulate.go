@@ -13,6 +13,7 @@ import (
 	appconfig "github.com/thalesraymond/world-generation-go/config"
 	adapter "github.com/thalesraymond/world-generation-go/internal/adapter/simulation"
 	"github.com/thalesraymond/world-generation-go/internal/domain/agent"
+	"github.com/thalesraymond/world-generation-go/internal/domain/artifact"
 	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	dompointcrawl "github.com/thalesraymond/world-generation-go/internal/domain/pointcrawl"
 	"github.com/thalesraymond/world-generation-go/internal/domain/settlement"
@@ -275,6 +276,10 @@ func newSimulateCommand() *cobra.Command {
 			}()
 			sim.Run(eventChan)
 			wg.Wait()
+
+			if err := artifact.PostProcess(worldState.Artifacts, events); err != nil {
+				return fmt.Errorf("post-process artifact state: %w", err)
+			}
 
 			stateJSON, err := json.Marshal(worldState)
 			if err != nil {

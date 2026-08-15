@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/thalesraymond/world-generation-go/internal/domain/artifact"
+	"github.com/thalesraymond/world-generation-go/internal/domain/figures"
 	"github.com/thalesraymond/world-generation-go/internal/domain/world"
 )
 
@@ -240,6 +241,65 @@ func TestExportArtifactsOwnerFromProvenance(t *testing.T) {
 	}
 	if !strings.Contains(string(indexData), "| [[Crown of Deepcrest]] | crown | lost | [[Deepcrest-3]] |") {
 		t.Errorf("index file missing Crown of Deepcrest row with owner link")
+	}
+}
+
+func TestExportArtifactsProvenanceLinksResolveToOwnerNotes(t *testing.T) {
+	state := &world.State{
+		Settlements: []world.Settlement{
+			{
+				Name: "Deepcrest",
+				Figures: []figures.HistoricalFigure{
+					{ID: "Deepcrest-3", Name: "Queen Elara"},
+				},
+			},
+			{
+				Name: "Ironforge",
+				Figures: []figures.HistoricalFigure{
+					{ID: "Ironforge-1", Name: "King Bran"},
+				},
+			},
+		},
+		Artifacts: []artifact.Artifact{
+			{
+				ID:                 "artifact-settlement-0",
+				Name:               "Crown of Deepcrest",
+				Type:               "crown",
+				SignificanceSource: "historical",
+				Status:             "held",
+				SignificanceScore:  5,
+				IsSignificant:      true,
+				SignificanceYear:   12,
+				Provenance: []artifact.ProvenanceEntry{
+					{Year: 12, Owner: artifact.Owner{Kind: "figure", ID: "Deepcrest-3"}, EventType: "Discovery", EventID: "event-12-0"},
+					{Year: 42, Owner: artifact.Owner{Kind: "settlement", ID: "Ironforge"}, EventType: "War", EventID: "event-42-0"},
+					{Year: 287, Owner: artifact.Owner{Kind: "lost", ID: ""}, EventType: "Owner death", EventID: "event-287-1"},
+				},
+				AssociatedEventIDs: []string{"event-12-0", "event-42-0", "event-287-1"},
+			},
+		},
+	}
+
+	targetDir := t.TempDir()
+	if err := ExportArtifacts(state, targetDir); err != nil {
+		t.Fatalf("ExportArtifacts() error = %v", err)
+	}
+
+	data, err := os.ReadFile(filepath.Join(targetDir, "artifacts", "Crown of Deepcrest.md"))
+	if err != nil {
+		t.Fatalf("read artifact file: %v", err)
+	}
+	content := string(data)
+
+	wantSubstrings := []string{
+		"| 12 | Discovery | [[Queen Elara]] |",
+		"| 42 | War | [[Ironforge]] |",
+		"| 287 | Owner death | _Lost_ |",
+	}
+	for _, want := range wantSubstrings {
+		if !strings.Contains(content, want) {
+			t.Errorf("artifact file missing %q", want)
+		}
 	}
 }
 
