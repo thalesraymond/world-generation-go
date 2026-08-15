@@ -57,17 +57,39 @@ type ReputationDelta struct {
 	Event string
 }
 
-// EmergencePass extends PostProcess with emergent artifact births (spec 5.3,
-// issue #72). It first runs the provenance and event-ID walk, then a second
-// stream-order walk: every qualifying event that does not already involve an
-// artifact performs a seeded rarity draw on the artifacts RNG lane. A passing
-// draw births a historical artifact at the event, owned by the event's
-// beneficiary (the aggressor settlement for Conquest spoils, the discovering
-// figure for a Discovery). A failing draw falls back to the owner-importance
-// rule: a figure beneficiary whose cumulative reputation crosses
-// reputationThreshold births one backdated artifact (one per figure per
-// pass). Settlement beneficiaries have no fallback — settlements track no
-// reputation.
+// EmergencePass is the post-processing pipeline entry: it extends PostProcess
+// (the provenance and event-ID walk, which also evaluates significance) with
+// the lifecycle steps and emergent artifact births (spec 5.3, issues #70,
+// #71, #72, #74). The artifacts RNG lane is consumed in a fixed order so the
+// in-flight branches merge coherently:
+//
+//  1. fake-discovery draws (issue #70): planted relics are handed to a
+//     figure through the temporary DiscoveryAgent seam; the minted synthetic
+//     Discovery events are PREPENDED to the stream and join the walk with
+//     walk-assigned IDs (fakeDiscovery).
+//  2. destruction draws (issue #71, reserved, in-walk).
+//  3. post-walk loss detection (issue #70): settlement owners whose FINAL
+//     class is Abandoned are recorded lost at the horizon year, and any
+//     artifact whose current owner is lost gets Status "lost" (applyLoss).
+//  4. rediscovery draws (issue #70): every artifact still lost draws a
+//     pass/fail gate on the lane; on a pass a synthetic Discovery event is
+//     APPENDED to the stream with a manually continued event ID and the
+//     artifact returns to held (rediscovery).
+//  5. significance evaluation (issue #74, reserved: earned powers hook
+//     there; unchanged today — PostProcess evaluates before the post-walk
+//     steps, which is safe because loss/rediscovery entries are dated at the
+//     horizon where nothing accrues).
+//  6. emergence draws (the second walk below).
+//
+// The second walk scans every qualifying event that does not already involve
+// an artifact and performs a seeded rarity draw on the artifacts RNG lane. A
+// passing draw births a historical artifact at the event, owned by the
+// event's beneficiary (the aggressor settlement for Conquest spoils, the
+// discovering figure for a Discovery). A failing draw falls back to the
+// owner-importance rule: a figure beneficiary whose cumulative reputation
+// crosses reputationThreshold births one backdated artifact (one per figure
+// per pass). Settlement beneficiaries have no fallback — settlements track
+// no reputation.
 //
 // The lane is consumed in a fixed order per qualifying event: type draw,
 // rarity-gate draw, then (on a birth) a name draw. Every draw happens inside
@@ -78,13 +100,23 @@ type ReputationDelta struct {
 // the same rule (recordTransfers applies to born artifacts only — the first
 // walk already handled the initial artifacts). transfers supplies the
 // figure lifecycle data for transfer destinations (spec 6.3).
-func EmergencePass(artifacts []Artifact, events []simulation.Event, figures []FigureContext, sigCtx SignificanceContext, transfers TransferContext, rng *randv2.Rand) ([]Artifact, error) {
+//
+// The pass extends the event stream (fake-discovery events are prepended,
+// rediscovery events appended), so it returns the extended slice; callers
+// must use the returned stream, not the one they passed in.
+func EmergencePass(artifacts []Artifact, events []simulation.Event, figures []FigureContext, sigCtx SignificanceContext, transfers TransferContext, rng *randv2.Rand) ([]Artifact, []simulation.Event, error) {
 	if rng == nil {
-		return nil, fmt.Errorf("emergence pass requires the artifacts RNG lane")
+		return nil, nil, fmt.Errorf("emergence pass requires the artifacts RNG lane")
 	}
+
+	agent := newFakeDiscoveryAgent(figures, rng)
+	events = fakeDiscovery(artifacts, events, agent)
 	if err := PostProcess(artifacts, events, sigCtx, transfers); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
+	horizon := HorizonYear(events)
+	applyLoss(artifacts, horizon, sigCtx)
+	events = rediscovery(artifacts, events, agent, rng, horizon)
 
 	byFigure := make(map[string]FigureContext, len(figures))
 	for _, f := range figures {
@@ -143,7 +175,22 @@ func EmergencePass(artifacts []Artifact, events []simulation.Event, figures []Fi
 		event.ArtifactID = born.ID
 		born.AssociatedEventIDs = append(born.AssociatedEventIDs, event.ID)
 	}
-	return artifacts, nil
+	return artifacts, events, nil
+}
+
+// HorizonYear returns the maximum event year in the stream, or 0 when the
+// stream is empty. Loss and rediscovery entries minted after the walk are
+// dated at the horizon: the world state records no historical population, so
+// settlement abandonment is only observable at pass end (spec 6.4 note). The
+// exporter uses the same definition for the banner fallback year.
+func HorizonYear(events []simulation.Event) int {
+	horizon := 0
+	for i := range events {
+		if events[i].Year > horizon {
+			horizon = events[i].Year
+		}
+	}
+	return horizon
 }
 
 // emergenceBeneficiary resolves the owner a born artifact is transferred to.

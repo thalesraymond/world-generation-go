@@ -433,7 +433,7 @@ func TestEmergencePassTransferChain(t *testing.T) {
 	run := func() ([]Artifact, []simulation.Event, error) {
 		evs := make([]simulation.Event, len(events))
 		copy(evs, events)
-		arts, err := EmergencePass(nil, evs, nil, SignificanceContext{}, TransferContext{}, artifactsRNG(1))
+		arts, evs, err := EmergencePass(nil, evs, nil, SignificanceContext{}, TransferContext{}, artifactsRNG(1))
 		return arts, evs, err
 	}
 
@@ -499,7 +499,7 @@ func TestEmergencePassDeathTransferChain(t *testing.T) {
 		{ID: "Deepcrest-4", Settlement: "Deepcrest", BirthYear: 4, Parents: []string{"Deepcrest-3"}},
 	}}
 
-	got, err := EmergencePass(nil, events, figures, SignificanceContext{}, transfers, artifactsRNG(1))
+	got, evs, err := EmergencePass(nil, events, figures, SignificanceContext{}, transfers, artifactsRNG(1))
 	if err != nil {
 		t.Fatalf("EmergencePass: %v", err)
 	}
@@ -518,7 +518,7 @@ func TestEmergencePassDeathTransferChain(t *testing.T) {
 	if owner := CurrentOwner(a); owner.Kind != "figure" || owner.ID != "Deepcrest-4" {
 		t.Errorf("current owner = %+v, want (figure, Deepcrest-4)", owner)
 	}
-	if events[1].ArtifactID != a.ID {
+	if evs[1].ArtifactID != a.ID {
 		t.Errorf("death event ArtifactID = %q, want %q", events[1].ArtifactID, a.ID)
 	}
 }

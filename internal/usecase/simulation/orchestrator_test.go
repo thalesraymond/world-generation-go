@@ -70,6 +70,70 @@ func TestRunSimulationDeterministic(t *testing.T) {
 	}
 }
 
+func TestRunSimulationPlantedRelicLifecycle(t *testing.T) {
+	events, worldState, err := ucsim.RunSimulation(context.Background(), ucsim.OrchestratorConfig{
+		Seed: 42, Width: 48, Height: 48, Years: 25,
+	})
+	if err != nil {
+		t.Fatalf("RunSimulation() error = %v", err)
+	}
+
+	// Every planted relic is fake-discovered at genesis year 0 by a drawn
+	// figure: provenance begins with a year-0 Discovery and the status is
+	// never the initial lost.
+	discovered := 0
+	for _, a := range worldState.Artifacts {
+		if a.SignificanceSource != "intrinsic" {
+			continue
+		}
+		discovered++
+		if len(a.Provenance) == 0 {
+			t.Errorf("planted relic %s has no provenance", a.ID)
+			continue
+		}
+		first := a.Provenance[0]
+		if first.Year != 0 || first.Owner.Kind != "figure" || first.EventType != "Discovery" {
+			t.Errorf("planted relic %s first provenance = %+v, want year-0 figure Discovery", a.ID, first)
+		}
+	}
+	if discovered == 0 {
+		t.Fatal("world has no planted relics to exercise the lifecycle")
+	}
+
+	// The synthetic discovery events reach the returned stream (the caller
+	// must consume the extended stream, not the pre-pass one).
+	sawGenesisDiscovery := false
+	for _, e := range events {
+		if e.Year == 0 && e.Category == "Discovery" && e.ArtifactID != "" {
+			sawGenesisDiscovery = true
+			break
+		}
+	}
+	if !sawGenesisDiscovery {
+		t.Error("no year-0 synthetic Discovery event reached the event stream")
+	}
+
+	// Same seed reproduces the identical lifecycle: the deterministic run
+	// below pins that the synthetic events and statuses are seeded, not
+	// incidental.
+	events2, state2, err := ucsim.RunSimulation(context.Background(), ucsim.OrchestratorConfig{
+		Seed: 42, Width: 48, Height: 48, Years: 25,
+	})
+	if err != nil {
+		t.Fatalf("RunSimulation() second run error = %v", err)
+	}
+	firstJSON, _ := json.Marshal(worldState.Artifacts)
+	secondJSON, _ := json.Marshal(state2.Artifacts)
+	if !bytes.Equal(firstJSON, secondJSON) {
+		t.Error("artifact lifecycle state differs across identical seeded runs")
+	}
+	ev1, _ := json.Marshal(events)
+	ev2, _ := json.Marshal(events2)
+	if !bytes.Equal(ev1, ev2) {
+		t.Error("event streams differ across identical seeded runs")
+	}
+}
+
 func TestRunSimulationInvalidDimensions(t *testing.T) {
 	events, worldState, err := ucsim.RunSimulation(context.Background(), ucsim.OrchestratorConfig{
 		Seed: 1, Width: 0, Height: 32, Years: 10,

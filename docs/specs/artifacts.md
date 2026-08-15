@@ -191,7 +191,7 @@ Class at acquisition, not later growth.
 
 **Implementation (issue #72, in `internal/domain/artifact/emergence.go`):**
 
-- `EmergencePass` runs the provenance/event-ID walk first, then a second stream-order walk; it returns the extended artifact slice.
+- `EmergencePass` runs the provenance/event-ID walk first (with the issue-#70 lifecycle steps around it, see §6.5), then a second stream-order walk; it returns the extended artifact slice and the extended event stream (the lifecycle steps mint events, so callers must use the returned stream).
 - Qualifying events are `Conquest` events with a `TargetSettlement` (spoils go to the aggressor settlement) and `Discovery` events naming a figure (the discovering figure). Events that already carry an `ArtifactID` (they involve an existing artifact) never trigger a draw — the spoils are that artifact.
 - Per qualifying event the artifacts lane is consumed in a fixed order: type draw, rarity-gate draw, then (on a birth) a name draw.
 - The type draw picks from the 5.6-weighted pool (common : rare = 2 : 1); the gate passes with 25% probability for common types and 10% for rare types.
@@ -287,6 +287,15 @@ Synthetic lifecycle events carry **no significance weight** — they are a separ
 - Happens **only via a `Discovery` event**.
 - Planted relics: temporary fake-discovery.
 - Historically-lost artifacts: seeded rediscovery chance in post-processing, minted as synthetic `Discovery`, or remain lost if the draw fails — deterministic from the `artifacts` lane.
+
+**Implementation (issue #70, in `internal/domain/artifact/discovery.go` and `loss.go`):**
+
+- `EmergencePass` is the pipeline entry; it consumes the artifacts lane in a fixed order so #70 (loss/rediscovery), #71 (destruction), and #74 (earned powers) merge coherently: fake-discovery draws → (destruction draws, #71) → post-walk loss detection → rediscovery draws → (earned-power draws, #74) → emergence draws. The pass extends the event stream, so it returns the extended stream; callers must use the return value.
+- Fake-discovery (§5.2) runs before the provenance walk, behind the temporary `DiscoveryAgent` interface — a seeded uniform figure draw on the artifacts lane, marked TODO until real expeditions exist (§9.5). Every planted relic (intrinsic source, still lost) draws one figure; a hit marks the relic `held` and mints a synthetic `Discovery` event at the genesis year carrying the relic's `ArtifactID`, PREPENDED to the stream so the walk assigns its ID (`event-0-{n}`) and records the first ownership via the existing Discovery provenance rule. When no figures exist the relic stays lost.
+- Loss (§6.4) is detected after the walk: the world state records no historical population, so abandonment is only observable at pass end. The owner settlement's FINAL class is read from the significance context; an abandoned owner is recorded lost at the horizon year (max event year, 0 with no events) with an `ArtifactLoss` provenance entry carrying no event ID (the loss is not a stream event) and Status becomes `lost`. Degenerate death transfers (no heir, no settlement; §6.3) are recorded mid-walk, and the same step propagates their Status to `lost`. Abandonment loss year is therefore always the horizon.
+- Rediscovery runs after loss detection: every artifact still `lost` — planted relics that failed fake-discovery, historically-lost artifacts, and abandonment losses — draws one pass/fail gate on the artifacts lane (fixed 50%). On a pass, the discovering figure is drawn through the same `DiscoveryAgent` seam and a synthetic `Discovery` event is minted at the horizon year, APPENDED to the stream with an ID continuing the walk's `event-{year}-{index}` scheme (index = count of events already at that year). The artifact records the rediscovery provenance entry — which closes the lost span for significance freezing — is associated with the event, and its Status returns to `held`. On a fail — or a pass with no figure available — the artifact stays lost and nothing is minted. Minted events carry `ArtifactID`, so the emergence second walk's "already" check skips them.
+- Significance (§4.6) freezes while lost via the existing lost-span logic: mid-stream lost entries freeze from the loss year to the next entry, and the synthetic rediscovery entry closes the span. Entries minted at the horizon have nothing after them, so the in-walk evaluation does not need to re-run.
+- Export (§8.5): the terminal banner uses the year of the artifact's most recent lost provenance entry — never the significance year, which is the creation year for intrinsic relics — falling back to the horizon year for relics lost before any recorded entry (planted relics never found).
 
 ### 6.6 Destruction
 
