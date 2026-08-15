@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/thalesraymond/world-generation-go/internal/domain/artifact"
 	"github.com/thalesraymond/world-generation-go/internal/geography/pointcrawl"
 )
 
@@ -96,9 +97,57 @@ func TestGeneratePlantedRelicsIntrinsicFields(t *testing.T) {
 	if a.AssociatedEventIDs != nil {
 		t.Errorf("AssociatedEventIDs = %v, want nil", a.AssociatedEventIDs)
 	}
-	if a.Powers != nil {
-		t.Errorf("Powers = %v, want nil", a.Powers)
+	if len(a.Powers) != 1 {
+		t.Errorf("Powers = %v, want exactly one intrinsic power", a.Powers)
 	}
+}
+
+func TestGeneratePlantedRelicsIntrinsicPowers(t *testing.T) {
+	wantTypes := []string{"weapon", "armor", "jewelry", "weapon", "armor", "crown", "relic", "tome"}
+	wantPowerTypes := map[string]string{
+		"weapon":  "combat",
+		"armor":   "combat",
+		"jewelry": "influence",
+		"crown":   "influence",
+		"relic":   "narrative",
+		"tome":    "narrative",
+	}
+
+	graph := pointcrawl.NewGraph()
+	for i := range wantTypes {
+		graph.AddNode(&pointcrawl.Node{ID: i, Name: fmt.Sprintf("Ruin-%d-%d", i, i), Kind: "ruin"})
+	}
+
+	artifacts := GeneratePlantedRelics(graph, 0)
+	if len(artifacts) != len(wantTypes) {
+		t.Fatalf("artifact count = %d, want %d", len(artifacts), len(wantTypes))
+	}
+
+	for i, a := range artifacts {
+		if len(a.Powers) != 1 {
+			t.Errorf("artifact[%d] (%s) Powers = %v, want exactly one intrinsic power", i, a.Type, a.Powers)
+			continue
+		}
+		if want := wantPowerTypes[a.Type]; a.Powers[0].Type() != want {
+			t.Errorf("artifact[%d] (%s) power type = %q, want %q", i, a.Type, a.Powers[0].Type(), want)
+		}
+		if source := powerSourceForTest(a.Powers[0]); source != "intrinsic" {
+			t.Errorf("artifact[%d] (%s) power source = %q, want intrinsic", i, a.Type, source)
+		}
+	}
+}
+
+// powerSourceForTest extracts the Source field from a power for assertions.
+func powerSourceForTest(p artifact.Power) string {
+	switch v := p.(type) {
+	case artifact.CombatPower:
+		return v.Source
+	case artifact.InfluencePower:
+		return v.Source
+	case artifact.NarrativePower:
+		return v.Source
+	}
+	return ""
 }
 
 func TestGeneratePlantedRelicsTypeRotatesOverVocabulary(t *testing.T) {

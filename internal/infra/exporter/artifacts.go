@@ -150,8 +150,7 @@ func artifactOwner(a artifact.Artifact) (kind, id string) {
 
 // artifactPowersYAML renders the powers list body for frontmatter. Each power
 // carries its type and type-specific fields; effective magnitude is scaled by
-// the artifact's significance score. Source tracking lands with issue #73, so
-// the source key is not emitted yet.
+// the artifact's significance score (spec 8.2).
 func artifactPowersYAML(powers []artifact.Power, score int) string {
 	var b strings.Builder
 	for _, p := range powers {
@@ -163,8 +162,32 @@ func artifactPowersYAML(powers []artifact.Power, score int) string {
 		case artifact.NarrativePower:
 			fmt.Fprintf(&b, "    effect: %q\n", v.Effect)
 		}
+		fmt.Fprintf(&b, "    source: %q\n", powerSource(p))
 	}
 	return b.String()
+}
+
+// powerSource returns the origin of a power ("intrinsic" for powers baked in
+// at creation, "earned" for event-granted powers). Powers saved before source
+// tracking existed are all intrinsic, so an empty source renders as
+// "intrinsic".
+func powerSource(p artifact.Power) string {
+	switch v := p.(type) {
+	case artifact.CombatPower:
+		return powerSourceOrIntrinsic(v.Source)
+	case artifact.InfluencePower:
+		return powerSourceOrIntrinsic(v.Source)
+	case artifact.NarrativePower:
+		return powerSourceOrIntrinsic(v.Source)
+	}
+	return ""
+}
+
+func powerSourceOrIntrinsic(source string) string {
+	if source == "" {
+		return "intrinsic"
+	}
+	return source
 }
 
 func buildArtifactBody(a artifact.Artifact, eventCategories map[string]string, links map[string]string) string {
@@ -234,8 +257,7 @@ func buildArtifactBody(a artifact.Artifact, eventCategories map[string]string, l
 
 // renderArtifactPowers renders the Powers section body. Combat and influence
 // powers render as a table per spec 8.3; narrative powers render effect
-// strings as prose. Source is intrinsic for all powers that exist before
-// earned powers land (issue #73).
+// strings as prose.
 func renderArtifactPowers(a artifact.Artifact) string {
 	var b strings.Builder
 	var tableRows []string
@@ -245,8 +267,8 @@ func renderArtifactPowers(a artifact.Artifact) string {
 		case artifact.NarrativePower:
 			narrativeLines = append(narrativeLines, fmt.Sprintf("- **%s:** %s", powerDisplayName(p.Type()), v.Effect))
 		default:
-			tableRows = append(tableRows, fmt.Sprintf("| %s | %d | %d | intrinsic |",
-				powerDisplayName(p.Type()), p.BaseMagnitude(), p.EffectiveMagnitude(a.SignificanceScore)))
+			tableRows = append(tableRows, fmt.Sprintf("| %s | %d | %d | %s |",
+				powerDisplayName(p.Type()), p.BaseMagnitude(), p.EffectiveMagnitude(a.SignificanceScore), powerSource(p)))
 		}
 	}
 	if len(tableRows) > 0 {

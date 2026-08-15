@@ -362,8 +362,9 @@ func TestExportArtifactsRendersPowers(t *testing.T) {
 				IsSignificant:      true,
 				SignificanceYear:   0,
 				Powers: []artifact.Power{
-					artifact.CombatPower{Base: 2},
-					artifact.NarrativePower{Effect: "reveals hidden knowledge"},
+					artifact.CombatPower{Base: 2, Source: "intrinsic"},
+					artifact.NarrativePower{Effect: "reveals hidden knowledge", Source: "intrinsic"},
+					artifact.InfluencePower{Base: 4, Source: "earned"},
 				},
 			},
 		},
@@ -381,10 +382,12 @@ func TestExportArtifactsRendersPowers(t *testing.T) {
 	content := string(data)
 
 	wantSubstrings := []string{
-		"powers:\n  - type: \"combat\"\n    base_magnitude: 2\n    effective_magnitude: 2",
-		"  - type: \"narrative\"\n    effect: \"reveals hidden knowledge\"",
+		"powers:\n  - type: \"combat\"\n    base_magnitude: 2\n    effective_magnitude: 2\n    source: \"intrinsic\"",
+		"  - type: \"narrative\"\n    effect: \"reveals hidden knowledge\"\n    source: \"intrinsic\"",
+		"  - type: \"influence\"\n    base_magnitude: 4\n    effective_magnitude: 5\n    source: \"earned\"",
 		"| Type | Base | Effective | Source |",
 		"| Combat | 2 | 2 | intrinsic |",
+		"| Influence | 4 | 5 | earned |",
 		"- **Narrative:** reveals hidden knowledge",
 	}
 	for _, want := range wantSubstrings {

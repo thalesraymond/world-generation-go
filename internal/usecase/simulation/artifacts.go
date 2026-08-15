@@ -37,15 +37,21 @@ func GeneratePlantedRelics(graph *pointcrawl.Graph, genesisYear int) []artifact.
 	artifacts := make([]artifact.Artifact, 0, len(ruinIDs))
 	for i, id := range ruinIDs {
 		node := graph.Nodes[id]
+		typ := artifactTypes[node.ID%len(artifactTypes)]
+		var powers []artifact.Power
+		if p, ok := artifact.IntrinsicPower(typ); ok {
+			powers = append(powers, p)
+		}
 		artifacts = append(artifacts, artifact.Artifact{
 			ID:                 fmt.Sprintf("artifact-ruin-%d", i),
 			Name:               "Relic of " + node.Name,
-			Type:               artifactTypes[node.ID%len(artifactTypes)],
+			Type:               typ,
 			SignificanceSource: "intrinsic",
 			Status:             "lost",
 			SignificanceScore:  3,
 			IsSignificant:      true,
 			SignificanceYear:   genesisYear,
+			Powers:             powers,
 		})
 	}
 	return artifacts

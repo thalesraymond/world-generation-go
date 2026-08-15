@@ -57,6 +57,16 @@ func TestEmergencePassDiscoveryBirthsArtifact(t *testing.T) {
 	if a.IsSignificant || a.SignificanceScore != 0 {
 		t.Errorf("Significance = (%v, %d), want (false, 0)", a.IsSignificant, a.SignificanceScore)
 	}
+	if len(a.Powers) != 1 {
+		t.Fatalf("Powers = %v, want exactly one intrinsic power", a.Powers)
+	}
+	cp, ok := a.Powers[0].(CombatPower)
+	if !ok {
+		t.Fatalf("power = %T, want CombatPower for a weapon", a.Powers[0])
+	}
+	if cp.Base != 2 || cp.Source != "intrinsic" {
+		t.Errorf("power = %+v, want CombatPower{Base: 2, Source: intrinsic}", cp)
+	}
 	wantProv := []ProvenanceEntry{
 		{Year: 12, Owner: Owner{Kind: "figure", ID: "Deepcrest-3"}, EventID: "event-12-0", EventType: "Discovery"},
 	}
@@ -429,6 +439,43 @@ func TestEmergencePassPreservesPostProcessBehavior(t *testing.T) {
 	for i, id := range wantIDs {
 		if events[i].ID != id {
 			t.Errorf("events[%d].ID = %q, want %q", i, events[i].ID, id)
+		}
+	}
+}
+
+func TestEmergencePassDeterministicWithPowers(t *testing.T) {
+	events := []simulation.Event{
+		{Year: 1, Category: "Birth", Description: "A"},
+		{Year: 2, Category: "Conquest", SettlementName: "Blackgate", TargetSettlement: "Ironforge", Description: "took Ironforge"},
+		{Year: 3, Category: "Discovery", FigureID: "Deepcrest-1", SettlementName: "Deepcrest", Description: "found"},
+		{Year: 4, Category: "Conquest", SettlementName: "Blackgate", TargetSettlement: "Haven", Description: "took Haven"},
+		{Year: 5, Category: "Discovery", FigureID: "D-1", SettlementName: "Haven", Description: "found"},
+	}
+	figures := []FigureContext{
+		{ID: "Deepcrest-1", Settlement: "Deepcrest"},
+		{ID: "D-1", Settlement: "Haven"},
+	}
+
+	run := func() []Artifact {
+		evs := make([]simulation.Event, len(events))
+		copy(evs, events)
+		rng := randv2.New(randv2.NewPCG(1, 2))
+		arts, err := EmergencePass(nil, evs, figures, SignificanceContext{}, rng)
+		if err != nil {
+			t.Fatalf("EmergencePass: %v", err)
+		}
+		return arts
+	}
+
+	first := run()
+	second := run()
+
+	if !reflect.DeepEqual(first, second) {
+		t.Errorf("identical seeded runs must mint identical artifacts including powers:\nfirst=%+v\nsecond=%+v", first, second)
+	}
+	for i, a := range first {
+		if len(a.Powers) != 1 {
+			t.Fatalf("artifact[%d] (%s) Powers = %v, want exactly one intrinsic power", i, a.Type, a.Powers)
 		}
 	}
 }
