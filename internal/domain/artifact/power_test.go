@@ -116,6 +116,138 @@ func TestPowerFromJSONUnknownType(t *testing.T) {
 	}
 }
 
+// poweredArtifact builds an artifact carrying one of each power kind so the
+// AppliedPowers status tests exercise the full slice.
+func poweredArtifact(status string) Artifact {
+	return Artifact{
+		ID:     "artifact-1",
+		Name:   "Crown of Deepcrest",
+		Type:   "crown",
+		Status: status,
+		Powers: []Power{
+			CombatPower{Base: 2, Source: "intrinsic"},
+			InfluencePower{Base: 5, Source: "intrinsic"},
+			NarrativePower{Effect: "inspires faith in followers", Source: "intrinsic"},
+		},
+	}
+}
+
+func TestAppliedPowersDormantWhileLost(t *testing.T) {
+	a := poweredArtifact("lost")
+	if len(a.Powers) == 0 {
+		t.Fatal("fixture must carry powers: dormancy means they exist but do not apply")
+	}
+	if got := AppliedPowers(a); got != nil {
+		t.Errorf("AppliedPowers(lost) = %v, want nil (powers dormant, spec 7.7)", got)
+	}
+}
+
+func TestAppliedPowersResumeOnRediscovery(t *testing.T) {
+	a := poweredArtifact("lost")
+	if AppliedPowers(a) != nil {
+		t.Fatal("powers must be dormant while lost")
+	}
+	// Rediscovery transitions status back to held (issue #70); powers resume.
+	a.Status = "held"
+	if got := AppliedPowers(a); !reflect.DeepEqual(got, a.Powers) {
+		t.Errorf("AppliedPowers(held after loss) = %v, want %v (powers resume, spec 7.7)", got, a.Powers)
+	}
+}
+
+func TestAppliedPowersDestroyed(t *testing.T) {
+	// Destruction clears powers (spec 7.7); the seam also never applies
+	// powers to a terminal artifact even if one carries them.
+	a := poweredArtifact("destroyed")
+	if got := AppliedPowers(a); got != nil {
+		t.Errorf("AppliedPowers(destroyed) = %v, want nil (powers vanish)", got)
+	}
+}
+
+func TestAppliedPowersActiveStatuses(t *testing.T) {
+	for _, status := range []string{"created", "held", "significant", "rediscovered"} {
+		t.Run(status, func(t *testing.T) {
+			a := poweredArtifact(status)
+			if got := AppliedPowers(a); !reflect.DeepEqual(got, a.Powers) {
+				t.Errorf("AppliedPowers(%s) = %v, want %v", status, got, a.Powers)
+			}
+		})
+	}
+}
+
+// TestAppliedPowersUnaffectedByOwnershipChange pins the transfer half of
+// spec 7.7: powers are intrinsic to the artifact, so an ownership change —
+// recorded here as a new provenance entry, exactly what the transfer
+// machinery produces (§6.3, transfers only mutate provenance) — never
+// changes what applies. The seam gates on status alone.
+func TestAppliedPowersUnaffectedByOwnershipChange(t *testing.T) {
+	a := poweredArtifact("significant")
+	before := AppliedPowers(a)
+	a.Provenance = append(a.Provenance, ProvenanceEntry{
+		Year:      12,
+		Owner:     Owner{Kind: "settlement", ID: "Ironforge"},
+		EventID:   "event-12-0",
+		EventType: "Conquest",
+	})
+	if got := AppliedPowers(a); !reflect.DeepEqual(got, before) {
+		t.Errorf("AppliedPowers after ownership change = %v, want %v (powers follow the artifact)", got, before)
+	}
+}
+
+// TestEffectiveMagnitudeDeterministic runs the post-processing pass twice
+// with identical seeds and inputs and requires byte-identical effective
+// magnitudes (spec 7.6, issue #75 acceptance: same seed produces identical
+// effective magnitudes). The pinned values catch regressions in the scaling
+// formula itself, not just run-to-run drift.
+func TestEffectiveMagnitudeDeterministic(t *testing.T) {
+	run := func(seed uint64) []Artifact {
+		artifacts, events := pivotedArtifacts(4)
+		if err := PostProcess(artifacts, events, SignificanceContext{}, TransferContext{}, artifactsRNG(seed)); err != nil {
+			t.Fatalf("PostProcess: %v", err)
+		}
+		return artifacts
+	}
+
+	first := run(1)
+	second := run(1)
+	for i := range first {
+		a := first[i]
+		if len(a.Powers) != 1 {
+			t.Fatalf("artifact %s has %d powers, want 1", a.ID, len(a.Powers))
+		}
+		got := a.Powers[0].EffectiveMagnitude(a.SignificanceScore)
+		if want := second[i].Powers[0].EffectiveMagnitude(second[i].SignificanceScore); got != want {
+			t.Errorf("artifact %s effective magnitude differs across identical runs: %d vs %d", a.ID, got, want)
+		}
+		if got == 0 {
+			t.Errorf("artifact %s effective magnitude = 0, want nonzero (score %d)", a.ID, a.SignificanceScore)
+		}
+	}
+
+	// Pin expected magnitudes so a regression in the formula is caught.
+	for i, want := range []int{3, 1, 3, 3} {
+		a := first[i]
+		if got := a.Powers[0].EffectiveMagnitude(a.SignificanceScore); got != want {
+			t.Errorf("artifact %s effective magnitude = %d, want %d (score %d)", a.ID, got, want, a.SignificanceScore)
+		}
+	}
+
+	// Magnitudes must derive from the lane, not hardcoded: a different seed
+	// producing all-identical magnitudes is improbable enough (1 in 3^4
+	// draws over the 1..3 base range, pinned) to catch lane-regression.
+	other := run(2)
+	differ := false
+	for i := range first {
+		if first[i].Powers[0].EffectiveMagnitude(first[i].SignificanceScore) !=
+			other[i].Powers[0].EffectiveMagnitude(other[i].SignificanceScore) {
+			differ = true
+			break
+		}
+	}
+	if !differ {
+		t.Fatal("different seeds produced identical effective magnitudes: draws ignore the RNG lane")
+	}
+}
+
 // powerSourceForTest extracts the Source field from a power for assertions.
 func powerSourceForTest(p Power) string {
 	switch v := p.(type) {

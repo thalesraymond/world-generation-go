@@ -392,6 +392,8 @@ Narrative powers: no magnitude (effect string only).
 
 **Narrative powers:** don't scale (effect string is static).
 
+**Implementation (issue #75):** `EffectiveMagnitude` already existed on the concrete power types (`scaleMagnitude` in `internal/domain/artifact/power.go`); issue #75 adds the application gate. `AppliedPowers(a Artifact) []Power` returns the artifact's powers for every active status (`created`, `held`, `significant`, `rediscovered`) and `nil` while `lost` (dormant) or `destroyed` (terminal). The future power-application consumer (§9.2 `ArtifactQuerier`, deferred until power-to-action integration lands) gates on the returned slice, never on the stored `Powers` field — the powers themselves are never mutated by lifecycle steps, so the artifact keeps them for export and later rediscovery.
+
 ### 7.7 Power loss/transfer behavior
 
 | Status | Behavior |
@@ -401,6 +403,8 @@ Narrative powers: no magnitude (effect string only).
 | Transferred | Powers follow the artifact (new owner gains them). |
 
 Powers are intrinsic to the artifact, not the owner.
+
+**Implementation (issue #75):** dormancy is status-driven, not data-driven: destruction clears `Powers` at destruction time (§6.6), but the `AppliedPowers` seam also refuses `destroyed` artifacts so the contract holds for any state a consumer sees. Rediscovery (issue #70) sets status back to `held`, so the seam resumes applying powers without any other change — the powers slice is never mutated by lifecycle steps (transfers, §6.3, only mutate provenance). Determinism is covered by `TestEffectiveMagnitudeDeterministic`: two identically-seeded post-processing runs produce identical effective magnitudes, with pinned values guarding the formula.
 
 ### 7.8 Narrative effect generation
 
