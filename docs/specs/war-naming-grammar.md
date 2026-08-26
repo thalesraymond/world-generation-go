@@ -174,7 +174,7 @@ escaping to the caller of a valid war.
 direct-variable checks are *necessary but not sufficient*. `WarName` alt 3 has no
 direct variables (its only variable sits inside `war_namesake`), yet it throws
 `ErrNoEligibleAlternative` at expansion time if `SettlementName` is absent — the
-engine does not backtrack (`engine.go:42-43`). Concretely: under a `{year}`-only
+engine does not backtrack (doc comment `engine.go:61-68`). Concretely: under a `{year}`-only
 context, `WarName` reports 2 eligible alternatives (the year form and alt 3); if
 the draw lands on alt 3, the whole expansion fails. This is exactly why the
 caller must guarantee `$SettlementName` unconditionally, and why the validation
@@ -195,7 +195,7 @@ than only checking variable subsets statically.
   function of `(context, rng)`: same context + same stream prefix ⇒ same name.
   The draw count varies with context (trace: 4 eligible for conquest with a
   figure yet faction absent, 2 for a target-less truce) — this is by design and
-  matches the chronicle semantics (`engine.go:47-48`).
+  matches the chronicle semantics (`engine.go:147`).
 - **Name exactly once, in deterministic order.** The caller names each war
   exactly once and then stores the result on the entity (`War.Name`) — the name
   is assigned at war formation, never re-drawn at export. Wars are processed in a
@@ -232,9 +232,13 @@ Justification:
   when they do occur, real-world history supplies the precedent of epithet
   suffixes, which reads naturally at the fantasy register.
 - **The vault is the right place to disambiguate.** Obsidian note slugs must be
-  unique across the *whole* vault (wars + settlements + artifacts); only the
-  export pass sees that full namespace, and only it needs uniqueness. Keeping the
-  grammar pure of it keeps #53 and #52 responsibilities cleanly separated.
+  unique across the *whole* vault (wars + settlements + artifacts), and only the
+  export layer sees that full namespace. Caveat for #52: today's `nameTracker`
+  dedupes case-insensitively but appends **no** suffix and is scoped per exporter,
+  not vault-wide — the `" II"`/`" III"` rule therefore means new suffixing logic in
+  the war exporter (grouped with the vault-wide naming pass #52 already plans),
+  not a reuse of the existing tracker. Keeping the grammar pure of uniqueness keeps
+  #53 and #52 responsibilities cleanly separated.
 - **Determinism holds:** the suffixing is a pure function of the sorted wars
   list, so the final displayed name is reproducible.
 
@@ -244,34 +248,38 @@ the pure function, and buys nothing the export pass does not already need.
 
 ## 8. Worked examples
 
-All expansions below are **actual engine output**: the §4 grammar parsed with
-`narrative.Parse` and expanded with the real `Engine.Resolve` plus the §5
-dispatch logic, using a PCG stream fresh per example (seed constants are
-scratch-only; in the product the stream derives from the master seed's `"war"`
-lane). Every trace line records `rule: <eligible count> eligible, drew
-alt <i>`, where `<i>` is the 0-based alternative index as written in the §4
-grammar.
+All expansions below are **actual engine output**, verified against the real
+`narrative.Engine`: the §4 grammar parsed with `narrative.Parse` and expanded with
+`Engine.Resolve` plus the §5 dispatch chain, using a fresh PCG stream per example
+(`rand.NewPCG(seed, seed)`; seeds are scratch-only — in the product the stream derives
+from the master seed's `"war"` lane). Every trace line records `rule: <eligible count>
+eligible, drew alt <i>`, where `<i>` is the 0-based alternative index **as written in
+the §4 grammar** (the position in the full alternative list, not the filtered eligible
+list — eligibility can skip alternatives, as in examples 2/5/7). An implementer can
+reproduce any trace: same grammar, same context, same `PCG(seed, seed)` stream ⇒ same
+name, byte-identical.
 
 **1. Conquest, figure-led** — `{year: 12, SettlementName: Deepcrest,
 TargetSettlement: Northhold, FigureName: Aldric}` (seed 1009)
 
 ```
 WarName.conquest: 4 eligible, drew alt 1
-war_namesake:     2 eligible, drew alt 0   → "Aldric"
-war_noun:         4 eligible, drew alt 2   → "Campaign"
-⇒ "Aldric's Campaign of Northhold"
+war_namesake:     2 eligible, drew alt 1   → "Deepcrest"
+war_noun:         4 eligible, drew alt 1   → "Conflict"
+⇒ "Deepcrest's Conflict of Northhold"
 ```
 
-The conqueror's figure namesakes the conquest, with the conquered settlement as
-the "of" target.
+The draw is uniform, not preferential: `$FigureName` is present and eligible (alt 0 of
+`war_namesake`), but this stream drew the settlement namesake. Eligibility never
+guarantees a specific flavor — only that the expansion succeeds.
 
 **2. Conquest, no figure, no faction** — `{year: 15, SettlementName: Deepcrest,
 TargetSettlement: Northhold}` (seed 421)
 
 ```
-WarName.conquest: 4 eligible, drew alt 3   (5th alt ineligible: $Faction absent)
-war_noun:         4 eligible, drew alt 1   → "Conflict"
-⇒ "the Conflict of Northhold by Deepcrest"
+WarName.conquest: 4 eligible, drew alt 3   (5th alt "…$Faction conquest…" ineligible: $Faction absent)
+war_noun:         4 eligible, drew alt 0   → "War"
+⇒ "the War of Northhold by Deepcrest"
 ```
 
 Both settlements named; the conqueror is the agent of the conquest.
@@ -280,34 +288,32 @@ Both settlements named; the conqueror is the agent of the conquest.
 Northhold, Duration: 5}` (seed 443)
 
 ```
-WarName.stalemate:     4 eligible, drew alt 1
-stalemate_adjective:   4 eligible, drew alt 3   → "Bloodless"
-war_noun:              4 eligible, drew alt 0   → "War"
-⇒ "the Bloodless War of Deepcrest"
+WarName.stalemate: 4 eligible, drew alt 3
+war_noun:          4 eligible, drew alt 1   → "Conflict"
+⇒ "the 5-year Conflict"
 ```
 
-The "region" flavor collapses onto the principal settlement (no region entity).
-The same rule would yield `"the 5-year War"` (alt 3) when `$Duration` is present,
-or `"the long War of 37"` (alt 0) when nothing else is.
+The `$Duration` form (alt 3) renders the war's span. With `$Duration` absent the same
+rule falls back to the adjective (alt 1) or year (alt 0) forms — at least one of them is
+always eligible (§5.2).
 
 **4. Truce between a pair** — `{year: 44, SettlementName: Ironhold,
 TargetSettlement: Eastwatch}` (seed 907)
 
 ```
-WarName.truce:  4 eligible, drew alt 1
-truce_adjective: 4 eligible, drew alt 2  → "Bitter"
-⇒ "the Bitter Truce of 44"
+WarName.truce:  4 eligible, drew alt 3
+⇒ "the truce at Ironhold"
 ```
 
-Truce flavor anchors on the year; the pair alternative (`"the truce of Ironhold
-and Eastwatch"`, alt 0) is likewise eligible for the same context.
+Truce flavor anchors on the principal settlement (alt 3); the pair form (alt 0) is
+likewise eligible for this context — the draw chose the shorter form.
 
 **5. Truce with an incomplete context** — `{year: 46, SettlementName: Ironhold}`
 (seed 613) — demonstrates the fallback invariant: with `$TargetSettlement`
 absent, only alts 1 and 3 are eligible, and the rule still resolves:
 
 ```
-WarName.truce:  2 eligible, drew alt 1   (pair alts 0 and 2 ineligible: no target)
+WarName.truce:  2 eligible, drew alt 1
 truce_adjective: 4 eligible, drew alt 1  → "Uneasy"
 ⇒ "the Uneasy Truce of 46"
 ```
@@ -316,30 +322,35 @@ truce_adjective: 4 eligible, drew alt 1  → "Uneasy"
 (seed 271), the dispatch skips `WarName.<outcome>` and resolves `WarName`:
 
 ```
-WarName:  4 eligible, drew alt 1
-war_noun: 4 eligible, drew alt 3   → "Siege"
-⇒ "the Stonemarch-Siege"
+WarName:  4 eligible, drew alt 3
+war_namesake: 1 eligible, drew alt 1   → "Stonemarch"
+war_noun: 4 eligible, drew alt 0       → "War"
+⇒ "Stonemarch's War"
 ```
 
 **7. Degenerate context (year only)** — `{year: 53}` (seed 977) — an
-intentionally weaker context than the caller contract, shown to demonstrate the
-year form:
+intentionally weaker context than the caller contract, demonstrating the
+**nested-viability trap (§5.2) live**: `WarName` reports 2 eligible alternatives;
+the draw lands on the namesake form (alt 3 — no direct variables, hence statically
+"eligible"), and `war_namesake` then fails because `$SettlementName` is absent:
 
 ```
-WarName:  2 eligible, drew alt 0
-war_noun: 4 eligible, drew alt 2   → "Campaign"
-⇒ "the Campaign of 53"
+WarName:        2 eligible, drew alt 3
+war_namesake:   0 eligible — ErrNoEligibleAlternative
+⇒ error: no eligible alternative: "war_namesake"
 ```
 
-Caveat (see §5.2): under `{year}`-only, the second eligible alternative is the
-namesake form, which would fail *inside* `war_namesake` if drawn — the engine
-does not backtrack, so a year-only context is **not** guaranteed. The caller's
-unconditional `$SettlementName` guarantee eliminates this path; the example only
-proves the year form itself expands.
+The engine does not backtrack (doc comment `engine.go:61-68`), so the whole expansion
+fails and the dispatch guard (§5.1 step 3) must absorb it. This is exactly why the
+caller must guarantee `$SettlementName` unconditionally: under the guaranteed context
+(§5.2 table) `war_namesake` is always viable, so alt 3 can never fail at expansion. The
+year form itself (alt 0) is statically eligible under `{year}` — the trap is that a
+parent rule's eligibility does not imply its non-terminals are expandable.
 
-Determinism spot-check: reseeding the same context twice (PCG(42, 42)) produced
-`"the Deepcrest conquest of Northhold"` twice; a fresh engine over the same
-grammar reproduces the same name.
+Determinism spot-check (verified against the real engine): reseeding the same conquest
+context (`{year: 42, SettlementName: Deepcrest, TargetSettlement: Northhold}`) twice
+with `PCG(42, 42)` produced `"the Deepcrest conquest of Northhold"` both times — the
+§5 chain is byte-reproducible per seed.
 
 ## 9. Integration note
 
@@ -373,7 +384,7 @@ grammar reproduces the same name.
   (c) expanded names contain no `$Variable` leaks and no double spaces.
 - **#52 handoff.** Export reads `War.Name` from the entity, title-cases it for
   the note title, and applies the §7 ordinal disambiguation. Example war notes
-  will show names such as "the Bitter Truce of 44".
+  will show names such as "the Uneasy Truce of 46".
 
 ## 10. Composition assumptions (other tickets)
 
