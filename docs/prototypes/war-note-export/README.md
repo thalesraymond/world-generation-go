@@ -16,11 +16,13 @@ Companion examples (one per outcome):
 All settlement and faction names in the examples are drawn from the existing
 `output/` vault (64×64 world, 100-year timeline); every wiki-link resolves to
 a real `bases/` or `factions/` note. Timeline rows are **verbatim chronicle
-events** from that vault, except two war-level events the grouping/truce/
-conquest passes of #48/#49/#50 would mint — the Year-100 conquest of
-[[Southfall-2]] and the Year-100 truce between [[Westhold]] and [[Brightdale]],
-listed with an `†` marker in [Event provenance](#12-event-provenance). The
-rendered notes deliberately do not mark them (they are the gold sample for
+events** from that vault, except the two war-level additions the #48/#49/#50
+pipeline would produce — the Year-100 Conquest of [[Southfall-2]] (a real
+event kind that closes a war per #48) and the war-level **truce state** of
+[[Westhold]]/[[Brightdale]] (not an event: per #49, truces are derived
+per-pair records rendered in a dedicated section, never as timeline rows) —
+both listed with an `†` marker in [Event provenance](#12-event-provenance).
+The rendered notes deliberately do not mark them (they are the gold sample for
 #54); this README is the provenance record.
 
 Shared vocabulary used exactly as specified by the war map: War, Participants
@@ -51,11 +53,11 @@ most recent first-class entity export.
 | `type` | string | Fixed discriminator. | `"war"` |
 | `name` | string | War name from the naming grammar (#51). | `"the Bitter Offensive of 91"` |
 | `start_year` | int | `StartYear` = year of the first grouped event. | `91` |
-| `end_year` | int | `EndYear` = year of the last grouped event (for truce wars: the truce event year). | `100` |
+| `end_year` | int | `EndYear` = year of the last grouped event (set by #48's close rule; for truce-end wars the outcome is *upgraded* at that close per #49 — no truce event year exists). | `100` |
 | `outcome` | string | `conquest` \| `stalemate` \| `truce` (closed set per the map vocabulary). | `"conquest"` |
 | `winner_faction` | string | Victor faction id. **Present only when `outcome: conquest`** (optional-field pattern from artifacts). | `"cinder"` |
 | `participants` | list[string] | Every settlement involved in grouped events, as **wiki-links** to `bases/` notes: aggressor(s) of raid/conquest events and every raid/conquest target (a conquest target joins the war even if it never launched raids). | `- "[[Ashbridge]]"` |
-| `factions` | list[string] | Distinct participant faction ids, **alphabetical, bare** (matching the `faction:` convention in `bases/` notes, whose values are bare ids like `cinder`). | `- "cinder"` `- "verdant"` |
+| `factions` | list[string] | Distinct participant faction ids, **alphabetical** — quoted like all string values (§2); the ids themselves are *bare* (lowercase, unwikilinked — matching the `faction: cinder` convention in `bases/` notes). | `- "cinder"` `- "verdant"` |
 | `event_count` | int | Derived: number of grouped timeline events rendered in `## Timeline`. (Same derived-aggregate pattern as `artifactCount` in the artifacts index.) | `12` |
 
 ```yaml
@@ -135,7 +137,7 @@ in alphabetical order; `[[...]]` = wiki-links):
 |---|---|
 | conquest | `<name> raged from Year <start_year> to Year <end_year> between the <faction_a> and the <faction_b>. It ended in Year <end_year> when [[<aggressor>]] conquered [[<target>]], and the <winner_faction> gained the upper hand.` |
 | stalemate | `<name> raged from Year <start_year> to Year <end_year> between the <faction_a> and the <faction_b>. Neither side seized a settlement, and the fighting died down without decision.` |
-| truce | `<name> raged from Year <start_year> to Year <end_year> between the <faction_a> and the <faction_b>. It ended in Year <end_year> when the two sides agreed to a truce.` |
+| truce | `<name> raged from Year <start_year> to Year <end_year> between the <faction_a> and the <faction_b>. A truce between the two sides, in force since Year <truce_start_year>, outlasted the fighting — the war ended in truce, not conquest.` |
 
 Example (conquest): *"The Bitter Offensive of 91 raged from Year 91 to Year
 100 between the cinder and the verdant. It ended in Year 100 when
@@ -175,11 +177,16 @@ stream order** (deterministic given the grouping pass's event slice):
 ```
 
 - **Year**: event year (`start_year`..`end_year`; gaps allowed — quiet years
-  simply have no row, e.g. Year 92 in `the Bitter Offensive of 91`).
+  simply have no row, e.g. Year 92 in `the Bitter Offensive of 91`, which has
+  no hostile events at all in `timeline.json`).
 - **Kind**: the event's **chronicle category**, reused verbatim — the war
   note never invents categories at export time. Vocabulary: `Raid`,
-  `Conquest`, `Conflict`, `Diplomacy`, and `Truce` (minted by #49 when a war
-  ends by negotiation). The ticket's "failed attempts" are `Raid`-kind
+  `Conquest`, `Conflict`, `Diplomacy` — whatever the grouped events actually
+  carry. `Truce` is **not** an event kind: per the truce spec (#49), truces
+  are per-pair records derived in post-processing (`War.Truces`, N quiet
+  years, no minted event), so notes render them in a dedicated
+  `## Truces` section (pair, start year, duration, active), never as
+  timeline rows. The ticket's "failed attempts" are `Raid`-kind
   events whose description records the failure (`raided ... but was driven
   off`) — a 1:1 mirror of `timeline.json` wording, exactly as the chronicle
   renders them. No separate "failed attempt" kind is proposed; splitting it
@@ -249,8 +256,14 @@ war_count: 3
   ("was driven off") as Raid-kind rows.
 - [`Brightdale's Reckoning.md`](Brightdale's%20Reckoning.md) — **truce**:
   verdant's [[Westhold]] vs auric's [[Brightdale]]. Seven real raids over
-  Years 96–100 ended by a hypothesized Diplomacy-kind truce event in Year 100
-  (#49 will define how truces are minted). Demonstrates the truce summary
+  Years 96–100; the truce itself is **hypothesized format state** — per the
+  truce spec (#49), truces are derived per-pair records (`War.Truces`), not
+  events, and no timeline row is fabricated for them. They render in a
+  `## Truces` section (pair, start year, duration, active). Caveat: under
+  #49's strict minting rules (`start < war.EndYear`, 10 quiet years) this
+  pair likely does **not** mint a truce from these real raids — the note
+  demonstrates the *format* for a war that does end in truce; the rules
+  behind such a war are #49/#53's business. Demonstrates the truce summary
   template.
 
 The three wars overlap in time (96–99) on disjoint settlements — deliberately,
@@ -276,7 +289,7 @@ to exercise "multiple concurrent wars" in the vault.
 | # | Assumption/decision this prototype presumes | Open question for |
 |---|---|---|
 | 48 | Membership = settlements appearing as aggressor or target of grouped events; conquest targets join even without raid history ([[Southfall-2]]). Start = first grouped event year, end = last (or truce/conquest year). Quiet years are allowed (e.g. Year 92). War IDs and pass order follow the artifacts-pass pattern. | segmentation rules, gap handling, pass ordering relative to the artifacts pass (both assign deterministic event/war IDs) |
-| 49 | A war ends by truce via a minted Diplomacy-kind `Truce` event at `end_year` (#49 may mint a new category instead). Whether existing chronicle "negotiates a treaty" Diplomacy lines can anchor truces is unprobed. | truce trigger rules, event kind, who may broker |
+| 49 | Truce (#49, **landed**): truces are per-pair records derived in post-processing (`ApplyTruces`, no minted event kind — see `docs/specs/war-truce-mechanics.md`); a stalemate-finalized war is upgraded to `outcome: "truce"` when a truce is active at its close. Notes render `War.Truces` in a `## Truces` section, never as timeline rows. Whether existing chronicle "negotiates a treaty" Diplomacy lines can anchor truces is #49's call (unprobed). | truce trigger rules, event kind, who may broker |
 | 50 | Conquest flips settlement ownership: `winner_faction` tracks the victor; the world state is assumed updated after the pass (world_state.json snapshot predates the war pass). Note: all 12 Conquest events in the current timeline are intra-faction — whether those group into wars at all is #48/#50's call; the prototype only demonstrates cross-faction wars. | ownership/faction flip mechanics, intra-faction conquest handling |
 | 51 | Example names use the sketch grammar verbatim: `"the " <war_adjective> " " <war_noun> " of " $year` (the Bitter Offensive of 91), `"the " $SettlementName "-" <war_noun>` (the Stonemere-War), `<war_namesake> "'s " <war_noun>` (Brightdale's Reckoning). Two assumptions: `$year` = `start_year`, and `<war_namesake>` = a participant settlement. The adjective/noun pools ("bitter", "offensive", "war", "reckoning") are invented for this prototype. | token semantics ($year anchor), namesake selection, word pools, uniqueness/disambiguation |
 
@@ -294,9 +307,10 @@ to exercise "multiple concurrent wars" in the vault.
   real notes today.
 - The domain entity (`internal/domain/war/`, #48's home) must expose at
   minimum: ID, Name, StartYear, EndYear, Outcome, WinnerFaction (empty unless
-  conquest), Participants (settlement names, ordered for rendering), Factions,
-  and an ordered Event slice (year, kind, description, aggressor/target
-  settlement names).
+  conquest), Truces (per #49: pair, start year, duration, active — for the
+  `## Truces` section), Participants (settlement names, ordered for rendering),
+  Factions, and an ordered Event slice (year, kind, description,
+  aggressor/target settlement names).
 - The timeline table renders `[[aggressor]] raided [[target]] and seized N
   wealth` — i.e., the description with settlement names substring-replaced by
   wiki-links. Do the replacement on the names the grouping pass recorded, not
@@ -311,8 +325,11 @@ to exercise "multiple concurrent wars" in the vault.
   except the two war-level events listed below. They are the natural
   chronicle lines (`[Raid] <X> raided <Y> and seized 50 wealth` / `but was
   driven off`) of the three raiding clusters.
-- **Hypothesized `†`** (war-level events a future pass would mint; not in
-  `timeline.json`): the Year-100 Conquest of [[Southfall-2]] (war-0) and the
-  Year-100 truce between [[Westhold]] and [[Brightdale]] (war-2). In the
-  rendered notes they are indistinguishable from real rows on purpose — the
-  notes are the gold sample for #54; this README is the provenance record.
+- **Hypothesized `†`** (war-level state a future pass would produce; not in
+  `timeline.json`): the Year-100 Conquest of [[Southfall-2]] (war-0 — an
+  event, per #48 it closes the war) and the truce state of war-2
+  ([[Westhold]]/[[Brightdale]] — **not** an event: per #49, `War.Truces` is a
+  derived per-pair record rendered in the `## Truces` section; the timeline
+  renders no truce row). In the rendered notes the conquest row is
+  indistinguishable from real rows on purpose — the notes are the gold sample
+  for #54; this README is the provenance record.

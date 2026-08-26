@@ -11,14 +11,14 @@ participants:
 factions:
   - "auric"
   - "verdant"
-event_count: 8
+event_count: 7
 ---
 
 # Brightdale's Reckoning
 
 ## Summary
 
-Brightdale's Reckoning raged from Year 96 to Year 100 between the auric and the verdant. It ended in Year 100 when the two sides agreed to a truce.
+Brightdale's Reckoning raged from Year 96 to Year 100 between the auric and the verdant. A truce between the two sides, in force since Year 96, outlasted the fighting — the war ended in truce, not conquest.
 
 ## Participants
 
@@ -41,4 +41,9 @@ Brightdale's Reckoning raged from Year 96 to Year 100 between the auric and the 
 | 99 | Raid | [[Westhold]] raided [[Brightdale]] and seized 50 wealth |
 | 99 | Raid | [[Brightdale]] raided [[Westhold]] and seized 50 wealth |
 | 100 | Raid | [[Brightdale]] raided [[Westhold]] and seized 50 wealth |
-| 100 | Diplomacy | Emissaries of [[Westhold]] and [[Brightdale]] agreed to a truce |
+
+## Truces
+
+| Pair | Start | Duration | Active |
+|---|---|---|---|
+| [[Westhold]] & [[Brightdale]] | 96 | 10 | active |
