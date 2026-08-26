@@ -12,10 +12,10 @@ compose into the "Map: Group military actions into wars" effort:
 
 | Ticket | Piece | Composition point |
 |---|---|---|
-| #48 | War grouping algorithm | war spans, participants, event attribution |
-| #49 | Truce mechanics | truce closes a war; Outcome `truce` |
-| **#50 (this spec)** | **Conquest tracking + outcome** | ownership ledger, `Conquest` records, Outcome `conquest`/`stalemate` |
-| #51 | War naming grammar | `Name` field; this spec pins only the structural `ID` |
+| #48 | War grouping algorithm | war spans, participants, event attribution, close triggers |
+| #49 | Truce mechanics | per-pair `Truce` records; outcome refinement `stalemate → truce` |
+| **#50 (this spec)** | **Conquest tracking + victor attribution** | ownership ledger, `Conquest` records, `VictorFaction` |
+| #51 | War naming grammar | `Name` field |
 | #52 | War-note export prototype | renders `War`/`Conquest` fields from `world_state.json` |
 
 Shared vocabulary this spec composes with: **War** (grouped hostile actions with
@@ -23,15 +23,24 @@ Shared vocabulary this spec composes with: **War** (grouped hostile actions with
 throughout the codebase), **Factions** (strings on settlements), **Events** (the
 `simulation.Event` stream), **Outcome** ∈ {`conquest`, `stalemate`, `truce`}.
 
+**Outcome is NOT this spec's decision.** Per the pinned grouping contract (#48,
+`docs/specs/war-grouping-algorithm.md`), a qualifying `Conquest` event closes its war
+immediately with `Outcome = "conquest"`; inactivity/EOF closes produce `"stalemate"`,
+which #49 (`docs/specs/war-truce-mechanics.md`) may upgrade to `"truce"` when a per-pair
+truce is active at close. This spec owns what the close leaves behind: the **`Conquest`
+records** (who conquered whom, from which faction to which, derived via the ledger) and
+the **`VictorFaction`** attribution for conquest-closed wars. It never re-decides an
+outcome.
+
 The tracking layer is **read-only and additive**: it never mutates the world state or the
-event stream; it derives new entities (`Conquest` records, war outcomes) from events plus
-a transient pre-simulation faction snapshot.
+event stream; it derives new entities (`Conquest` records, `VictorFaction`) from events
+plus a transient pre-simulation faction snapshot.
 
 ## 2. Grounding — what counts as a conquest today
 
 ### 2.1 The Conquest event
 
-`ConquerAction.Execute` (`internal/domain/agent/actions.go:188-210`) emits the event:
+`ConquerAction.Execute` (`internal/domain/agent/actions.go`) emits the event:
 
 ```go
 event := simulation.Event{Year: -1, Category: "Conquest", SettlementName: self.Name} // line 189
@@ -67,10 +76,10 @@ if targetSettlement != nil {
 }
 ```
 
-`world.Settlement.Faction` (`internal/domain/world/state.go:18`, JSON `faction`) is the
+`world.Settlement.Faction` (`internal/domain/world/state.go`, JSON `faction`) is the
 ownership state. Verified invariant: **conquest (`actions.go:201`) is the only mutation of
 `Settlement.Faction` during simulation** — genesis assigns it once
-(`internal/domain/settlement/generator.go:65-79`, from the `FactionInfluence` layer,
+(`internal/domain/settlement/generator.go`, from the `FactionInfluence` layer,
 defaulting to `"independent"`), expansions copy the parent's faction at founding
 (`actions.go:61`), and nothing else writes it. This is what makes the ledger replay in
 §3.2 exact.
@@ -84,8 +93,8 @@ defaulting to `"independent"`), expansions copy the parent's faction at founding
 - **Event IDs already exist.** The artifacts post-processing pass
   (`internal/domain/artifact/postprocess.go:69`) stamps every event with
   `event.ID = fmt.Sprintf("event-%d-%d", event.Year, yearCounts[event.Year])` during
-  `EmergencePass`, which `RunSimulation` (`orchestrator.go:100-104`) runs before returning.
-  The war pipeline therefore reads ID-carrying events.
+  `EmergencePass`, which `RunSimulation` runs before returning. The war pipeline
+  therefore reads ID-carrying events.
 - **Stream order is deterministic and chronological.** `sim.Run`
   (`internal/domain/simulation/engine.go:29-36`) ticks year-major, entity-registration
   order (ADR-0010); conquests of the same year are ordered by stream position. The
@@ -93,24 +102,30 @@ defaulting to `"independent"`), expansions copy the parent's faction at founding
   `Discovery` events; neither category touches the ledger, so the war pass iterates the
   final slice order as-is.
 - **A conquered settlement keeps acting.** The entity list is frozen before simulation
-  (`orchestrator.go:58-69`) and conquest never removes a settlement, so a conquered
-  settlement keeps its agent in later years under its new faction — this is what makes
-  re-conquest (and post-conquest raids) possible.
-- **Re-conquest reachability (agent balance, not tracking).** Re-conquest of a
-  settlement by its original faction requires the defender's relations toward that
-  settlement below `ConquerMaxRelations = -0.7` (`actions.go:164`) and military strength
-  above `1.5 ×` the target's. Under current relation dynamics (`internal/domain/world/
-  relations.go`), a *same-origin-faction* pair is effectively frozen at the +0.3
-  `RelationShiftSameFactionBaseline` — no mechanic drives it negative — so the canonical
-  "B re-conquers its own S1" is hard to reach today; the reachable path is a pair that
-  was already hostile at genesis (cross-faction friction down to
-  `CrossFactionFrictionMax = -0.6`) where the absorbed settlement raids its old rival
-  (each successful raid shifts the defender's relations toward the raider by −0.3,
+  and conquest never removes a settlement, so a conquered settlement keeps its agent in
+  later years under its new faction — this is what makes post-conquest raids and
+  cross-war re-conquest possible.
+- **Conquest ends its war; feuds resume as new wars.** Per #48's close rule, the
+  conquest event (by any participant, or by an outsider who joins first) closes the war
+  containing the attacker **immediately** — so a war can contain **at most one**
+  `Conquest` event, always its closing event. Later hostility between the same
+  settlements forms a **new** war ("feud resumption", grouping §5.7). The observed
+  seed-42 run matches: Deepcrest conquers Northhold at year 27 (the grouping spec's
+  golden feud), and Northhold's 40+ post-conquest raids land in new wars through year 99.
+- **Cross-war re-conquest reachability (agent balance, not tracking).** Re-conquest of a
+  settlement by a faction that once owned it requires the defender's relations toward
+  that settlement below `ConquerMaxRelations = -0.7` (`actions.go:164`) and military
+  strength above `1.5 ×` the target's. Under current relation dynamics
+  (`internal/domain/world/relations.go`), a *same-origin-faction* pair is effectively
+  frozen at the +0.3 `RelationShiftSameFactionBaseline` — no mechanic drives it
+  negative — so the canonical "B re-conquers its own S1" is hard to reach today; the
+  reachable path is a pair that was already hostile at genesis (cross-faction friction
+  down to `CrossFactionFrictionMax = -0.6`) where the absorbed settlement raids its old
+  rival (each successful raid shifts the defender's relations toward the raider by −0.3,
   `RelationShiftRaidSuccessTarget`, pushing −0.6 below −0.7). The tracking layer is
   **event-driven and tuning-agnostic**: it must derive correctly from *any* stream the
   simulation can emit, and any future relation/balance change automatically flows
-  through. §8.1's walkthrough is written as the stream that the example demands (the
-  ticket's beats), with this constraint noted.
+  through.
 
 ## 3. Tracking model — `internal/domain/war/`
 
@@ -118,6 +133,7 @@ defaulting to `"independent"`), expansions copy the parent's faction at founding
 
 ```go
 // Conquest is one settlement ownership change derived from the event stream.
+// Each war contributes at most one Conquest — its closing event (§2.3).
 type Conquest struct {
     Year         int    `json:"year"`
     EventID      string `json:"eventID"`       // event-{year}-{index} (postprocess.go:69)
@@ -153,7 +169,8 @@ Rules, applied in stream order (closure over the two categories that change owne
    `ledger[TargetSettlement] = ledger[SettlementName]`, exactly mirroring
    `actions.go:201` (`targetSettlement.Faction = self.Faction`, where `self.Faction` is
    the attacker's *current* faction — possibly itself the result of an earlier conquest
-   in the same war).
+   in an **earlier** war, which is how cross-war re-conquest chains resolve: the second
+   record's `FromFaction` equals the first record's `ToFaction`).
 2. `Category == "Expansion"`: the child is founded with the parent's *current* faction
    (`actions.go:61`). The child's name appears only in the description
    (`"<parent> founded <child>"`, `actions.go:78`) — register
@@ -172,7 +189,7 @@ snapshot (§3.3) is the missing input, and it exists only in memory at simulatio
 ### 3.3 Initial faction capture (orchestrator change)
 
 `RunSimulation` (`internal/usecase/simulation/orchestrator.go`) must capture the genesis
-factions **before** `sim.Run` (line 97), at entity construction (lines 58-69) when
+factions **before** `sim.Run`, at entity construction, when
 `worldState.Settlements` still holds genesis values:
 
 ```go
@@ -182,7 +199,7 @@ for i := range worldState.Settlements {
 }
 ```
 
-The war pipeline runs **after** `EmergencePass` (line 100-104), receiving
+The war pipeline runs **after** `EmergencePass`, receiving
 `(events, initialFactions)`; it returns `[]war.War` which `RunSimulation` stores on
 `worldState.Wars` (mirroring the `worldState.Artifacts` pattern) and which is serialized
 into `world_state.json` wholesale by `cmd/simulate.go`. `initialFactions` is transient —
@@ -200,31 +217,29 @@ is empty terminates nothing", `docs/specs/artifacts.md` §6.3):
   expansion-registered): **no record, no ledger change** (defensive; unreachable in valid
   runs). No error return: the pass is total, like `PostProcess`'s degenerate handling.
 
-### 3.5 War attachment and the exclusivity invariant
+### 3.5 War attachment
 
-The grouping design (#48) produces wars with spans and participant sets. This spec adds
-the **attribution** rule that links global conquests to wars:
+The grouping contract (#48) guarantees: every qualifying event — including every
+`Conquest` — belongs to **exactly one** war's `Events` (completeness invariant), and the
+conquest event is always that war's closing event, with both its attacker and its target
+among the war's participants (the join rule draws either party in before the close). This
+spec therefore attributes conquests to wars trivially:
 
-- A conquest is attributed to the **unique** war whose span contains `Conquest.Year`
-  (`startYear ≤ year ≤ endYear`) and whose participant set contains `ConquerorID` or
-  `SettlementID`.
-- **Participant closure:** the target of an attributed conquest **joins the war's
-  participant set** (a conquered settlement is by definition a party to the war).
-  Attribution and closure are applied as one deterministic pass
-  (`AttachConquests`, §9).
-- **Exclusivity invariant (required of the grouping):** no settlement belongs to two
-  wars whose spans overlap. The grouping must merge overlapping wars that share a
-  settlement (deterministic merge: earliest `StartYear`, then lexicographically smallest
-  participant) rather than allowing split membership. Under this invariant every
-  in-span conquest belongs to exactly one war, and attribution is total.
-- If attribution finds zero candidate wars (no war covers the conquest) or two+
-  candidates (exclusivity was violated), the war pipeline returns an error — this is a
-  programming invariant, not a data condition.
+- A `Conquest` record is attributed to the unique war whose `Events` contains its
+  `EventID`.
+- `War.Conquests` is the war's attributed records, in stream order (at most one in
+  practice — §2.3 — but the field is a list for uniform serialization and future-proofing
+  should #48 ever relax the close rule).
+- Participant closure needs no rule here: #48's join rule already makes the conquered
+  settlement a participant of the war it closes (`grouping §5.4` trigger 1).
+- If attribution finds zero candidate wars (a conquest whose event was not grouped —
+  impossible per #48's completeness invariant) or two+ candidates, the pipeline returns
+  an error: a programming invariant, not a data condition.
 
 ### 3.6 Persistence
 
 `world.State` gains `Wars []war.War json:"wars,omitempty"` (`state.go`, next to
-`Artifacts`, line 36). `internal/domain/war` imports only `internal/domain/simulation`
+`Artifacts`). `internal/domain/war` imports only `internal/domain/simulation`
 (and stdlib), so `world → war` introduces no cycle — the same shape as `world → artifact`.
 
 ## 4. Multi-party edge cases
@@ -232,134 +247,117 @@ the **attribution** rule that links global conquests to wars:
 ### 4.1 Conquest between two participants while others are in the war
 
 There is **no sub-conflict entity**. A conquest between any two war participants — while
-the war includes third parties — is a first-class event of the *whole* war: it is
-attributed to the war, recorded in `War.Conquests`, and enters the outcome evaluation
-(§5). Bilateral sub-scores ("A vs B within the A-B-C war") are derivable from the
-conquest list but are not stored: the war is the single container (no speculative
-abstraction; the export can always filter). This deliberately matches the shared
-vocabulary where *wars* are the first-class entities.
+the war includes third parties — is a first-class event of the *whole* war: #48's close
+rule ends the war for **everyone** at that event, with `Outcome = "conquest"`. The
+conquest is attributed to the war (§3.5), recorded in `War.Conquests`, and the victor is
+the attacker's faction (§5). The other participants' sub-conflicts end unresolved with
+the war; their holdings are untouched. Bilateral sub-scores ("A vs B within the A-B-C
+war") are derivable from the conquest list but are not stored: the war is the single
+container (no speculative abstraction; the export can always filter).
 
-### 4.2 Re-conquest of a settlement earlier conquered in the same war
+### 4.2 Re-conquest — always across wars, never within one
 
-A re-conquest is a **second ownership change, not a rollback**. Example: A conquers S1
-from B (record `{y10, S1, F_B → F_A}`); B1 later re-conquers S1 (`{y17, S1, F_A → F_B}`,
-matching §8.1). Both records are retained, in stream order, as distinct entries; the
-ledger simply applies the second transition. Consequences:
+Because a conquest closes its war (#48), a re-conquest can **never** be a second
+`Conquest` record of the same war. Re-conquest is a **new war** ("feud resumption"):
+A conquers S1 in war-1 (`{y10, S1, F_B → F_A}`); later hostility resumes and B
+re-conquers S1 in war-2 (`{y17, S1, F_A → F_B}`). Both records are retained, in stream
+order, as distinct entries attributed to their own wars; the ledger simply applies the
+second transition. Consequences:
 
-- `FromFaction` of a re-conquest is the *current* ledger faction (the first record's
+- `FromFaction` of the re-conquest is the *current* ledger faction (the first record's
   `ToFaction`), never looked up from the final world state.
-- Chronology is preserved for narrative: the war note can show the settlement's ebb and
-  flow as consecutive conquest rows.
-- Outcome evaluation (§5) deliberately reads **holdings at `EndYear`**, so a re-conquest
-  that survives to the end of the war is decisive for the defender — see §8.
+- Chronology is preserved for narrative: the vault can show the settlement's ebb and
+  flow as consecutive conquest rows across two war notes.
 - Reachability note: in the current simulation such a re-conquest can only occur after
   the absorbed settlement has ground down its old faction-mates' relations through raids
   (§2.3); the tracking layer is agnostic.
 
-### 4.3 Conquest of a settlement whose owner is not a war participant
+### 4.3 Conquest involving settlements outside the war
 
-Two sub-cases, one rule:
+Two sub-cases, both already settled by #48's join rule — this spec only records:
 
-- The conquered settlement is not a participant: **it joins the war** (participant
-  closure, §3.5). Its owner faction (if it differs from the war's existing factions)
-  thereby becomes involved in the war through its settlement.
-- The conqueror settlement is not a participant (a third party attacks inside the
-  war's span): the conquest is attributed to the war **only if** the grouping's maximal
-  closure includes it (the attacker joins as participant). This is a **grouping
-  decision** — #48 must confirm whether hostile events by outsiders *extend* a war or
-  *seed a new one*. This spec's default, for composition: **conquests/raids by or
-  against settlements already in a war's event chain extend that war** (maximal
-  closure); only events fully outside the chain seed new wars. If #48 chooses the
-  narrower "fixed roster" rule instead, the tracking layer is unaffected — attribution
-  (§3.5) just finds a different (new) war for the conquest.
+- The conquered settlement is not a participant: the join rule draws it into the war
+  **before** the close (`grouping §5.4` trigger 1: "If the conquest's target was not yet
+  a participant, the join rule draws it into the war first; the war then ends with that
+  conquest"). Attribution (§3.5) then finds it in the war's participants.
+- The conqueror settlement is not a participant (a third party attacks inside the war's
+  span): the join rule draws the attacker into the war on the side opposite the target,
+  and the conquest closes it (`grouping §5.5` case 3). Attribution by `EventID` still
+  finds the one war.
+
+No "maximal closure" question exists: the grouping spec's join/merge rules are pinned
+and this spec depends only on the completeness invariant (§3.5).
 
 ### 4.4 A settlement involved in two wars; simultaneous wars
 
-Under the exclusivity invariant (§3.5), a settlement cannot be at war against two
-parties at the same time — overlapping wars sharing a settlement are merged. This is
-the **one-war-per-settlement rule**. Distinct wars with **disjoint** participant sets
-may run simultaneously (A vs B in years 10-20 while C vs D runs 12-18); their conquests
-are disjoint in settlement space, so attribution stays total.
+Under #48's merge rule, a settlement belongs to **at most one open war at any scan
+point** — two wars whose participants fight each other merge instead — so "a settlement
+in two overlapping wars" is impossible by construction. Distinct wars with **disjoint**
+participant sets may run simultaneously (A vs B in years 10-20 while C vs D runs 12-18);
+their conquests are disjoint in settlement space, so attribution stays total. The
+exclusivity invariant is therefore **guaranteed by the grouping contract**, not demanded
+from it.
 
-Coordination: if #48's grouping instead permits a settlement in two overlapping wars,
-this spec still *records* correctly (conquests would need a `WarID` scope and the
-exclusivity error path would be removed), but outcome evaluation would be ambiguous
-for the shared settlement's holdings. The exclusivity invariant is therefore declared
-**required** by this spec, not optional.
+## 5. Outcome and victor attribution
 
-## 5. Outcome determination
+### 5.1 Rule — outcome comes from the close trigger, victor from the closing conquest
 
-### 5.1 Rule — elimination with a unique dominant faction
+**Outcome is set by #48/#49, never re-decided here:**
 
-For a war W with participants `P` (settlement names), span `[StartYear, EndYear]`,
-and the global conquest ledger, evaluate holdings at the boundaries:
+| War closed by | Outcome (owned by) | `VictorFaction` (owned by this spec) |
+|---|---|---|
+| A qualifying `Conquest` event | `"conquest"` (#48 trigger 1) | `ToFaction` of the war's closing `Conquest` (attacker's faction at conquest time, via the ledger) |
+| Inactivity gap or end of stream | `"stalemate"` (#48 trigger 2) | empty |
+| `"stalemate"` with an active per-pair truce at close | `"truce"` (#49 upgrade) | empty |
 
-- `FactionAt(s, y)`: the `ToFaction` of the last conquest of `s` with `year ≤ y`, else
-  `initialFactions[s]`. Start-ownership uses `FactionAt(s, StartYear - 1)`; end-holdings
-  use `FactionAt(s, EndYear)`. A conquest *in* `StartYear` is in-span (a
-  one-year decisive war works) and flips end-holdings only.
-- **Elimination:** faction `g` has eliminated faction `f` (distinct faction strings
-  owned by participant settlements) iff:
-  1. `f` owns ≥ 1 participant settlement at `StartYear - 1` (**non-vacuous guard** —
-     a faction with no start-ownership cannot be "eliminated" by an empty set), and
-  2. every participant settlement `s` with `FactionAt(s, StartYear - 1) == f` has
-     `FactionAt(s, EndYear) == g`.
-- **Dominance:** faction `g` dominates W iff it has eliminated ≥ 1 faction and no
-  faction has eliminated it.
-- **Outcome** (checked in this order — truce first):
-  1. War closed by a truce (#49) → `outcome = "truce"`, no victor.
-  2. Exactly one faction dominates → `outcome = "conquest"`, `victorFaction = g`.
-  3. Otherwise → `outcome = "stalemate"`, no victor.
-
-Rationale for "holdings at EndYear, not conquest counts": the simulation's conquest
-changes *faction ownership*, so a war is won when the opponent's presence in the theatre
-is absorbed — "fall of the last unconquered settlement", evaluated as a snapshot, not a
-body count. Re-conquest that survives to `EndYear` is real defense; conquests that were
-reversed leave no residue. "Most conquests" was rejected: it rewards swings and ignores
-that re-conquest cancels them (see the worked example, §8.2, where A has more conquests
-in *both* variants yet only the variant with end-of-war holdings wins).
+`VictorFaction` is a pure function of the attributed `Conquest` records: for a
+conquest-closed war it is the single record's `ToFaction`; otherwise it is empty.
+Deterministic by construction — no matrix, no holdings snapshot, no tie-breaks.
 
 ### 5.2 Raids and failed attempts
 
 - **Raids and failed attempts factor into war formation only** (they are hostile
   events that the grouping chains into wars and that the narrative needs), never into
-  outcome: they do not change ownership, and the elimination matrix reads only
-  `Conquest` records.
+  outcome or victor: they do not change ownership.
 - The target-less "sought conquest in vain" no-op events never produce records and never
   affect outcome.
 - Same-faction transfers: a settlement can in principle conquer a settlement already
-  under its own faction (relations are per-pair, not faction-wide — an absorbed
+  under the same faction (relations are per-pair, not faction-wide — an absorbed
   settlement keeps hostile relations). Such records are kept faithfully
-  (`FromFaction == ToFaction`) but are **outcome-neutral by construction**: the
-  elimination matrix ranges only over settlements owned by a *different* faction at
-  `StartYear - 1`.
+  (`FromFaction == ToFaction`) and the war still closes as `conquest` with
+  `VictorFaction = ToFaction` — an intra-faction war is a valid war under #48's
+  category-based rules.
 
 ### 5.3 Guards and degenerate cases
 
 | Case | Resolution |
 |---|---|
-| No `Conquest` records in span (raid-only war) | no eliminations → `stalemate` |
-| Two factions each eliminate someone (`A` and `C` both eliminate `B`) | two dominants → `stalemate` (explicit, no tie-break needed) |
-| Mutual elimination (`A` holds all of `B`'s start settlements, `B` all of `A`'s) | both are eliminated → no dominant → `stalemate` |
-| Faction with zero start-owned participant settlements | cannot be eliminated (guard 5.1-1), cannot dominate via vacuous victory |
-| Settlement founded mid-war, then conquered | record kept; settlement had no start-ownership, so it never enters the elimination matrix |
-| War of a single year containing one conquest | start-ownership at `StartYear - 1`, end-holdings at `EndYear` → clean `conquest` |
+| No `Conquest` record in a war (raid-only war) | closed by decay/EOF → `stalemate`, or upgraded → `truce` (#49); no victor |
+| War with a `Conquest` record | always `"conquest"` (#48 closes on it); victor = the record's `ToFaction` |
+| Conquest by an outsider | join rule draws the outsider in first (#48); record attributed to the war it closes |
+| Conquest in `StartYear` (one-year decisive war) | fine: the war opens and closes on the same event; single record, victor attributed |
+| Degenerate conquest event (empty names / unknown settlement) | no record (§3.4); it cannot close a war (the qualifying filter skips it, grouping §5.2) |
 
 ## 6. Interaction with truce (#49) — conquests before a truce stand
 
-**Whoever holds a settlement when the truce lands keeps it.** Concretely:
+**The precedence is conquest > truce > stalemate (`#48`/`#49`), and conquests stand.**
+Concretely:
 
-- The ledger is global and truce-blind: conquests before the truce are already applied
-  and recorded; the truce changes nothing about ownership.
-- The war records `outcome = "truce"` (overriding any elimination result, §5.1) and no
-  victor; the conquest list up to the truce year stays attributed to the war.
+- The ledger is global and truce-blind: conquests are already applied and recorded; the
+  truce pass changes nothing about ownership.
+- A conquest-closed war keeps any `Truce` records concluded *before* the close (#49 §9),
+  but `Outcome` stays `"conquest"` — the truce pass never downgrades a conquest.
+- A truce-upgraded war (`stalemate → truce`) has **no** `Conquest` records: any conquest
+  would have closed the war as `conquest` instead. (#49's minting guard `start <
+  war.EndYear` makes a pre-close truce and a subsequent conquest mutually exclusive in
+  the same war — the conquest closes the war at its own year.)
 - The world state is never mutated by war post-processing — the final
   `world_state.json` factions are the simulation's truth. **Restitution (status quo
   ante bellum) is rejected**: it would require synthesizing ownership reversals that no
   event recorded, i.e. duplicated state that could diverge from the ledger.
 - Later conflicts between the same settlements form a **new** war (#49 defines the
-  post-truce gap that separates wars); they do not reopen the truced war's conquest
-  list.
+  post-truce separation; #48's gap rule separates resumptions); they do not reopen the
+  truced war's conquest list.
 - This matches artifact transfer semantics (`docs/specs/artifacts.md` §6.3): spoils
   taken by conquest stay with the conqueror's settlement.
 
@@ -373,19 +371,15 @@ ledgers because:
 1. **Stream order is the only iteration order.** `DeriveConquests` walks the event
    slice in order (year-major, entity order, ADR-0010); same-year conquests are ordered
    by stream position. No sorting, no map iteration is ever emitted from.
-2. **Maps are lookup-only.** The ledger (`map[string]string`) and any year/index
-   counters are keyed by settlement name or year but never iterated for output. The
-   elimination matrix iterates factions and settlements in **sorted lexicographic
-   order** (even though "exactly one dominant" is set-semantic, sorting pins `victorFaction`
-   and makes the pass robust against future tie-break additions).
-3. **Stable IDs.** Wars get `war-{StartYear}-{index}`: after grouping, wars are ordered
-   by `(StartYear asc, first attributed event's stream position asc)`; `index` is the
-   ordinal among wars sharing `StartYear`. `#51` owns the human-readable `Name`; this ID
-   is the structural key the export links on.
-4. **Boundary semantics are pinned.** `startYear ≤ year ≤ endYear` for in-span
-   conquests; `FactionAt(s, StartYear - 1)` for start-ownership (a conquest *in*
-   `StartYear` never contaminates start-ownership but always counts toward
-   end-holdings).
+2. **Maps are lookup-only.** The ledger (`map[string]string`) is keyed by settlement
+   name and never iterated for output. `War.Conquests`, `VictorFaction`, and `Events`
+   derive from slices and record fields only.
+3. **Stable IDs.** Wars use #48's dense `war-{i}` ordinals (assigned at finalization in
+   creation order). #51 owns the human-readable `Name`; the ID is the structural key the
+   export links on.
+4. **Boundary semantics are pinned.** Conquest records carry their event's exact
+   `Year`; attribution matches by `EventID` (no year-window arithmetic); `FromFaction`
+   is the ledger state *before* the conquest event, `ToFaction` *after*.
 5. **The artifact pass ordering is respected.** The war pipeline runs after
    `EmergencePass` and iterates the returned slice; prepended/appended synthetic
    `Discovery` events are ignored by category filter and never reorder conquests.
@@ -396,69 +390,68 @@ Determinism gate: two `RunSimulation` calls with the same config produce byte-id
 
 ## 8. Worked examples
 
-### 8.1 Three-faction war with re-conquest — decisive outcome
+### 8.1 Three-faction war with a decisive multi-party conquest — `conquest` + victor
 
-Roster: faction `F_A` = {A1, A2}; faction `F_B` = {B1, S1}; faction `F_C` = {C1}.
-(Reachability note, §2.3: under current relation dynamics the same-faction re-conquest
-beat is hard to reach — in the reachable variant the pair is genesis-hostile and the
-absorbed settlement's raids do the relation work. The tracking walk is identical either
-way: it derives from the stream, not from reachability.)
+Roster: faction `F_A` = {A1}; faction `F_B` = {B1, S1}; faction `F_C` = {C1}.
+(Reachability note, §2.3: the stream is synthetic; the tracking walk derives from the
+stream, not from reachability.)
 
-| Year | Event | Ledger change | Conquest record |
-|---|---|---|---|
-| 10 | A1 conquers S1 | `S1: F_B → F_A` | `{10, S1, F_B → F_A}` |
-| 11 | A1 raids B1 (success) | none | — (raid: formation only; also feeds A1's later conquest threshold) |
-| 12 | C1 raids B1 (driven off) | none | — (third faction joins the war as participant via the hostile event chain) |
-| 13–16 | S1 (absorbed into F_A) raids B1 repeatedly | none | — (defender-side relations decay below `ConquerMaxRelations`, per §2.3) |
-| 17 | B1 re-conquers S1 | `S1: F_A → F_B` | `{17, S1, F_A → F_B}` — re-conquest kept as a fresh record, not a rollback |
-| 18 | A1 raids B1 (success) | none | — (A1's relations toward B1 pass the −0.7 conquest threshold) |
-| 19 | A1 conquers B1 — B's last unconquered stronghold | `B1: F_B → F_A` | `{19, B1, F_B → F_A}` |
-| 21 | A1 conquers S1 — B's last settlement falls | `S1: F_B → F_A` | `{21, S1, F_B → F_A}` |
+| Year | Event | Grouping effect | Ledger change | Conquest record |
+|---|---|---|---|---|
+| 10 | A1 raids B1 (success) | war opens: A1 vs B1 | none | — |
+| 12 | C1 raids B1 (driven off) | C1 joins the war (join rule) | none | — (raid: formation only) |
+| 13–16 | S1 raids B1 repeatedly | same war (participant refreshes window) | none | — (defender-side relations decay per §2.3) |
+| 19 | **A1 conquers B1** | **closes the war** (Outcome `"conquest"`, #48) | `B1: F_B → F_A` | `{19, event-19-x, B1, A1, F_B → F_A}` |
 
-Grouping closes the war at the decisive conquest: `EndYear = 21`
-(assumption A-1, §11). Outcome evaluation:
+Attribution: the record's `EventID` is in the war's `Events` → `War.Conquests =
+[{19, B1, A1, F_B → F_A}]`. Victor: `ToFaction = "F_A"` → `VictorFaction = "F_A"`.
+`C1` was a participant whose sub-conflict ended unresolved when the war closed for
+everyone (§4.1); C1's holdings are untouched.
 
-- Start-ownership (`StartYear - 1 = 9`): `A1, A2 → F_A`; `B1, S1 → F_B`; `C1 → F_C`.
-- End-holdings (`Year 21`): `A1, A2 → F_A`; `B1, S1 → F_A`; `C1 → F_C`.
-- Elimination matrix: `F_A` eliminated `F_B` (both `B1` and `S1` held by `F_A` at end);
-  nobody eliminated `F_A`; `F_C` eliminated nobody and was eliminated by nobody.
-- Exactly one dominant → **`outcome = "conquest"`, `victorFaction = "F_A"`**.
+### 8.2 Cross-war re-conquest — two records, one ledger chain
 
-The walk shows the machinery working together: the third-party participant (`C1` via a
-failed raid) never disturbs the unique-dominant result; the re-conquest (`{17, S1}`) is
-overridden only because `F_A` re-took S1 *after* it and held it at `EndYear`.
+Same roster, longer window. War-1: A1 conquers S1 at y10 (closes: `S1: F_B → F_A`,
+record `{10, S1, A1, F_B → F_A}`). Feud resumption: war-2 opens with
+B1 raiding A1 at y14, and B1 re-conquers S1 at y17 (closes war-2: `S1: F_A → F_B`,
+record `{17, S1, B1, F_A → F_B}`).
 
-### 8.2 Variant — the same war closes before the final re-take (stalemate)
+| War | Year | Event | Ledger change | Conquest record |
+|---|---|---|---|---|
+| war-0 | 10 | A1 conquers S1 | `S1: F_B → F_A` | `{10, S1, A1, F_B → F_A}` |
+| war-0 | — | closes at y10 | `Outcome "conquest"`, victor `F_A` | attributed to war-0 |
+| war-1 | 14 | B1 raids A1 (success) | none | — |
+| war-1 | 17 | **B1 re-conquers S1** | `S1: F_A → F_B` | `{17, S1, B1, F_A → F_B}` |
+| war-1 | — | closes at y17 | `Outcome "conquest"`, victor `F_B` | attributed to war-1 |
 
-Same roster and stream, but the war ends at `EndYear = 19` (grouping closes it at the
-A1-conquers-B1 event; no y21 re-take — e.g. separated by a #49 truce or by grouping
-decay). End-holdings: `S1 → F_B` (not lost since y17). Elimination: `F_A` holds `B1`
-but **not** `S1` → `F_A` eliminated nobody → no dominant →
-**`outcome = "stalemate"`** despite `F_A` holding more conquests (2 records vs B's 1).
-This is exactly why the rule reads holdings at `EndYear` rather than counting conquests:
-A's y10 conquest was cancelled by B's y17 re-conquest, and only the y21 re-take makes
-the war decisive.
+The ledger chains across wars: the second record's `FromFaction` (`F_A`) is the first
+record's `ToFaction` — never looked up from final state (war-0's conquest) or from a
+mid-war snapshot. The vault shows the ebb and flow as two conquest rows in two war
+notes.
 
-### 8.3 Partial conquest ending in stalemate
+### 8.3 Raid-only war — `stalemate`, no conquests
 
-Roster: `F_A` = {A1}; `F_B` = {B1, B2}.
+Roster: `F_A` = {A1}; `F_B` = {B1}.
 
 | Year | Event | Ledger change |
 |---|---|---|
-| 30 | A1 conquers B1 | `B1: F_B → F_A` |
-| 33 | A1 raids B2 (driven off — failed attempt) | none |
-| 36 | war closes (grouping decay; no truce) | — |
+| 30 | A1 raids B1 (success) | none |
+| 33 | A1 raids B1 (driven off — failed attempt) | none |
+| 36 | war closes (grouping decay: gap > `MaxGapYears`, #48) | — |
 
-End-holdings: `B1 → F_A`, `B2 → F_B`. Elimination: `F_A` holds B1 but not B2 → no
-elimination → **`outcome = "stalemate"`**, no victor. The partial conquest remains
-visible in `War.Conquests` (and stands in the world state — B1 stays under `F_A`).
+No `Conquest` records; `War.Conquests` empty; `VictorFaction` empty; `Outcome =
+"stalemate"` (#48) unless an active pair truce upgrades it to `"truce"` (#49).
+The partial-decision note: a conquest *would* have flipped this to `conquest`; raids
+never do.
 
-### 8.4 Truce outcome
+### 8.4 Truce outcome — no conquests, no victor
 
-Roster: `F_A` = {A1}; `F_B` = {B1}. A1 conquers B1 at y5; a #49 truce closes the war at
-y7. Elimination alone would say `conquest` (B1 held by `F_A` at end), but the truce
-check runs first → **`outcome = "truce"`**, `victorFaction` empty. B1 stays `F_A` — the
-pre-truce conquest stands (§6).
+Roster: `F_A` = {A1}; `F_B` = {B1}. A1 raids B1 at y5 and y6; no conquest at any point.
+The pair's 10 quiet years complete at y16; the war's last event is at y15, so
+`EndYear = 15` and `16 > EndYear` — the strict guard blocks minting (`truce spec §11`),
+so **`stalemate`**. (Variant: if the war's last event were at y20, the y16 truce would
+be active at close and #49 upgrades the war to `"truce"`.) Either way: no `Conquest`
+records, `VictorFaction` empty — this is the composition the map wants: a truce war
+fades into silence with no ownership change.
 
 ## 9. API surface for #53
 
@@ -478,60 +471,53 @@ type Conquest struct {
 // DeriveConquests replays the stream (§3.2). Pure, total, no RNG.
 func DeriveConquests(initialFactions map[string]string, events []simulation.Event) []Conquest
 
-// FactionAt returns the ledger faction of a settlement at year y (§5.1).
-func FactionAt(initialFactions map[string]string, conquests []Conquest, settlement string, y int) string
-
-const (
-    OutcomeConquest = "conquest"
-    OutcomeStalemate = "stalemate"
-    OutcomeTruce     = "truce"
-)
-
-// EvaluateOutcome decides a war's outcome from end-of-war holdings (§5).
-// endedByTruce is the #49 seam: true → OutcomeTruce, no victor.
-func EvaluateOutcome(participants []string, conquests []Conquest, initialFactions map[string]string, startYear, endYear int, endedByTruce bool) (outcome string, victorFaction string)
-
-// AttachConquests attributes the global ledger to wars and applies participant
-// closure (§3.5). Errors only on exclusivity violations (programming invariant).
+// AttachConquests attributes the global ledger to wars by EventID membership
+// (§3.5), fills War.Conquests (stream order) and War.VictorFaction (ToFaction
+// of the closing conquest; empty otherwise). Errors only on attribution
+// anomalies (zero or two+ candidate wars) — programming invariant.
 func AttachConquests(wars []*War, conquests []Conquest) error
 
-// War is the shared entity. Span/participants/events are owned by #48; truce by
-// #49; name by #51; conquests and outcome by this spec.
+// War is the shared entity. Span/participants/events/outcome are owned by #48;
+// truces by #49; name by #51; conquests and victor by this spec.
 type War struct {
-    ID            string     `json:"id"`                    // war-{startYear}-{index}
+    ID            string     `json:"id"`                    // war-{i}, dense ordinal (#48)
+    Name          string     `json:"name"`                  // #51
     StartYear     int        `json:"startYear"`
     EndYear       int        `json:"endYear"`
-    Participants  []string   `json:"participants"`          // settlement names
-    Outcome       string     `json:"outcome"`               // conquest | stalemate | truce
-    VictorFaction string     `json:"victorFaction,omitempty"`
-    Conquests     []Conquest `json:"conquests,omitempty"`   // in-span, stream order
-    // Events, TruceYear, Name: owned by #48/#49/#51.
+    Outcome       string     `json:"outcome"`               // conquest | stalemate | truce (#48/#49)
+    Participants  []string   `json:"participants"`          // settlement names (#48)
+    Factions      []string   `json:"factions"`              // #48
+    Events        []string   `json:"events"`                // event IDs, stream order (#48)
+    Truces        []Truce    `json:"truces,omitempty"`      // #49
+    VictorFaction string     `json:"victorFaction,omitempty"` // this spec: ToFaction of the closing conquest
+    Conquests     []Conquest `json:"conquests,omitempty"`   // attributed records, stream order (this spec)
 }
 ```
 
 Orchestrator changes (`internal/usecase/simulation/orchestrator.go`): capture
-`initialFactions` before `sim.Run` (line 97); after `EmergencePass` (lines 100-104) run
-the war pipeline (grouping #48 → `DeriveConquests` → `AttachConquests` →
-`EvaluateOutcome` per war), store `worldState.Wars`, return it. `world.State` gains
-`Wars []war.War json:"wars,omitempty"`. No other production files change (the export
-prototype #52 consumes `world_state.json`; `cmd/` needs no changes).
+`initialFactions` before `sim.Run`; after `EmergencePass` run the war pipeline —
+grouping (#48) → `ApplyTruces` (#49) → `DeriveConquests` → `AttachConquests` — store
+`worldState.Wars`, return it. `world.State` gains `Wars []war.War json:"wars,omitempty"`.
+No other production files change (the export prototype #52 consumes `world_state.json`;
+`cmd/` needs no changes).
 
 ## 10. Acceptance criteria (for #53)
 
 1. **Ledger unit tests**: conquest record derivation (fields, `FromFaction`/`ToFaction`
-   against a hand-built stream), re-conquest as a second record, same-faction transfer
-   recorded, expansion registration via description parse, degenerate-event skips
-   (empty `SettlementName`/`TargetSettlement`, unknown settlement), conquest in
-   `StartYear` counts toward end-holdings only.
-2. **Outcome unit tests**: unique dominant → `conquest` with `victorFaction`; two
-   dominants → `stalemate`; mutual elimination → `stalemate`; raid-only war →
-   `stalemate`; truce overrides elimination; non-vacuous guard (faction with zero
-   start-owned participant settlements cannot be eliminated); partial conquest →
-   `stalemate`.
-3. **Worked-example tests**: §8.1 and §8.2 and §8.3 streams as table fixtures →
-   `conquest`/`stalemate`/`stalemate` respectively.
-4. **Attribution tests**: participant closure (target joins), exclusivity violation
-   returns the error, disjoint simultaneous wars attribute cleanly.
+   against a hand-built stream), cross-war re-conquest as a second record chaining the
+   ledger, same-faction transfer recorded, expansion registration via description
+   parse, degenerate-event skips (empty `SettlementName`/`TargetSettlement`, unknown
+   settlement).
+2. **Attribution tests**: conquest attributed to the war whose `Events` carries its
+   `EventID` (§8.1/§8.2 fixtures); `VictorFaction` = closing conquest's `ToFaction`;
+   empty for stalemate/truce wars; zero- or two+-candidate attribution returns the
+   error (programming invariant).
+3. **Outcome composition tests** (integration with #48/#49): conquest-closed war keeps
+   `Outcome "conquest"` even with an earlier `Truce` record; raid-only war →
+   `"stalemate"`; raid-only war with active truce at close → `"truce"`; `VictorFaction`
+   empty in both non-conquest outcomes.
+4. **Worked-example tests**: §8.1, §8.2, §8.3, §8.4 streams as table fixtures →
+   expected records/outcomes/victors.
 5. **Determinism test**: two `RunSimulation` runs with the same seed produce
    byte-identical `world_state.json` including `wars` (extends the existing pipeline
    determinism test).
@@ -543,27 +529,30 @@ prototype #52 consumes `world_state.json`; `cmd/` needs no changes).
 
 | # | Assumption | Owner | Impact if false |
 |---|---|---|---|
-| A-1 | Grouping closes a war at its decisive conquest (or at its last in-span event); `EndYear` is the closure year and in-span means `StartYear ≤ year ≤ EndYear` | #48 | Outcome only shifts if holdings at the new `EndYear` differ; the rule itself is unchanged |
-| A-2 | Wars are maximal closures over hostile events; hostile events by/against an existing war's settlements **extend** that war rather than seeding a new one (§4.3) | #48 | Attribution (§3.5) finds the new war instead; tracking unchanged |
-| A-3 | Exclusivity invariant: no settlement in two overlapping wars; grouping merges on overlap (§4.4) | #48 | Required by this spec — see §4.4; otherwise outcome for shared settlements is undefined |
-| A-4 | Truce closes a war and sets `endedByTruce = true`; post-truce conflicts start a new war (§6) | #49 | Conquest retention is truce-blind either way; only the outcome label differs |
+| A-1 | #48's close rule: a qualifying `Conquest` closes its war immediately, `Outcome = "conquest"`, `EndYear` = the conquest's year; a war contains at most one conquest event; every qualifying event appears in exactly one war's `Events` (completeness invariant) | #48 | Attribution-by-EventID and the victor rule would need to change |
+| A-2 | #48's join rule draws a conquest's attacker *and* target into the war before the close | #48 | §4.3's cases would need rework; attribution itself is unaffected |
+| A-3 | #48's merge rule guarantees one-open-war-per-settlement (exclusivity) | #48 | Required by §4.4; otherwise the attribution invariants' rationale degrades |
+| A-4 | #49 never closes a war: it upgrades `"stalemate"` → `"truce"` when a per-pair truce is active at close, and never downgrades `"conquest"` | #49 | Outcome composition (§5.1) and §6 rewrite; precedence conquest > truce > stalemate is pinned |
 | A-5 | Truce = no restitution (conquests stand) | #49 | This spec hard-codes no-restitution (§6); a restitution decision in #49 must be rejected for consistency |
-| A-6 | War ID `war-{StartYear}-{index}` (§7.3) is acceptable as the structural key | #51 | Only the `Name` changes; IDs are this spec's choice, naming takes prose |
+| A-6 | War IDs are #48's dense `war-{i}`; `Name` is #51's field | #48, #51 | IDs are a structural key only; naming takes prose |
 | A-7 | Export (#52) renders `Conquests`, `Outcome`, `VictorFaction` from `world_state.json` without new fields | #52 | Field names here are the contract; any rename must be coordinated |
 | A-8 | The war pipeline runs inside `RunSimulation` (like `EmergencePass`), not as a disk-based pass | #48 | `initialFactions` (§3.3) exists only in memory; a disk-based pass cannot recover pre-conquest factions from `(final state, events)` alone (§3.2) |
 
-The two load-bearing assumptions for this spec are **A-1** (span semantics) and
-**A-3** (exclusivity); the rest degrade gracefully.
+The two load-bearing assumptions for this spec are **A-1** (close rule + completeness)
+and **A-4** (truce semantics); the rest degrade gracefully.
 
 ## 12. Out of scope
 
-- War grouping, event attribution to wars, war start/end triggers — #48.
+- War grouping, event attribution to wars, war start/end triggers and close rules — #48.
 - Truce mechanics, truce duration, post-truce separation windows — #49.
 - War naming grammar and `Name` generation — #51.
 - War-note export rendering, wiki-links, frontmatter — #52.
 - Balance changes to make re-conquest reachable more often (relation/military tuning) —
   the tracking layer is event-driven and tuning-agnostic.
 - Restitution/status-quo-ante-bellum — explicitly rejected (§6).
+- Elimination/dominance outcome machinery: under the pinned close rule a war holds at
+  most one conquest, so outcome is set by the close trigger, not by end-of-war holdings
+  (§5).
 - Faction-level entities as war participants — participants are settlements
   (shared vocabulary); factions appear only as ownership labels on `Conquest` records
-  and the `victorFaction` outcome.
+  and the `VictorFaction` outcome.
