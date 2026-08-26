@@ -12,7 +12,7 @@ Wars are the shared vocabulary the war feature composes on. This spec fixes the 
 
 - Issue #48 (this ticket) — design the war grouping algorithm; implementation in `internal/domain/war/`.
 - Issue #53 — implementation ticket (blocked on this spec and #49–#52 design tickets).
-- Sibling design tickets this spec composes with: #49 (truce mechanics), #50 (conquest tracking in multi-party wars), #51 (war naming grammar), #52 (war-note export prototype).
+- Sibling design tickets this spec composes with: #49 (truce mechanics — **landed**: `docs/specs/war-truce-mechanics.md`, contract pinned in §5.4/§10.1), #50 (conquest tracking in multi-party wars), #51 (war naming grammar), #52 (war-note export prototype).
 - Real field shapes and volumes quoted from `internal/domain/simulation/event.go`, `internal/domain/agent/actions.go`, `internal/domain/artifact/postprocess.go`, `internal/domain/world/state.go`, and a study run (seed 42, medium 64×64, 30 years; see §3.3).
 
 ## 3. Inputs
@@ -31,13 +31,14 @@ Wars are the shared vocabulary the war feature composes on. This spec fixes the 
 | `Description string` | `description` | Carries outcome text (e.g. `"… and seized 50 wealth"` vs `"… but was driven off"`); **not** parsed by grouping |
 | `FigureID`, `RelatedFigures`, `ArtifactID` | — | Not used |
 
-### 3.2 Event producers (confirmed in `internal/domain/agent/actions.go` and `internal/domain/figures/role_general.go`)
+### 3.2 Event producers (confirmed in `internal/domain/agent/actions.go` and `internal/domain/figures/`)
 
 | Category | Producer | `SettlementName` | `TargetSettlement` | Outcome encoding | Qualifies? |
 |---|---|---|---|---|---|
 | `Raid` | `RaidAction.Execute` (agent) | attacker self | in-range hostile settlement | Description only: `"%s raided %s and seized %.0f wealth"` (~70%, `RaidSuccessChance = 0.7`) or `"%s raided %s but was driven off"` (failed attempt). The no-target branch `"%s sought war in vain"` leaves `TargetSettlement` empty and is unreachable in practice (preconditions guarantee a target), but the target-resolution guard (§5.2) excludes it regardless | **Yes** — success and failure alike |
-| `Conquest` | `ConquerAction.Execute` (agent) | attacker self | in-range hostile settlement | Always decisive: flips `targetSettlement.Faction` to the attacker's faction; description `"%s conquered %s"` (no failure path exists today) | **Yes** — and closes the war (§5.4) |
-| `Conflict` | `General.GenerateEvents` (figure role) | figure's home settlement | Hard-coded placeholder names (`"Blackdale"`, `"Thornfield"`, `"Ashgate"`, `"Ironpeak"`) that do **not** exist in world state; in the study run 223/223 `Conflict` events carried **no** `targetSettlement` at all | Description variants ("led a successful raid on …", "led a failed assault on …") | **No** — different category, and the placeholder targets never resolve |
+| `Conquest` | `ConquerAction.Execute` (agent) | attacker self | in-range hostile settlement | Decisive when it fires: flips `targetSettlement.Faction` to the attacker's faction; description `"%s conquered %s"`. A targetless branch (`"%s sought conquest in vain"`, `actions.go`) exists but was **not observed** in the study run (8/8 conquests carry real targets); had it fired, the §5.2 guard would skip it, so it cannot close a war | **Yes** — and closes the war (§5.4) |
+| `Conflict` | `Leader.GenerateEvents` (figure role) — the observed producer: in the study run 223/223 `Conflict` events carry **no** `TargetSettlement` at all (skirmish/fortify/rally descriptions) | figure's home settlement | (absent) | Description variants ("leads a skirmish near …", "fortifies the defenses of …", "rallies the militia of …") | **No** — different category |
+| `Conflict` (variant) | `General.GenerateEvents` (figure role) — sets hard-coded *flavor* targets (`"Blackdale"`, `"Thornfield"`, `"Ashgate"`, `"Ironpeak"`). These names **can coincide with real settlements** (e.g. `Blackdale` exists in the study run), so a General-produced Conflict could pass the target-resolution guard | figure's home settlement | Flavor name from a fixed list; may or may not resolve | Description variants ("led a successful raid on …", "led a failed assault on …") | **No** — excluded by category allowlist (§5.2 item 1); the resolution guard alone would not exclude it |
 
 **Failed attempts** therefore enter grouping as `Raid` events with `"but was driven off"` descriptions. Their `targetSettlement` is present and real, so they count as war actions, keep the war's inactivity window open, and may be the *only* action of a settlement in a war. They are not distinguished structurally — no parsing of `Description` anywhere in grouping.
 
@@ -60,7 +61,7 @@ Every event is assigned `id = "event-{year}-{index}"` with a monotone per-year i
 
 `world.State` (`internal/domain/world/state.go`) is used for exactly two things:
 
-1. **Target resolution**: `TargetSettlement` (and `SettlementName`) must be present in `worldState.Settlements` (matched by `Name` — settlements have no ID field). Unresolvable events are skipped (§5.2). This also future-proofs against placeholder-target events.
+1. **Target resolution**: `TargetSettlement` (and `SettlementName`) must be present in `worldState.Settlements` (matched by `Name` — settlements have no ID field). Unresolvable events are skipped (§5.2). This is a defensive guard against degenerate events (e.g. the no-target raid/conquest branches of §3.2); it is **not** the mechanism that excludes `Conflict` events, because `General`-produced flavor targets can coincide with real settlement names (§3.2). `Conflict` exclusion is by category allowlist only.
 2. **Faction resolution for the `Factions` field**: each participant's `Faction` string is read from the **final** world state. Historical factions are not recoverable: the simulation mutates `Settlement.Faction` on conquest and `GroupWars` only sees the final state. Caveat: in a war that ends in the conquest of a participant, that participant's recorded faction may equal the conqueror's faction. Refinement of per-war faction snapshots is #50's remit (§10); grouping deliberately ignores it.
 
 ## 4. War entity (`internal/domain/war/`)
@@ -72,12 +73,14 @@ type Outcome string
 const (
     OutcomeConquest  Outcome = "conquest"  // closed by a Conquest event (§5.4)
     OutcomeStalemate Outcome = "stalemate" // inactivity gap or end of stream (§5.3)
-    OutcomeTruce     Outcome = "truce"     // closed by a truce event (#49); unreachable today
+    OutcomeTruce     Outcome = "truce"     // refined by the truce pass (#49): a stalemate-finalized war
+    //                                 with a truce active at close is upgraded to truce
 )
 
 // War groups the qualifying events fought between two sides of settlements.
 type War struct {
     ID           string   `json:"id"`           // "war-{i}", dense ordinal, §5.5
+    Name         string   `json:"name"`         // generated by the naming pass (#51); empty until then
     StartYear    int      `json:"startYear"`    // year of the first qualifying event
     EndYear      int      `json:"endYear"`      // year the war closed (close trigger or last event)
     Outcome      Outcome  `json:"outcome"`
@@ -111,10 +114,11 @@ A war is **open** while the scan year `y` satisfies `y − lastYear ≤ MaxGapYe
 ```go
 const (
     MaxGapYears = 8 // fixed; tuned against §3.3, see §5.3. Must stay seed-independent.
-    // Extensible allowlists (see §5.2, §5.4):
+    // Extensible allowlist (see §5.2):
     // warActionCategories = {"Raid", "Conquest"}       (+#50 extensions)
     // conquestCategory    = "Conquest"
-    // truceCategory       = "Truce"  (reserved; #49 defines the production contract)
+    // There is NO in-stream truce category: truce closing is a post-pass run after
+    // GroupWars (#49, ApplyTruces) — see §5.4 trigger 3 and §10.1.
 )
 ```
 
@@ -147,7 +151,7 @@ Gap applies per **war**, not per pair: any event involving a participant refresh
 
 1. **Conquest resolution**: a qualifying `Conquest` event (category `"Conquest"`) finalizes the war containing the attacker **immediately**, with `Outcome = "conquest"`, `EndYear = event.Year`, and the conquest event itself included in `Events`. Conquest is decisive in the simulation (target's faction flips; attacker pays `ConquerWarCostRatio`), so it terminates the campaign. If the conquest's target was not yet a participant, the join rule (§5.5) draws it into the war first; the war then ends with that conquest. Subsequent actions involving the same settlements open a **new** war.
 2. **Inactivity gap** (lazy, on access or at end of scan): when the scan reaches an event at year `y` and a war's `lastYear + MaxGapYears < y`, the war is finalized with `Outcome = "stalemate"`, `EndYear = lastYear`, and all its participants are evicted from `bySettlement` *before* the current event is processed. Wars still open when the scan finishes are finalized the same way.
-3. **Truce** (reserved seam for #49): an event with `Category == "Truce"` (constant `truceCategory`; no producer exists today) whose parties resolve to participants of one open war finalizes that war with `Outcome = "truce"`, `EndYear = event.Year`. Truce resolution runs **after** join/merge (§5.5), exactly like conquest, so a truce event can also merge two open wars and then close the merged war. Exact truce event category/field contract is #49's decision; this spec only reserves the seam and the ordering semantics.
+3. **Truce (post-pass, #49)**: truce mechanics do **not** emit events into the stream and do not fire during the scan. `#49`'s design is a separate pass, `ApplyTruces(wars []War, events []simulation.Event) ([]War, error)`, run after `GroupWars`: it tracks per-pair hostile-free spans and, when a pair's span reaches `InactivityWindow` (10) strictly before `war.EndYear`, records a `Truce` on the war. Outcome refinement is `conquest` wins > `truce` (≥1 truce active at war close) > `stalemate`; the pass never touches `StartYear`/`EndYear`/`Participants`. Grouping therefore finalizes wars as `conquest` or `stalemate` only, and #49 upgrades eligible stalemates. Full contract in [war-truce-mechanics.md](../specs/war-truce-mechanics.md) §13.
 
 Close triggers are processed **after** the join/merge step of the same event: an event that merges two wars and is a conquest closes the merged war; a war closed by trigger never receives further events.
 
@@ -167,13 +171,13 @@ For each qualifying event `e` (attacker `A`, target `T`, year `y`, stream index 
 | 5 | `wa == wt` (same open war) | Append `e`; **sides unchanged** (same-side fighting is recorded as-is; sides never repartition). |
 
    **Merge mechanics (case 4)**: the older war — the one whose first event has the smaller stream index — survives and absorbs the newer one (its `ID`/`StartYear`/first events remain). The absorbed war is retired (never finalized with an outcome; its events live on in the merged war). Side labels: if `A` and `T` are on the **same** side under the two wars' labels, flip the newer war's side labels so attacker and target end up on opposite sides (deterministic tie-break: newer = larger first-event stream index). Then merge the event/participant lists: `events` = sorted merge by stream index; `Participants`/`SideA`/`SideB` = recomputed from the merged event list as first-involvement order (§4). Merging therefore preserves every ordering invariant.
-3. **Close check**: if `e.Category == "Conquest"` → finalize (trigger 1). If `e.Category == truceCategory` → finalize (trigger 3, reserved). A finalized war's participants are evicted from `bySettlement`.
+3. **Close check**: if `e.Category == "Conquest"` → finalize (trigger 1). Truce never fires during the scan — it is a post-pass refinement (#49, trigger 3). A finalized war's participants are evicted from `bySettlement`.
 
 The merge rule is what makes simultaneous wars impossible: **at any scan point a settlement belongs to at most one open war**. Any event that would put it in a second one merges the two wars instead.
 
 ### 5.6 Why sides stay meaningful
 
-Every event lands with attacker and target on opposite sides (by construction: cases 2–3 place the newcomer opposite the participant it fights; case 4 flips if needed; case 5 records intra-side conflict without re-partitioning). Sides are therefore a consistent two-coloring of the war's conflict graph, which is all #51 (naming) and #52 (export) need. No coalition algebra beyond this is required.
+Every event lands with attacker and target on opposite sides **except** case 5: a same-war event keeps the sides unchanged, so intra-side conflict is recorded as-is (by construction — sides never repartition within a war). Merge case 4 flips the newer war's labels only when attacker and target would land on the same side. Sides are therefore event-derived **labels**, not a guaranteed two-coloring of the war's conflict graph: after a merge, two settlements on the same side can still fight (recorded as case-5 events). #51 (naming) and #52 (export) may use `SideA`/`SideB` for order and flavor, but must not assume intra-side conflict is impossible.
 
 ### 5.7 Edge cases (explicit)
 
@@ -277,7 +281,7 @@ Deepcrest vs Northhold (study run): raids at years 1, 2, 4, 6, 8, 10, 14, 20, 22
 
 This spec assumes, and hands over, the following. Each is a coordination point to confirm when #49–#52 land:
 
-1. **Truce (#49)**: truce mechanics will *close* wars with `Outcome = "truce"` by emitting events into the timeline stream (assumed category `"Truce"`, constant `truceCategory`). This spec reserves the seam: truce events resolve exactly like conquest (join/merge first, then close; §5.4 trigger 3), so a truce always lands in a single war whose participants it names. **If #49 instead closes wars via an out-of-band signal (not an event), the seam changes to a `CloseWar(warID, outcome)`-style input; this spec's entity and triggers are otherwise unchanged.** Until #49 lands, no producer emits `Truce`; grouping is already correct without it.
+1. **Truce (#49)**: **landed** — [war-truce-mechanics.md](../specs/war-truce-mechanics.md) §13. Truce is a post-pass (`ApplyTruces`) run **after** `GroupWars`, upgrading stalemate-finalized wars to `Outcome = "truce"` when a per-pair truce is active at close; conquest outcomes are never downgraded. No in-stream truce events exist, so this spec's scan needs no truce seam (§5.4 trigger 3 removed it). Pipeline order for #53: `RunSimulation` → `GroupWars` → `ApplyTruces`. Coordination points: the shared `InactivityWindow = 10` constant (referenced by both docs), and the strict `truce start < war.EndYear` minting guard — see the open question in war-truce-mechanics.md §11.
 2. **Conquest tracking (#50)**: this spec's join rule (an attacked outsider joins the war; conquest closes it) is the hook #50 builds multi-party conquest history on. Assumptions: (a) #50's per-war conquest records reference war participant settlements by `Name` and events by `id` — both available on `War`; (b) if #50 introduces new qualifying categories (e.g. failed conquests), the implementer extends `warActionCategories` and the conquest-close list *deliberately* — a failed conquest must not trigger the conquest close; (c) historical per-war faction snapshots (pre-conquest factions) are **not** recoverable from final world state and are out of scope for grouping (§3.5) — #50 may own that reconstruction.
 3. **Naming (#51)**: the naming grammar's context variables draw from `War`'s fields — `StartYear`/`EndYear`, `Participants`, `SideA`/`SideB` (ordered, deterministic), `Outcome`. This spec pins those field names and ordering invariants so naming output is byte-deterministic per seed. #51 should not need new grouping fields.
 4. **Export (#52)**: war-note export consumes `[]War` with the JSON tags in §4; `ID`, `Events` (by `id`), and sorted/ordered slices make vault output reproducible. #52 may filter or render single-event wars compactly; grouping keeps them.
@@ -288,15 +292,16 @@ This spec assumes, and hands over, the following. Each is a coordination point t
 1. **Determinism**: `GroupWars` on the same seed's `(events, state)` twice ⇒ `reflect.DeepEqual`; after JSON marshal ⇒ byte-identical. Golden test: seed 42, medium, 30 years — assert the Deepcrest–Northhold war of §9.3 (11 events, `StartYear 1`, `EndYear 27`, `Outcome "conquest"`).
 2. **Worked examples as fixtures**: §9.1 and §9.2 sequences produce exactly the specified `War` values (all fields).
 3. **Rule coverage** (unit tests): each join case (1–5), side flip on merge, gap staleness finalization, conquest close, single-event war, same-year events, unresolvable-target skip, `Conflict`-category skip, empty-input ⇒ empty slice, event-completeness invariant (count of events across all wars == count of qualifying events; every qualifying event appears in exactly one war's `Events`).
-4. **No-RNG invariant**: `internal/domain/war/` imports no `math/rand`; `GroupWars` builds no maps that are ranged for output.
-5. **No source mutation**: `GroupWars` does not modify `events` or `worldState` (defensive: assert input slice unchanged in tests).
-6. **Coverage gates** per AGENTS.md: changed lines ≥ 90 %; `internal/domain` ≥ 90 %.
-7. **Pipeline smoke**: `simulate` still writes byte-identical `timeline.json`/`world_state.json` (grouping is additive; until #52 wires output, `GroupWars` results need not appear in any file).
+4. **Truce integration** (with #49's `ApplyTruces`): pipeline `GroupWars` → `ApplyTruces` on a fixture with an active per-pair truce at close ⇒ `Outcome = "truce"`; a conquest-finalized war with a truce record ⇒ stays `conquest` (never downgraded); truce pass is deterministic (same input twice ⇒ `reflect.DeepEqual`).
+5. **No-RNG invariant**: `internal/domain/war/` imports no `math/rand`; `GroupWars` builds no maps that are ranged for output.
+6. **No source mutation**: `GroupWars` does not modify `events` or `worldState` (defensive: assert input slice unchanged in tests).
+7. **Coverage gates** per AGENTS.md: changed lines ≥ 90 %; `internal/domain` ≥ 90 %.
+8. **Pipeline smoke**: `simulate` still writes byte-identical `timeline.json`/`world_state.json` (grouping is additive; until #52 wires output, `GroupWars` results need not appear in any file).
 
 ## 12. Out of scope
 
 - Implementation of grouping (that is #53) — this spec is the contract.
-- Truce event production, war naming, war-note export (#49, #51, #52).
+- The truce pass (`ApplyTruces`), war naming, war-note export (#49, #51, #52).
 - Historical faction snapshots and per-war conquest history (#50).
 - Any change to simulation event producers, grammars, or CLI flags (§8).
 - War severity/scoring, minimum-event thresholds, derived gap policies (revisit only with measured evidence).
