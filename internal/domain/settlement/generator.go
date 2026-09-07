@@ -36,7 +36,7 @@ func DefaultConfig() Config {
 		MaxPopulation:  100000,
 		MaxSettlements: 0,
 		MergeDistance:  0,
-		RNG:            randv2.New(randv2.NewPCG(0, 0)),
+		RNG:            randv2.New(randv2.NewPCG(0, 0)), //nosec G404 -- Deterministic PRNG required for simulation
 	}
 }
 

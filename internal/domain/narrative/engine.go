@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	randv2 "math/rand/v2"
@@ -37,7 +38,7 @@ func NewEngine(g *Grammar) *Engine {
 
 // NewEngineFromFile reads a grammar file from disk and returns an Engine.
 func NewEngineFromFile(path string) (*Engine, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return nil, fmt.Errorf("read grammar file: %w", err)
 	}

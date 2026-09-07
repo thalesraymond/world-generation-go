@@ -14,17 +14,17 @@ import (
 )
 
 func Export(state *world.State, targetDir string) error {
-	if err := os.MkdirAll(targetDir, 0755); err != nil {
+	if err := os.MkdirAll(targetDir, 0750); err != nil {
 		return fmt.Errorf("create target directory: %w", err)
 	}
 
 	basesDir := filepath.Join(targetDir, "bases")
-	if err := os.MkdirAll(basesDir, 0755); err != nil {
+	if err := os.MkdirAll(basesDir, 0750); err != nil {
 		return fmt.Errorf("create bases directory: %w", err)
 	}
 
 	factionsDir := filepath.Join(targetDir, "factions")
-	if err := os.MkdirAll(factionsDir, 0755); err != nil {
+	if err := os.MkdirAll(factionsDir, 0750); err != nil {
 		return fmt.Errorf("create factions directory: %w", err)
 	}
 
@@ -96,7 +96,7 @@ func Export(state *world.State, targetDir string) error {
 			}
 		}
 
-		if err := os.WriteFile(path, []byte(frontmatter(fields)+content), 0644); err != nil {
+		if err := os.WriteFile(path, []byte(frontmatter(fields)+content), 0600); err != nil {
 			return fmt.Errorf("write settlement file: %w", err)
 		}
 
@@ -126,7 +126,7 @@ func Export(state *world.State, targetDir string) error {
 			fmt.Fprintf(&b, "- [[%s]]\n", sanitized)
 		}
 
-		if err := os.WriteFile(path, []byte(frontmatter(fields)+b.String()), 0644); err != nil {
+		if err := os.WriteFile(path, []byte(frontmatter(fields)+b.String()), 0600); err != nil {
 			return fmt.Errorf("write faction file: %w", err)
 		}
 	}
@@ -143,7 +143,7 @@ func ExportPointcrawl(state *world.State, targetDir string) error {
 	graph := state.PointcrawlGraph
 
 	pointcrawlDir := filepath.Join(targetDir, "pointcrawl")
-	if err := os.MkdirAll(pointcrawlDir, 0755); err != nil {
+	if err := os.MkdirAll(pointcrawlDir, 0750); err != nil {
 		return fmt.Errorf("create pointcrawl directory: %w", err)
 	}
 
@@ -207,7 +207,7 @@ func writeNetworkIndex(graph *pointcrawl.Graph, nodeNames map[int]string, path s
 			fromName, toName, edge.Cost)
 	}
 
-	if err := os.WriteFile(path, []byte(b.String()), 0644); err != nil {
+	if err := os.WriteFile(path, []byte(b.String()), 0600); err != nil {
 		return fmt.Errorf("write network index: %w", err)
 	}
 
@@ -240,7 +240,7 @@ func writeNodeFile(node *pointcrawl.Node, graph *pointcrawl.Graph, nodeNames map
 		fmt.Fprintf(&b, "| [[%s]] | %d |\n", toName, edge.Cost)
 	}
 
-	if err := os.WriteFile(path, []byte(b.String()), 0644); err != nil {
+	if err := os.WriteFile(path, []byte(b.String()), 0600); err != nil {
 		return fmt.Errorf("write node file: %w", err)
 	}
 
@@ -419,7 +419,7 @@ func ExportTimeline(state *world.State, events []simulation.Event, targetDir str
 	})
 
 	chroniclesDir := filepath.Join(targetDir, "chronicles")
-	if err := os.MkdirAll(chroniclesDir, 0755); err != nil {
+	if err := os.MkdirAll(chroniclesDir, 0750); err != nil {
 		return fmt.Errorf("create chronicles directory: %w", err)
 	}
 
@@ -450,7 +450,7 @@ func ExportTimeline(state *world.State, events []simulation.Event, targetDir str
 	}
 
 	path := filepath.Join(chroniclesDir, "Chronicle.md")
-	if err := os.WriteFile(path, []byte(b.String()), 0644); err != nil {
+	if err := os.WriteFile(path, []byte(b.String()), 0600); err != nil {
 		return fmt.Errorf("write chronicle: %w", err)
 	}
 

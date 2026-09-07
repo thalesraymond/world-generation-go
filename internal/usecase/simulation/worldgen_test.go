@@ -9,7 +9,7 @@ import (
 )
 
 func TestGenerateWorldHasPointcrawlGraph(t *testing.T) {
-	config := WorldGenConfig{Seed: 42, Width: 32, Height: 32, Years: 100}
+	config := WorldGenConfig{Seed: uint64(42), Width: 32, Height: 32, Years: 100}
 
 	worldState, err := GenerateWorld(config)
 	if err != nil {
@@ -30,7 +30,7 @@ func TestGenerateWorldHasPointcrawlGraph(t *testing.T) {
 }
 
 func TestGenerateWorldPointcrawlGraphIsDeterministic(t *testing.T) {
-	config := WorldGenConfig{Seed: 42, Width: 32, Height: 32, Years: 100}
+	config := WorldGenConfig{Seed: uint64(42), Width: 32, Height: 32, Years: 100}
 
 	first, err := GenerateWorld(config)
 	if err != nil {
@@ -62,7 +62,7 @@ func graphToJSON(graph *pointcrawl.Graph) ([]byte, error) {
 }
 
 func TestGenerateWorldCreatesSettlementFigures(t *testing.T) {
-	config := WorldGenConfig{Seed: 42, Width: 48, Height: 48, Years: 100}
+	config := WorldGenConfig{Seed: uint64(42), Width: 48, Height: 48, Years: 100}
 
 	worldState, err := GenerateWorld(config)
 	if err != nil {
@@ -90,7 +90,7 @@ func TestGenerateWorldCreatesSettlementFigures(t *testing.T) {
 }
 
 func TestGenerateWorldFoundersAreDeterministic(t *testing.T) {
-	config := WorldGenConfig{Seed: 42, Width: 48, Height: 48, Years: 100}
+	config := WorldGenConfig{Seed: uint64(42), Width: 48, Height: 48, Years: 100}
 
 	first, err := GenerateWorld(config)
 	if err != nil {
@@ -121,7 +121,7 @@ func TestGenerateWorldFoundersAreDeterministic(t *testing.T) {
 }
 
 func TestGenerateWorldIsDeterministicForSameSeed(t *testing.T) {
-	config := WorldGenConfig{Seed: 42, Width: 16, Height: 16, Years: 100}
+	config := WorldGenConfig{Seed: uint64(42), Width: 16, Height: 16, Years: 100}
 
 	first, err := GenerateWorld(config)
 	if err != nil {
@@ -149,8 +149,8 @@ func TestGenerateWorldIsDeterministicForSameSeed(t *testing.T) {
 }
 
 func TestGenerateWorldDiffersAcrossSeeds(t *testing.T) {
-	configA := WorldGenConfig{Seed: 42, Width: 16, Height: 16, Years: 100}
-	configB := WorldGenConfig{Seed: 99, Width: 16, Height: 16, Years: 100}
+	configA := WorldGenConfig{Seed: uint64(42), Width: 16, Height: 16, Years: 100}
+	configB := WorldGenConfig{Seed: uint64(99), Width: 16, Height: 16, Years: 100}
 
 	worldA, err := GenerateWorld(configA)
 	if err != nil {
@@ -178,7 +178,7 @@ func TestGenerateWorldDiffersAcrossSeeds(t *testing.T) {
 }
 
 func TestGenerateWorldRejectsInvalidDimensions(t *testing.T) {
-	config := WorldGenConfig{Seed: 1, Width: 0, Height: 16, Years: 100}
+	config := WorldGenConfig{Seed: uint64(1), Width: 0, Height: 16, Years: 100}
 
 	_, err := GenerateWorld(config)
 	if err == nil {
@@ -187,7 +187,7 @@ func TestGenerateWorldRejectsInvalidDimensions(t *testing.T) {
 }
 
 func TestGenerateWorldCreatesPlantedRelicsPerRuin(t *testing.T) {
-	config := WorldGenConfig{Seed: 42, Width: 48, Height: 48, Years: 100}
+	config := WorldGenConfig{Seed: uint64(42), Width: 48, Height: 48, Years: 100}
 
 	worldState, err := GenerateWorld(config)
 	if err != nil {
@@ -211,7 +211,7 @@ func TestGenerateWorldCreatesPlantedRelicsPerRuin(t *testing.T) {
 }
 
 func TestGenerateWorldArtifactsAreDeterministic(t *testing.T) {
-	config := WorldGenConfig{Seed: 42, Width: 48, Height: 48, Years: 100}
+	config := WorldGenConfig{Seed: uint64(42), Width: 48, Height: 48, Years: 100}
 
 	first, err := GenerateWorld(config)
 	if err != nil {
@@ -239,7 +239,7 @@ func TestGenerateWorldArtifactsAreDeterministic(t *testing.T) {
 }
 
 func TestGenerateWorldComponentStreamsAreIsolated(t *testing.T) {
-	config := WorldGenConfig{Seed: 42, Width: 16, Height: 16, Years: 100}
+	config := WorldGenConfig{Seed: uint64(42), Width: 16, Height: 16, Years: 100}
 
 	world1, err := GenerateWorld(config)
 	if err != nil {
@@ -265,7 +265,7 @@ func TestGenerateWorldComponentStreamsAreIsolated(t *testing.T) {
 		t.Fatalf("expected identical output for same seed")
 	}
 
-	configDiff := WorldGenConfig{Seed: 43, Width: 16, Height: 16, Years: 100}
+	configDiff := WorldGenConfig{Seed: uint64(43), Width: 16, Height: 16, Years: 100}
 	world3, err := GenerateWorld(configDiff)
 	if err != nil {
 		t.Fatalf("GenerateWorld() third run error = %v", err)
