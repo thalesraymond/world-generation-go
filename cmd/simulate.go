@@ -37,7 +37,7 @@ func newSimulateCommand() *cobra.Command {
 			cmd.Printf("Starting timeline simulation for %d years with event density %q.\n", cfg.Years, cfg.Events)
 
 			events, worldState, err := ucsim.RunSimulation(cmd.Context(), ucsim.OrchestratorConfig{
-				Seed:   uint64(cfg.Seed),
+				Seed:   uint64(cfg.Seed), //nosec G115 -- Seed parameter wraps from int64 configuration seamlessly.
 				Width:  width,
 				Height: height,
 				Years:  cfg.Years,
@@ -70,7 +70,7 @@ func newSimulateCommand() *cobra.Command {
 			}
 			cmd.Printf("Timeline saved to %s\n", timelinePath)
 
-			narrativeRNG := state.NewEngine(uint64(cfg.Seed)).GetPRNG("narrative")
+			narrativeRNG := state.NewEngine(uint64(cfg.Seed)).GetPRNG("narrative") //nosec G115 -- Seed parameter wraps from int64 configuration seamlessly.
 			chronicle, err := adapter.NewChronicleForWorld(narrativeRNG, worldState, cfg.Events)
 			if err != nil {
 				return fmt.Errorf("create chronicle: %w", err)

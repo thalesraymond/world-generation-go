@@ -28,7 +28,7 @@ type OrchestratorConfig struct {
 // cancellation escape hatch for the event collector.
 func RunSimulation(ctx context.Context, config OrchestratorConfig) ([]domsim.Event, *world.State, error) {
 	worldState, err := GenerateWorld(WorldGenConfig{
-		Seed:   int64(config.Seed),
+		Seed:   int64(config.Seed), //nosec G115 -- The Seed parameter intentionally wraps int64 to match configuration semantics.
 		Width:  config.Width,
 		Height: config.Height,
 		Years:  config.Years,
