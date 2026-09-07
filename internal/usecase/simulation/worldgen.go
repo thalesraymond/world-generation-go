@@ -13,7 +13,7 @@ import (
 )
 
 type WorldGenConfig struct {
-	Seed   uint64
+	Seed   int64
 	Width  int
 	Height int
 	Years  int
@@ -24,7 +24,7 @@ func GenerateWorld(config WorldGenConfig) (*world.State, error) {
 		return nil, fmt.Errorf("invalid dimensions: %dx%d", config.Width, config.Height)
 	}
 
-	engine := state.NewEngine(config.Seed)
+	engine := state.NewEngine(uint64(config.Seed))
 
 	terrainRNG := engine.GetPRNG("terrain")
 	climateRNG := engine.GetPRNG("climate")

@@ -21,7 +21,7 @@ func (e *Engine) GetPRNG(componentID string) *randv2.Rand {
 	seed1 := deriveSeed(e.masterSeed, componentID, "stream")
 	seed2 := deriveSeed(e.masterSeed, componentID, "sequence")
 
-	return randv2.New(randv2.NewPCG(seed1, seed2)) //nosec G404 -- Deterministic PRNG required for simulation
+	return randv2.New(randv2.NewPCG(seed1, seed2))
 }
 
 func deriveSeed(masterSeed uint64, componentID, lane string) uint64 {

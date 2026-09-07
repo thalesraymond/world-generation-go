@@ -85,7 +85,7 @@ func sampleTerrainNodes(terrainMap *terrain.Map, config GeneratorConfig) []Node 
 
 	var rng *randv2.Rand
 	if config.RNG == nil {
-		rng = randv2.New(randv2.NewPCG(0, 0)) //nosec G404 -- Deterministic PRNG required for simulation
+		rng = randv2.New(randv2.NewPCG(0, 0))
 	} else {
 		rng = config.RNG
 	}
