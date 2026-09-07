@@ -24,7 +24,7 @@ func GenerateWorld(config WorldGenConfig) (*world.State, error) {
 		return nil, fmt.Errorf("invalid dimensions: %dx%d", config.Width, config.Height)
 	}
 
-	engine := state.NewEngine(uint64(config.Seed)) //nosec G115 -- Seed parameter wraps from int64 configuration seamlessly.
+	engine := state.NewEngine(uint64(config.Seed))
 
 	terrainRNG := engine.GetPRNG("terrain")
 	climateRNG := engine.GetPRNG("climate")
