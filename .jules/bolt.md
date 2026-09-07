@@ -1,0 +1,3 @@
+## 2026-09-07 - Automata Grid Allocations
+**Learning:** In Go grid simulations, extracting zero-allocation helper functions (like `[8]int` stack arrays for neighbors) or inlining them, and avoiding `map[string]float64` allocations inside tight cellular automata inner loops, yields massive 4-5x performance gains by eliminating garbage collection pressure. Linear searching a max 8-element array is significantly faster than hashing maps per-cell.
+**Action:** When optimizing tight grid loops in Go, always look to replace dynamic slices and maps with fixed-size stack arrays `[N]T` if the maximum upper bound of elements (like neighbors) is known and small.

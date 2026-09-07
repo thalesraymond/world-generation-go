@@ -114,8 +114,11 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 		next[idx] = population * (1 - rate)
 	}
 
-	for y := 0; y < state.Height; y++ {
-		for x := 0; x < state.Width; x++ {
+	width := state.Width
+	height := state.Height
+
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
 			idx, _ := state.Index(x, y)
 			population := state.PopulationDensity[idx]
 			if population <= 0 {
@@ -127,24 +130,67 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 				continue
 			}
 
+			// OPTIMIZATION: Use stack-allocated array instead of dynamic slice to avoid heap allocations in tight loop
 			type weightedNeighbor struct {
 				idx    int
 				weight float64
 			}
 
-			var targets []weightedNeighbor
+			var targets [8]weightedNeighbor
+			targetsCount := 0
+
 			totalWeight := 0.0
-			for _, n := range neighbors(state, x, y) {
-				if state.PopulationDensity[n.idx] >= population {
+
+			// OPTIMIZATION: Inline neighbor calculation to avoid allocations and function call overhead
+			var nIdxs [8]int
+			nCount := 0
+
+			if y > 0 {
+				if x > 0 {
+					nIdxs[nCount] = (y-1)*width + (x - 1)
+					nCount++
+				}
+				nIdxs[nCount] = (y-1)*width + x
+				nCount++
+				if x < width-1 {
+					nIdxs[nCount] = (y-1)*width + (x + 1)
+					nCount++
+				}
+			}
+			if x > 0 {
+				nIdxs[nCount] = y*width + (x - 1)
+				nCount++
+			}
+			if x < width-1 {
+				nIdxs[nCount] = y*width + (x + 1)
+				nCount++
+			}
+			if y < height-1 {
+				if x > 0 {
+					nIdxs[nCount] = (y+1)*width + (x - 1)
+					nCount++
+				}
+				nIdxs[nCount] = (y+1)*width + x
+				nCount++
+				if x < width-1 {
+					nIdxs[nCount] = (y+1)*width + (x + 1)
+					nCount++
+				}
+			}
+
+			for i := 0; i < nCount; i++ {
+				nIdx := nIdxs[i]
+				if state.PopulationDensity[nIdx] >= population {
 					continue
 				}
 
-				weight := state.Suitability[n.idx]
+				weight := state.Suitability[nIdx]
 				if weight <= 0 {
 					continue
 				}
 
-				targets = append(targets, weightedNeighbor{idx: n.idx, weight: weight})
+				targets[targetsCount] = weightedNeighbor{idx: nIdx, weight: weight}
+				targetsCount++
 				totalWeight += weight
 			}
 
@@ -153,7 +199,8 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 				continue
 			}
 
-			for _, target := range targets {
+			for i := 0; i < targetsCount; i++ {
+				target := targets[i]
 				next[target.idx] += transfer * (target.weight / totalWeight)
 			}
 		}
@@ -165,30 +212,90 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 func spreadFactionInfluence(state *world.State, nextPopulation []float64, minPopulation float64) []string {
 	next := make([]string, len(state.FactionInfluence))
 
-	for y := 0; y < state.Height; y++ {
-		for x := 0; x < state.Width; x++ {
+	width := state.Width
+	height := state.Height
+
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
 			idx, _ := state.Index(x, y)
 			if nextPopulation[idx] < minPopulation {
 				next[idx] = ""
 				continue
 			}
 
-			scores := map[string]float64{}
-			for _, neighbor := range neighbors(state, x, y) {
-				faction := state.FactionInfluence[neighbor.idx]
+			// OPTIMIZATION: Use stack-allocated array and linear search instead of map[string]float64
+			// to avoid map allocation and hashing overhead per cell. Linear search on max 8 elements is faster.
+			type factionScore struct {
+				faction string
+				score   float64
+			}
+			var scores [8]factionScore
+			scoresCount := 0
+
+			// OPTIMIZATION: Inline neighbor calculation
+			var nIdxs [8]int
+			nCount := 0
+
+			if y > 0 {
+				if x > 0 {
+					nIdxs[nCount] = (y-1)*width + (x - 1)
+					nCount++
+				}
+				nIdxs[nCount] = (y-1)*width + x
+				nCount++
+				if x < width-1 {
+					nIdxs[nCount] = (y-1)*width + (x + 1)
+					nCount++
+				}
+			}
+			if x > 0 {
+				nIdxs[nCount] = y*width + (x - 1)
+				nCount++
+			}
+			if x < width-1 {
+				nIdxs[nCount] = y*width + (x + 1)
+				nCount++
+			}
+			if y < height-1 {
+				if x > 0 {
+					nIdxs[nCount] = (y+1)*width + (x - 1)
+					nCount++
+				}
+				nIdxs[nCount] = (y+1)*width + x
+				nCount++
+				if x < width-1 {
+					nIdxs[nCount] = (y+1)*width + (x + 1)
+					nCount++
+				}
+			}
+
+			for i := 0; i < nCount; i++ {
+				nIdx := nIdxs[i]
+				faction := state.FactionInfluence[nIdx]
 				if faction == "" {
 					continue
 				}
 
-				scores[faction] += state.PopulationDensity[neighbor.idx]
+				found := false
+				for j := 0; j < scoresCount; j++ {
+					if scores[j].faction == faction {
+						scores[j].score += state.PopulationDensity[nIdx]
+						found = true
+						break
+					}
+				}
+				if !found {
+					scores[scoresCount] = factionScore{faction: faction, score: state.PopulationDensity[nIdx]}
+					scoresCount++
+				}
 			}
 
 			bestFaction := state.FactionInfluence[idx]
 			bestScore := 0.0
-			for faction, score := range scores {
-				if score > bestScore {
-					bestScore = score
-					bestFaction = faction
+			for j := 0; j < scoresCount; j++ {
+				if scores[j].score > bestScore {
+					bestScore = scores[j].score
+					bestFaction = scores[j].faction
 				}
 			}
 
@@ -197,28 +304,4 @@ func spreadFactionInfluence(state *world.State, nextPopulation []float64, minPop
 	}
 
 	return next
-}
-
-type neighborCell struct {
-	idx int
-}
-
-func neighbors(state *world.State, x, y int) []neighborCell {
-	cells := make([]neighborCell, 0, 8)
-	for dy := -1; dy <= 1; dy++ {
-		for dx := -1; dx <= 1; dx++ {
-			if dx == 0 && dy == 0 {
-				continue
-			}
-
-			idx, ok := state.Index(x+dx, y+dy)
-			if !ok {
-				continue
-			}
-
-			cells = append(cells, neighborCell{idx: idx})
-		}
-	}
-
-	return cells
 }
