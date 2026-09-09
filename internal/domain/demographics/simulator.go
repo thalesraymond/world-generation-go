@@ -38,7 +38,7 @@ func PreGenerateSuitability(state *world.State, terrainMap terrain.Map) error {
 		return fmt.Errorf("state and terrain dimensions differ: state=%dx%d terrain=%dx%d", state.Width, state.Height, terrainMap.Width, terrainMap.Height)
 	}
 
-	return state.SetSuitability(spatial.CalculateSuitabilityMap(terrainMap))
+	return state.SetSuitability(spatial.CalculateSuitabilityMap(&terrainMap))
 }
 
 // SeedPopulationFromSuitability creates deterministic starting populations.

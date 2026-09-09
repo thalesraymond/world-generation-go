@@ -167,10 +167,14 @@ func cullNodes(nodes []Node, minDistance float64) []Node {
 	})
 
 	kept := make([]Node, 0, len(nodes))
+	minDistSq := minDistance * minDistance
 	for _, candidate := range nodes {
 		tooClose := false
 		for _, existing := range kept {
-			if distance(candidate.X, candidate.Y, existing.X, existing.Y) < minDistance {
+			dx := float64(existing.X - candidate.X)
+			dy := float64(existing.Y - candidate.Y)
+			// ⚡ Bolt: Use squared distance to avoid expensive math.Hypot calls.
+			if dx*dx+dy*dy < minDistSq {
 				tooClose = true
 				break
 			}

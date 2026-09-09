@@ -133,6 +133,7 @@ func findCandidates(state *world.State, config Config) []candidate {
 
 func filterByDistance(candidates []candidate, minDistance float64, maxSettlements int) []candidate {
 	selected := make([]candidate, 0, len(candidates))
+	minDistSq := minDistance * minDistance
 	for _, c := range candidates {
 		if maxSettlements > 0 && len(selected) >= maxSettlements {
 			break
@@ -140,7 +141,10 @@ func filterByDistance(candidates []candidate, minDistance float64, maxSettlement
 
 		tooClose := false
 		for _, existing := range selected {
-			if distance(c.x, c.y, existing.x, existing.y) < minDistance {
+			dx := float64(existing.x - c.x)
+			dy := float64(existing.y - c.y)
+			// ⚡ Bolt: Use squared distance to avoid expensive math.Hypot calls.
+			if dx*dx+dy*dy < minDistSq {
 				tooClose = true
 				break
 			}
