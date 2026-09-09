@@ -15,12 +15,14 @@ func ResolveProximityConflicts(settlements []world.Settlement, mergeDistance flo
 		if absorbed[i] {
 			continue
 		}
+		mergeDistSq := mergeDistance * mergeDistance
 		for j := i + 1; j < len(settlements); j++ {
 			if absorbed[j] {
 				continue
 			}
-			d := distance(settlements[i].X, settlements[i].Y, settlements[j].X, settlements[j].Y)
-			if d < mergeDistance {
+			dx := float64(settlements[j].X - settlements[i].X)
+			dy := float64(settlements[j].Y - settlements[i].Y)
+			if dx*dx+dy*dy < mergeDistSq {
 				if settlements[i].Population >= settlements[j].Population {
 					settlements[i].Population += settlements[j].Population
 					settlements[i].Type = Classify(settlements[i].Population)
