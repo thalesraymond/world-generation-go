@@ -21,7 +21,8 @@ func EvaluateTileSuitability(tile terrain.Tile, nearWater bool, elevationVarianc
 }
 
 // CalculateSuitabilityMap precomputes per-tile suitability for simulation.
-func CalculateSuitabilityMap(terrainMap terrain.Map) []float64 {
+// ⚡ Bolt: Pass terrainMap by pointer to avoid expensive struct copies in hot loops.
+func CalculateSuitabilityMap(terrainMap *terrain.Map) []float64 {
 	cellCount := terrainMap.Width * terrainMap.Height
 	if cellCount <= 0 {
 		return nil
@@ -43,7 +44,7 @@ func CalculateSuitabilityMap(terrainMap terrain.Map) []float64 {
 	return scores
 }
 
-func hasNearbyWater(terrainMap terrain.Map, x, y, radius int) bool {
+func hasNearbyWater(terrainMap *terrain.Map, x, y, radius int) bool {
 	for dy := -radius; dy <= radius; dy++ {
 		for dx := -radius; dx <= radius; dx++ {
 			neighbor, ok := terrainMap.TileAt(x+dx, y+dy)
@@ -60,7 +61,7 @@ func hasNearbyWater(terrainMap terrain.Map, x, y, radius int) bool {
 	return false
 }
 
-func localElevationVariance(terrainMap terrain.Map, x, y int) float64 {
+func localElevationVariance(terrainMap *terrain.Map, x, y int) float64 {
 	minElevation := 1.0
 	maxElevation := 0.0
 	found := false

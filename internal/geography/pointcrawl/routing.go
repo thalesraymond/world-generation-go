@@ -103,6 +103,7 @@ func ConnectNodes(graph *Graph, terrainMap *terrain.Map, maxDistance float64) {
 		return nodes[i].ID < nodes[j].ID
 	})
 
+	maxDistSq := maxDistance * maxDistance
 	for i := 0; i < len(nodes); i++ {
 		for j := i + 1; j < len(nodes); j++ {
 			a := nodes[i]
@@ -110,9 +111,10 @@ func ConnectNodes(graph *Graph, terrainMap *terrain.Map, maxDistance float64) {
 
 			dx := float64(b.X - a.X)
 			dy := float64(b.Y - a.Y)
-			d := math.Hypot(dx, dy)
+			// ⚡ Bolt: Use squared distance to avoid expensive math.Hypot calls.
+			dSq := dx*dx + dy*dy
 
-			if d < maxDistance {
+			if dSq < maxDistSq {
 				cost := CalculateEdgeCost(a, b, terrainMap)
 				graph.AddEdge(a.ID, b.ID, cost)
 				graph.AddEdge(b.ID, a.ID, cost)

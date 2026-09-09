@@ -40,7 +40,7 @@ func TestCalculateSuitabilityMapReturnsOneScorePerTile(t *testing.T) {
 		},
 	}
 
-	scores := CalculateSuitabilityMap(terrainMap)
+	scores := CalculateSuitabilityMap(&terrainMap)
 	if len(scores) != 4 {
 		t.Fatalf("score count = %d, want 4", len(scores))
 	}
