@@ -26,6 +26,6 @@ func BenchmarkGenerate(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		settlement.Generate(state, config)
+		_ = settlement.Generate(state, config)
 	}
 }
