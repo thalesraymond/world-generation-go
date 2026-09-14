@@ -31,11 +31,7 @@ func CalculateSuitabilityMap(terrainMap terrain.Map) []float64 {
 	for y := 0; y < terrainMap.Height; y++ {
 		for x := 0; x < terrainMap.Width; x++ {
 			idx := y*terrainMap.Width + x
-			tile, ok := terrainMap.TileAt(x, y)
-			if !ok {
-				continue
-			}
-
+			tile := terrainMap.Tiles[idx]
 			scores[idx] = EvaluateTileSuitability(tile, hasNearbyWater(terrainMap, x, y, 2), localElevationVariance(terrainMap, x, y))
 		}
 	}
@@ -43,15 +39,31 @@ func CalculateSuitabilityMap(terrainMap terrain.Map) []float64 {
 	return scores
 }
 
+// hasNearbyWater determines if there is any water tile within the given radius.
+// Optimized to avoid function call overhead and redundant boundary checks.
 func hasNearbyWater(terrainMap terrain.Map, x, y, radius int) bool {
-	for dy := -radius; dy <= radius; dy++ {
-		for dx := -radius; dx <= radius; dx++ {
-			neighbor, ok := terrainMap.TileAt(x+dx, y+dy)
-			if !ok {
-				continue
-			}
+	minY := y - radius
+	if minY < 0 {
+		minY = 0
+	}
+	maxY := y + radius
+	if maxY >= terrainMap.Height {
+		maxY = terrainMap.Height - 1
+	}
 
-			if neighbor.Biome == terrain.BiomeWater {
+	minX := x - radius
+	if minX < 0 {
+		minX = 0
+	}
+	maxX := x + radius
+	if maxX >= terrainMap.Width {
+		maxX = terrainMap.Width - 1
+	}
+
+	for dy := minY; dy <= maxY; dy++ {
+		rowOffset := dy * terrainMap.Width
+		for dx := minX; dx <= maxX; dx++ {
+			if terrainMap.Tiles[rowOffset+dx].Biome == terrain.BiomeWater {
 				return true
 			}
 		}
@@ -60,26 +72,41 @@ func hasNearbyWater(terrainMap terrain.Map, x, y, radius int) bool {
 	return false
 }
 
+// localElevationVariance calculates the difference between max and min elevation in the 3x3 area.
+// Optimized to avoid function call overhead and redundant boundary checks.
 func localElevationVariance(terrainMap terrain.Map, x, y int) float64 {
+	minY := y - 1
+	if minY < 0 {
+		minY = 0
+	}
+	maxY := y + 1
+	if maxY >= terrainMap.Height {
+		maxY = terrainMap.Height - 1
+	}
+
+	minX := x - 1
+	if minX < 0 {
+		minX = 0
+	}
+	maxX := x + 1
+	if maxX >= terrainMap.Width {
+		maxX = terrainMap.Width - 1
+	}
+
 	minElevation := 1.0
 	maxElevation := 0.0
 	found := false
 
-	for dy := -1; dy <= 1; dy++ {
-		for dx := -1; dx <= 1; dx++ {
-			neighbor, ok := terrainMap.TileAt(x+dx, y+dy)
-			if !ok {
-				continue
+	for dy := minY; dy <= maxY; dy++ {
+		rowOffset := dy * terrainMap.Width
+		for dx := minX; dx <= maxX; dx++ {
+			e := terrainMap.Tiles[rowOffset+dx].Elevation
+			if e < minElevation {
+				minElevation = e
 			}
-
-			if neighbor.Elevation < minElevation {
-				minElevation = neighbor.Elevation
+			if e > maxElevation {
+				maxElevation = e
 			}
-
-			if neighbor.Elevation > maxElevation {
-				maxElevation = neighbor.Elevation
-			}
-
 			found = true
 		}
 	}
