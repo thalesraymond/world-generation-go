@@ -97,9 +97,12 @@ func Simulate(state *world.State, config SimulatorConfig) error {
 		rate = 1
 	}
 
+	nextPopulation := make([]float64, len(state.PopulationDensity))
+	nextFaction := make([]string, len(state.FactionInfluence))
+
 	for i := 0; i < config.Iterations; i++ {
-		nextPopulation := diffusePopulation(state, rate)
-		nextFaction := spreadFactionInfluence(state, nextPopulation, config.MinPopulation)
+		diffusePopulationInPlace(state, rate, nextPopulation)
+		spreadFactionInfluenceInPlace(state, nextPopulation, config.MinPopulation, nextFaction)
 
 		copy(state.PopulationDensity, nextPopulation)
 		copy(state.FactionInfluence, nextFaction)
@@ -108,11 +111,16 @@ func Simulate(state *world.State, config SimulatorConfig) error {
 	return nil
 }
 
-func diffusePopulation(state *world.State, rate float64) []float64 {
-	next := make([]float64, len(state.PopulationDensity))
+func diffusePopulationInPlace(state *world.State, rate float64, next []float64) {
 	for idx, population := range state.PopulationDensity {
 		next[idx] = population * (1 - rate)
 	}
+
+	type weightedNeighbor struct {
+		idx    int
+		weight float64
+	}
+	targets := make([]weightedNeighbor, 0, 8)
 
 	for y := 0; y < state.Height; y++ {
 		for x := 0; x < state.Width; x++ {
@@ -127,25 +135,36 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 				continue
 			}
 
-			type weightedNeighbor struct {
-				idx    int
-				weight float64
-			}
-
-			var targets []weightedNeighbor
+			targets = targets[:0]
 			totalWeight := 0.0
-			for _, n := range neighbors(state, x, y) {
-				if state.PopulationDensity[n.idx] >= population {
+
+			for dy := -1; dy <= 1; dy++ {
+				ny := y + dy
+				if ny < 0 || ny >= state.Height {
 					continue
 				}
+				for dx := -1; dx <= 1; dx++ {
+					if dx == 0 && dy == 0 {
+						continue
+					}
+					nx := x + dx
+					if nx < 0 || nx >= state.Width {
+						continue
+					}
+					nIdx := ny*state.Width + nx
 
-				weight := state.Suitability[n.idx]
-				if weight <= 0 {
-					continue
+					if state.PopulationDensity[nIdx] >= population {
+						continue
+					}
+
+					weight := state.Suitability[nIdx]
+					if weight <= 0 {
+						continue
+					}
+
+					targets = append(targets, weightedNeighbor{idx: nIdx, weight: weight})
+					totalWeight += weight
 				}
-
-				targets = append(targets, weightedNeighbor{idx: n.idx, weight: weight})
-				totalWeight += weight
 			}
 
 			if totalWeight == 0 {
@@ -158,12 +177,14 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 			}
 		}
 	}
-
-	return next
 }
 
-func spreadFactionInfluence(state *world.State, nextPopulation []float64, minPopulation float64) []string {
-	next := make([]string, len(state.FactionInfluence))
+func spreadFactionInfluenceInPlace(state *world.State, nextPopulation []float64, minPopulation float64, next []string) {
+	type factionScore struct {
+		name  string
+		score float64
+	}
+	var scores [8]factionScore
 
 	for y := 0; y < state.Height; y++ {
 		for x := 0; x < state.Width; x++ {
@@ -173,52 +194,54 @@ func spreadFactionInfluence(state *world.State, nextPopulation []float64, minPop
 				continue
 			}
 
-			scores := map[string]float64{}
-			for _, neighbor := range neighbors(state, x, y) {
-				faction := state.FactionInfluence[neighbor.idx]
-				if faction == "" {
+			scoreCount := 0
+
+			for dy := -1; dy <= 1; dy++ {
+				ny := y + dy
+				if ny < 0 || ny >= state.Height {
 					continue
 				}
+				for dx := -1; dx <= 1; dx++ {
+					if dx == 0 && dy == 0 {
+						continue
+					}
+					nx := x + dx
+					if nx < 0 || nx >= state.Width {
+						continue
+					}
+					nIdx := ny*state.Width + nx
 
-				scores[faction] += state.PopulationDensity[neighbor.idx]
+					faction := state.FactionInfluence[nIdx]
+					if faction == "" {
+						continue
+					}
+
+					pop := state.PopulationDensity[nIdx]
+					found := false
+					for i := 0; i < scoreCount; i++ {
+						if scores[i].name == faction {
+							scores[i].score += pop
+							found = true
+							break
+						}
+					}
+					if !found {
+						scores[scoreCount] = factionScore{name: faction, score: pop}
+						scoreCount++
+					}
+				}
 			}
 
 			bestFaction := state.FactionInfluence[idx]
 			bestScore := 0.0
-			for faction, score := range scores {
-				if score > bestScore {
-					bestScore = score
-					bestFaction = faction
+			for i := 0; i < scoreCount; i++ {
+				if scores[i].score > bestScore {
+					bestScore = scores[i].score
+					bestFaction = scores[i].name
 				}
 			}
 
 			next[idx] = bestFaction
 		}
 	}
-
-	return next
-}
-
-type neighborCell struct {
-	idx int
-}
-
-func neighbors(state *world.State, x, y int) []neighborCell {
-	cells := make([]neighborCell, 0, 8)
-	for dy := -1; dy <= 1; dy++ {
-		for dx := -1; dx <= 1; dx++ {
-			if dx == 0 && dy == 0 {
-				continue
-			}
-
-			idx, ok := state.Index(x+dx, y+dy)
-			if !ok {
-				continue
-			}
-
-			cells = append(cells, neighborCell{idx: idx})
-		}
-	}
-
-	return cells
 }
