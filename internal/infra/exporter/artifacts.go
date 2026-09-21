@@ -34,7 +34,7 @@ func ExportArtifacts(state *world.State, events []simulation.Event, targetDir st
 	horizon := artifact.HorizonYear(events)
 
 	artifactsDir := filepath.Join(targetDir, "artifacts")
-	if err := os.MkdirAll(artifactsDir, 0o755); err != nil {
+	if err := os.MkdirAll(artifactsDir, 0750); err != nil {
 		return fmt.Errorf("create artifacts dir: %w", err)
 	}
 
@@ -48,7 +48,7 @@ func ExportArtifacts(state *world.State, events []simulation.Event, targetDir st
 	for _, a := range state.Artifacts {
 		path := filepath.Join(artifactsDir, names[a.ID]+".md")
 		content := artifactFrontmatter(buildArtifactFields(a)) + "\n" + buildArtifactBody(a, eventCategories, links, horizon)
-		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		if err := os.WriteFile(path, []byte(content), 0600); err != nil {
 			return fmt.Errorf("write artifact %s: %w", a.Name, err)
 		}
 	}
@@ -360,7 +360,7 @@ func writeArtifactIndex(artifacts []artifact.Artifact, names map[string]string, 
 	}
 
 	path := filepath.Join(dir, "Index.md")
-	if err := os.WriteFile(path, []byte(b.String()), 0o644); err != nil {
+	if err := os.WriteFile(path, []byte(b.String()), 0600); err != nil {
 		return fmt.Errorf("write artifact index: %w", err)
 	}
 	return nil

@@ -30,7 +30,7 @@ func newSimulateCommand() *cobra.Command {
 
 			cmd.Printf("Generating world: %dx%d with seed %d ...\n", width, height, cfg.Seed)
 
-			if err := os.MkdirAll(outputDir, 0755); err != nil {
+			if err := os.MkdirAll(outputDir, 0750); err != nil {
 				return fmt.Errorf("create output directory: %w", err)
 			}
 
@@ -54,7 +54,7 @@ func newSimulateCommand() *cobra.Command {
 			}
 
 			statePath := filepath.Join(outputDir, "world_state.json")
-			if err := os.WriteFile(statePath, stateJSON, 0644); err != nil {
+			if err := os.WriteFile(statePath, stateJSON, 0600); err != nil {
 				return fmt.Errorf("write world state: %w", err)
 			}
 			cmd.Printf("World state saved to %s\n", statePath)
@@ -65,7 +65,7 @@ func newSimulateCommand() *cobra.Command {
 			}
 
 			timelinePath := filepath.Join(outputDir, "timeline.json")
-			if err := os.WriteFile(timelinePath, timelineJSON, 0644); err != nil {
+			if err := os.WriteFile(timelinePath, timelineJSON, 0600); err != nil {
 				return fmt.Errorf("write timeline: %w", err)
 			}
 			cmd.Printf("Timeline saved to %s\n", timelinePath)
