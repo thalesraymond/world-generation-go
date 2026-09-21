@@ -25,7 +25,7 @@ func newExportCommand() *cobra.Command {
 			}
 
 			statePath := filepath.Join(cfg.Output, "world_state.json")
-			stateData, err := os.ReadFile(filepath.Clean(statePath)) // #nosec G304
+			stateData, err := os.ReadFile(statePath)
 			if err != nil {
 				return fmt.Errorf("read world state: %w", err)
 			}
@@ -37,7 +37,7 @@ func newExportCommand() *cobra.Command {
 
 			var events []simulation.Event
 			timelinePath := filepath.Join(cfg.Output, "timeline.json")
-			if timelineData, err := os.ReadFile(filepath.Clean(timelinePath)); err == nil { // #nosec G304
+			if timelineData, err := os.ReadFile(timelinePath); err == nil {
 				if err := json.Unmarshal(timelineData, &events); err != nil {
 					return fmt.Errorf("parse timeline: %w", err)
 				}
