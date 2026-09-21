@@ -1,0 +1,4 @@
+## 2024-03-20 - Integer Overflow Vulnerability
+**Vulnerability:** G115: integer overflow conversion uint64 -> int64 (`int64(config.Seed)`) in `internal/usecase/simulation/orchestrator.go`, `internal/usecase/simulation/worldgen.go`, and `cmd/simulate.go`.
+**Learning:** In scenarios where variables such as `Seed` are used strictly for deterministic simulation configuration, the perceived integer overflow does not represent a boundary constraint violation or safety issue (like buffer overflow). Thus, silencing the false positive with `#nosec G115` is the correct approach over making major structural changes or type-casting checks for a non-issue.
+**Prevention:** Always verify if a `gosec` warning represents an actionable threat model for the specific domain before refactoring architecture to satisfy the linter. Use `#nosec` to suppress when appropriate.
