@@ -26,7 +26,7 @@ func newInitCommand() *cobra.Command {
 				return fmt.Errorf("marshal config: %w", err)
 			}
 
-			if err := os.WriteFile("worldgen.yaml", data, 0600); err != nil {
+			if err := os.WriteFile("worldgen.yaml", data, 0644); err != nil {
 				return fmt.Errorf("write worldgen.yaml: %w", err)
 			}
 

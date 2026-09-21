@@ -23,7 +23,7 @@ func ExportFigures(state *world.State, events []simulation.Event, targetDir stri
 	}
 
 	charsDir := filepath.Join(targetDir, "characters")
-	if err := os.MkdirAll(charsDir, 0750); err != nil {
+	if err := os.MkdirAll(charsDir, 0o755); err != nil {
 		return fmt.Errorf("create characters dir: %w", err)
 	}
 
@@ -37,7 +37,7 @@ func ExportFigures(state *world.State, events []simulation.Event, targetDir stri
 			fileName := nameTracker.sanitize(figure.Name) + ".md"
 			content := fm + "\n" + body
 			path := filepath.Join(charsDir, fileName)
-			if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+			if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
 				return fmt.Errorf("write figure %s: %w", figure.Name, err)
 			}
 		}
