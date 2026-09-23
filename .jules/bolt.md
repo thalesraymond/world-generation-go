@@ -1,0 +1,3 @@
+## 2026-09-23 - Avoid allocations in demographics inner loops
+**Learning:** The demographics simulation runs O(N^2) loops over the whole grid each iteration. Re-allocating dynamic structures like `scores := map[string]float64{}` and `var targets []weightedNeighbor` at each grid coordinate generates an immense number of small heap allocations (~20k allocs/op for just a 100x100 grid). This causes tremendous GC pressure.
+**Action:** Use fixed-size stack arrays (like `var neighborBuf [8]neighborCell`) for guaranteed bounds. For dynamically sized collections used as scratchpads, hoist the allocation out of the loop and reuse them inside using `slice = slice[:0]` and the Go 1.21+ `clear(map)` built-in.
