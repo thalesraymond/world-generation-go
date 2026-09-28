@@ -108,11 +108,19 @@ func Simulate(state *world.State, config SimulatorConfig) error {
 	return nil
 }
 
+type weightedNeighbor struct {
+	idx    int
+	weight float64
+}
+
 func diffusePopulation(state *world.State, rate float64) []float64 {
 	next := make([]float64, len(state.PopulationDensity))
 	for idx, population := range state.PopulationDensity {
 		next[idx] = population * (1 - rate)
 	}
+
+	neighborBuf := make([]neighborCell, 0, 8)
+	targetBuf := make([]weightedNeighbor, 0, 8)
 
 	for y := 0; y < state.Height; y++ {
 		for x := 0; x < state.Width; x++ {
@@ -127,14 +135,9 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 				continue
 			}
 
-			type weightedNeighbor struct {
-				idx    int
-				weight float64
-			}
-
-			var targets []weightedNeighbor
+			targets := targetBuf[:0]
 			totalWeight := 0.0
-			for _, n := range neighbors(state, x, y) {
+			for _, n := range neighbors(state, x, y, neighborBuf) {
 				if state.PopulationDensity[n.idx] >= population {
 					continue
 				}
@@ -165,6 +168,9 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 func spreadFactionInfluence(state *world.State, nextPopulation []float64, minPopulation float64) []string {
 	next := make([]string, len(state.FactionInfluence))
 
+	scores := make(map[string]float64)
+	neighborBuf := make([]neighborCell, 0, 8)
+
 	for y := 0; y < state.Height; y++ {
 		for x := 0; x < state.Width; x++ {
 			idx, _ := state.Index(x, y)
@@ -173,8 +179,8 @@ func spreadFactionInfluence(state *world.State, nextPopulation []float64, minPop
 				continue
 			}
 
-			scores := map[string]float64{}
-			for _, neighbor := range neighbors(state, x, y) {
+			clear(scores)
+			for _, neighbor := range neighbors(state, x, y, neighborBuf) {
 				faction := state.FactionInfluence[neighbor.idx]
 				if faction == "" {
 					continue
@@ -203,8 +209,8 @@ type neighborCell struct {
 	idx int
 }
 
-func neighbors(state *world.State, x, y int) []neighborCell {
-	cells := make([]neighborCell, 0, 8)
+func neighbors(state *world.State, x, y int, buf []neighborCell) []neighborCell {
+	buf = buf[:0]
 	for dy := -1; dy <= 1; dy++ {
 		for dx := -1; dx <= 1; dx++ {
 			if dx == 0 && dy == 0 {
@@ -216,9 +222,9 @@ func neighbors(state *world.State, x, y int) []neighborCell {
 				continue
 			}
 
-			cells = append(cells, neighborCell{idx: idx})
+			buf = append(buf, neighborCell{idx: idx})
 		}
 	}
 
-	return cells
+	return buf
 }
