@@ -82,11 +82,12 @@ func BenchmarkSpreadFactionInfluence(b *testing.B) {
 	for i := range state.FactionInfluence {
 		state.PopulationDensity[i] = 1.0
 		nextPop[i] = 1.0
-		if i%3 == 0 {
+		switch i % 3 {
+		case 0:
 			state.FactionInfluence[i] = "auric"
-		} else if i%3 == 1 {
+		case 1:
 			state.FactionInfluence[i] = "verdant"
-		} else {
+		default:
 			state.FactionInfluence[i] = "cinder"
 		}
 	}
