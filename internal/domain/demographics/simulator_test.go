@@ -76,3 +76,34 @@ func TestSeedPopulationFromSuitabilityAssignsFactionsDeterministically(t *testin
 		t.Fatalf("expected low-population tile to remain unclaimed")
 	}
 }
+func BenchmarkSpreadFactionInfluence(b *testing.B) {
+	state := world.NewState(100, 100)
+	nextPop := make([]float64, 100*100)
+	for i := range state.FactionInfluence {
+		state.PopulationDensity[i] = 1.0
+		nextPop[i] = 1.0
+		if i%3 == 0 {
+			state.FactionInfluence[i] = "auric"
+		} else if i%3 == 1 {
+			state.FactionInfluence[i] = "verdant"
+		} else {
+			state.FactionInfluence[i] = "cinder"
+		}
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		spreadFactionInfluence(state, nextPop, 0.5)
+	}
+}
+
+func BenchmarkDiffusePopulation(b *testing.B) {
+	state := world.NewState(100, 100)
+	for i := range state.PopulationDensity {
+		state.PopulationDensity[i] = 1.0
+		state.Suitability[i] = 0.5
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		diffusePopulation(state, 0.5)
+	}
+}
