@@ -114,6 +114,14 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 		next[idx] = population * (1 - rate)
 	}
 
+	type weightedNeighbor struct {
+		idx    int
+		weight float64
+	}
+
+	// Pre-allocate to prevent slice allocation in tight loop
+	targets := make([]weightedNeighbor, 0, 8)
+
 	for y := 0; y < state.Height; y++ {
 		for x := 0; x < state.Width; x++ {
 			idx, _ := state.Index(x, y)
@@ -127,12 +135,7 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 				continue
 			}
 
-			type weightedNeighbor struct {
-				idx    int
-				weight float64
-			}
-
-			var targets []weightedNeighbor
+			targets = targets[:0]
 			totalWeight := 0.0
 			for _, n := range neighbors(state, x, y) {
 				if state.PopulationDensity[n.idx] >= population {
@@ -165,6 +168,9 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 func spreadFactionInfluence(state *world.State, nextPopulation []float64, minPopulation float64) []string {
 	next := make([]string, len(state.FactionInfluence))
 
+	// Pre-allocate to prevent map allocation in tight loop
+	scores := make(map[string]float64)
+
 	for y := 0; y < state.Height; y++ {
 		for x := 0; x < state.Width; x++ {
 			idx, _ := state.Index(x, y)
@@ -173,7 +179,7 @@ func spreadFactionInfluence(state *world.State, nextPopulation []float64, minPop
 				continue
 			}
 
-			scores := map[string]float64{}
+			clear(scores)
 			for _, neighbor := range neighbors(state, x, y) {
 				faction := state.FactionInfluence[neighbor.idx]
 				if faction == "" {

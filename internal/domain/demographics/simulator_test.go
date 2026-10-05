@@ -76,3 +76,18 @@ func TestSeedPopulationFromSuitabilityAssignsFactionsDeterministically(t *testin
 		t.Fatalf("expected low-population tile to remain unclaimed")
 	}
 }
+
+func BenchmarkSimulate(b *testing.B) {
+	state := world.NewState(128, 128)
+	config := DefaultConfig()
+	config.Iterations = 1
+	for i := range state.Suitability {
+		state.Suitability[i] = 0.5
+		state.PopulationDensity[i] = 1.0
+		state.FactionInfluence[i] = "auric"
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Simulate(state, config)
+	}
+}
