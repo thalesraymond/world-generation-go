@@ -114,6 +114,14 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 		next[idx] = population * (1 - rate)
 	}
 
+	type weightedNeighbor struct {
+		idx    int
+		weight float64
+	}
+
+	targetsBuf := make([]weightedNeighbor, 0, 8)
+	neighborsBuf := make([]neighborCell, 0, 8)
+
 	for y := 0; y < state.Height; y++ {
 		for x := 0; x < state.Width; x++ {
 			idx, _ := state.Index(x, y)
@@ -127,14 +135,9 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 				continue
 			}
 
-			type weightedNeighbor struct {
-				idx    int
-				weight float64
-			}
-
-			var targets []weightedNeighbor
+			targetsBuf = targetsBuf[:0]
 			totalWeight := 0.0
-			for _, n := range neighbors(state, x, y) {
+			for _, n := range neighbors(state, x, y, neighborsBuf) {
 				if state.PopulationDensity[n.idx] >= population {
 					continue
 				}
@@ -144,7 +147,7 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 					continue
 				}
 
-				targets = append(targets, weightedNeighbor{idx: n.idx, weight: weight})
+				targetsBuf = append(targetsBuf, weightedNeighbor{idx: n.idx, weight: weight})
 				totalWeight += weight
 			}
 
@@ -153,7 +156,7 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 				continue
 			}
 
-			for _, target := range targets {
+			for _, target := range targetsBuf {
 				next[target.idx] += transfer * (target.weight / totalWeight)
 			}
 		}
@@ -165,6 +168,10 @@ func diffusePopulation(state *world.State, rate float64) []float64 {
 func spreadFactionInfluence(state *world.State, nextPopulation []float64, minPopulation float64) []string {
 	next := make([]string, len(state.FactionInfluence))
 
+	// Pre-allocate map to reuse in the hot inner loop to prevent GC pressure
+	scores := make(map[string]float64, 4) // 4 is typically max number of surrounding factions
+	neighborsBuf := make([]neighborCell, 0, 8)
+
 	for y := 0; y < state.Height; y++ {
 		for x := 0; x < state.Width; x++ {
 			idx, _ := state.Index(x, y)
@@ -173,8 +180,8 @@ func spreadFactionInfluence(state *world.State, nextPopulation []float64, minPop
 				continue
 			}
 
-			scores := map[string]float64{}
-			for _, neighbor := range neighbors(state, x, y) {
+			clear(scores)
+			for _, neighbor := range neighbors(state, x, y, neighborsBuf) {
 				faction := state.FactionInfluence[neighbor.idx]
 				if faction == "" {
 					continue
@@ -203,8 +210,8 @@ type neighborCell struct {
 	idx int
 }
 
-func neighbors(state *world.State, x, y int) []neighborCell {
-	cells := make([]neighborCell, 0, 8)
+func neighbors(state *world.State, x, y int, buf []neighborCell) []neighborCell {
+	buf = buf[:0]
 	for dy := -1; dy <= 1; dy++ {
 		for dx := -1; dx <= 1; dx++ {
 			if dx == 0 && dy == 0 {
@@ -216,9 +223,9 @@ func neighbors(state *world.State, x, y int) []neighborCell {
 				continue
 			}
 
-			cells = append(cells, neighborCell{idx: idx})
+			buf = append(buf, neighborCell{idx: idx})
 		}
 	}
 
-	return cells
+	return buf
 }
